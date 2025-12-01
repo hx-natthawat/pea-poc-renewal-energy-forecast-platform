@@ -1,35 +1,98 @@
 @import "tailwindcss";
 
+/* Google Fonts - Prompt for Thai language support */
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
 /* =============================================================================
    PEA RE Forecast Platform - Custom Theme
+   Based on PEA Brand Bible 2022
    ============================================================================= */
 
 :root {
-  /* PEA Brand Colors */
-  --color-pea-primary: #1e40af;
-  --color-pea-secondary: #059669;
-  --color-pea-accent: #f59e0b;
-  --color-pea-dark: #1e293b;
-  --color-pea-light: #f8fafc;
+  /* PEA Brand Colors (Primary) */
+  --pea-purple: #74045f;
+  --pea-purple-light: #8b1a75;
+  --pea-purple-dark: #5a0349;
+
+  /* PEA Brand Colors (Secondary) */
+  --pea-gold: #c7911b;
+  --pea-gold-light: #d4a43d;
+  --pea-gold-dark: #a67814;
+
+  /* Neutral Colors */
+  --pea-white: #ffffff;
+  --pea-gray-50: #f9fafb;
+  --pea-gray-100: #f3f4f6;
+  --pea-gray-200: #e5e7eb;
+  --pea-gray-300: #d1d5db;
+  --pea-gray-500: #6b7280;
+  --pea-gray-700: #374151;
+  --pea-gray-900: #111827;
+
+  /* Semantic Colors */
+  --pea-success: #10b981;
+  --pea-warning: #f59e0b;
+  --pea-error: #ef4444;
+  --pea-info: #3b82f6;
+
+  /* Chart Colors - Solar (Gold theme) */
+  --color-chart-solar: #c7911b;
+  --color-chart-solar-gradient-1: #c7911b;
+  --color-chart-solar-gradient-2: #d4a43d;
+  --color-chart-solar-gradient-3: #e8c87a;
+
+  /* Chart Colors - Voltage (Purple theme) */
+  --color-chart-voltage: #74045f;
+  --color-chart-phase-a: #74045f;
+  --color-chart-phase-b: #c7911b;
+  --color-chart-phase-c: #6b7280;
+
+  /* Legacy mappings for compatibility */
+  --color-pea-primary: var(--pea-purple);
+  --color-pea-secondary: var(--pea-gold);
+  --color-pea-accent: var(--pea-gold-light);
+  --color-pea-dark: var(--pea-gray-900);
+  --color-pea-light: var(--pea-gray-50);
 
   /* Status Colors */
-  --color-status-normal: #22c55e;
-  --color-status-warning: #eab308;
-  --color-status-critical: #ef4444;
-
-  /* Chart Colors */
-  --color-chart-solar: #f59e0b;
-  --color-chart-voltage: #3b82f6;
-  --color-chart-power: #10b981;
+  --color-status-normal: var(--pea-success);
+  --color-status-warning: var(--pea-warning);
+  --color-status-critical: var(--pea-error);
 
   /* Base Colors */
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 248, 250, 252;
+  --foreground-rgb: 17, 24, 39;
+  --background-rgb: 249, 250, 251;
 }
 
 body {
+  font-family: "Prompt", "Noto Sans Thai", system-ui, sans-serif;
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
+}
+
+/* Typography Scale */
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 /* =============================================================================

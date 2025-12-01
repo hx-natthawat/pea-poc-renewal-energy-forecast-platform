@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { AlertTriangle, RefreshCw, Zap } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  LineChart,
+  CartesianGrid,
   Line,
+  LineChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-  Legend,
 } from "recharts";
-import { Zap, AlertTriangle, RefreshCw } from "lucide-react";
 
 interface VoltageDataPoint {
   time: string;
@@ -50,9 +49,7 @@ function generateMockVoltageData(): VoltageDataPoint[] {
     const loadFactor = hour >= 18 && hour <= 21 ? 1.3 : hour >= 7 && hour <= 9 ? 1.15 : 1.0;
 
     // PV generation effect (raises voltage during day)
-    const pvFactor = hour >= 9 && hour <= 15
-      ? 0.5 * Math.sin(Math.PI * (hour - 9) / 6)
-      : 0;
+    const pvFactor = hour >= 9 && hour <= 15 ? 0.5 * Math.sin((Math.PI * (hour - 9)) / 6) : 0;
 
     data.push({
       time: time.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }),
@@ -69,14 +66,15 @@ function generateMockVoltageData(): VoltageDataPoint[] {
   return data;
 }
 
+// PEA Brand-inspired color scheme for prosumer phases
 const PROSUMER_COLORS: Record<string, string> = {
-  prosumer1: "#ef4444", // red (Phase A, far)
-  prosumer2: "#f97316", // orange (Phase A, mid)
-  prosumer3: "#eab308", // yellow (Phase A, near)
-  prosumer4: "#22c55e", // green (Phase B, mid)
-  prosumer5: "#06b6d4", // cyan (Phase B, far)
-  prosumer6: "#3b82f6", // blue (Phase B, near)
-  prosumer7: "#8b5cf6", // purple (Phase C)
+  prosumer1: "#74045F", // PEA Purple (Phase A, far - critical point)
+  prosumer2: "#8B1A75", // PEA Purple Light (Phase A, mid)
+  prosumer3: "#A67814", // PEA Gold Dark (Phase A, near)
+  prosumer4: "#C7911B", // PEA Gold (Phase B, mid)
+  prosumer5: "#D4A43D", // PEA Gold Light (Phase B, far)
+  prosumer6: "#5A0349", // PEA Purple Dark (Phase B, near)
+  prosumer7: "#6B7280", // Gray (Phase C)
 };
 
 const PROSUMER_CONFIG: Record<string, { phase: string; position: number }> = {
@@ -99,10 +97,13 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
   const [isLoading, setIsLoading] = useState(true);
   const [violations, setViolations] = useState(0);
   const [selectedProsumers, setSelectedProsumers] = useState<string[]>([
-    "prosumer1", "prosumer3", "prosumer5", "prosumer7"
+    "prosumer1",
+    "prosumer3",
+    "prosumer5",
+    "prosumer7",
   ]);
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     setIsLoading(true);
     setTimeout(() => {
       const mockData = generateMockVoltageData();
@@ -110,7 +111,7 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
 
       // Calculate current status for each prosumer
       const latestData = mockData[mockData.length - 1];
-      const statuses: ProsumerStatus[] = Object.keys(PROSUMER_CONFIG).map(id => {
+      const statuses: ProsumerStatus[] = Object.keys(PROSUMER_CONFIG).map((id) => {
         const voltage = latestData[id as keyof VoltageDataPoint] as number;
         let status: "normal" | "warning" | "critical" = "normal";
         if (voltage < 220 || voltage > 240) status = "critical";
@@ -126,31 +127,29 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
       });
 
       setProsumerStatus(statuses);
-      setViolations(statuses.filter(s => s.status !== "normal").length);
+      setViolations(statuses.filter((s) => s.status !== "normal").length);
       setIsLoading(false);
     }, 500);
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
     const interval = setInterval(loadData, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadData]);
 
   const toggleProsumer = (id: string) => {
-    setSelectedProsumers(prev =>
-      prev.includes(id)
-        ? prev.filter(p => p !== id)
-        : [...prev, id]
+    setSelectedProsumers((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     );
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
+    <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-[#74045F]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
-          <Zap className="w-5 h-5 text-blue-500 mr-2" />
+          <Zap className="w-5 h-5 text-[#74045F] mr-2" />
           <h3 className="text-lg font-semibold text-gray-800">Voltage Monitoring</h3>
         </div>
         <div className="flex items-center gap-2">
@@ -161,6 +160,7 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
             </span>
           )}
           <button
+            type="button"
             onClick={loadData}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             title="Refresh data"
@@ -172,20 +172,19 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
 
       {/* Prosumer Status Grid */}
       <div className="grid grid-cols-7 gap-2 mb-4">
-        {prosumerStatus.map(ps => (
+        {prosumerStatus.map((ps) => (
           <button
+            type="button"
             key={ps.id}
             onClick={() => toggleProsumer(ps.id)}
             className={`p-2 rounded text-xs text-center transition-all ${
-              selectedProsumers.includes(ps.id)
-                ? "ring-2 ring-offset-1"
-                : "opacity-50"
+              selectedProsumers.includes(ps.id) ? "ring-2 ring-offset-1" : "opacity-50"
             } ${
               ps.status === "critical"
                 ? "bg-red-50 ring-red-400"
                 : ps.status === "warning"
-                ? "bg-amber-50 ring-amber-400"
-                : "bg-green-50 ring-green-400"
+                  ? "bg-amber-50 ring-amber-400"
+                  : "bg-green-50 ring-green-400"
             }`}
             style={{ borderLeft: `3px solid ${PROSUMER_COLORS[ps.id]}` }}
           >
@@ -218,20 +217,40 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
               label={{ value: "Voltage (V)", angle: -90, position: "insideLeft", fontSize: 11 }}
             />
             <Tooltip
-              contentStyle={{ backgroundColor: "white", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}
+              contentStyle={{
+                backgroundColor: "white",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                borderLeft: "4px solid #74045F",
+              }}
               formatter={(value: number, name: string) => [
                 `${value.toFixed(1)} V`,
-                `Prosumer ${name.slice(-1)} (Phase ${PROSUMER_CONFIG[name]?.phase})`
+                `Prosumer ${name.slice(-1)} (Phase ${PROSUMER_CONFIG[name]?.phase})`,
               ]}
             />
 
             {/* Voltage limit reference lines */}
-            <ReferenceLine y={242} stroke="#ef4444" strokeDasharray="5 5" label={{ value: "+5%", position: "right", fontSize: 10 }} />
-            <ReferenceLine y={230} stroke="#6b7280" strokeDasharray="3 3" label={{ value: "Nominal", position: "right", fontSize: 10 }} />
-            <ReferenceLine y={218} stroke="#ef4444" strokeDasharray="5 5" label={{ value: "-5%", position: "right", fontSize: 10 }} />
+            <ReferenceLine
+              y={242}
+              stroke="#EF4444"
+              strokeDasharray="5 5"
+              label={{ value: "+5%", position: "right", fontSize: 10, fill: "#EF4444" }}
+            />
+            <ReferenceLine
+              y={230}
+              stroke="#74045F"
+              strokeDasharray="3 3"
+              label={{ value: "230V", position: "right", fontSize: 10, fill: "#74045F" }}
+            />
+            <ReferenceLine
+              y={218}
+              stroke="#EF4444"
+              strokeDasharray="5 5"
+              label={{ value: "-5%", position: "right", fontSize: 10, fill: "#EF4444" }}
+            />
 
             {/* Prosumer lines */}
-            {selectedProsumers.map(prosumerId => (
+            {selectedProsumers.map((prosumerId) => (
               <Line
                 key={prosumerId}
                 type="monotone"
@@ -249,11 +268,9 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
 
       {/* Footer */}
       <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
-        <p className="text-xs text-gray-500">
-          Target: MAE &lt; 2V | Limits: 218V - 242V (±5%)
-        </p>
+        <p className="text-xs text-gray-500">Target: MAE &lt; 2V | Limits: 218V - 242V (±5%)</p>
         <div className="flex gap-2">
-          {["A", "B", "C"].map(phase => (
+          {["A", "B", "C"].map((phase) => (
             <span key={phase} className="text-xs text-gray-400">
               Phase {phase}
             </span>

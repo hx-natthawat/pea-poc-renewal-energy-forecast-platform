@@ -22,7 +22,13 @@
       "Bash(pip3 install:*)",
       "Bash(source:*)",
       "Bash(pip install:*)",
-      "Bash(npm run type-check:*)"
+      "Bash(npm run type-check:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run check:fix:*)",
+      "Bash(npx biome migrate:*)",
+      "Bash(pnpm run check:*)",
+      "Bash(pnpm run type-check:*)",
+      "Bash(pnpm run check:fix:*)"
     ],
     "deny": [],
     "ask": []

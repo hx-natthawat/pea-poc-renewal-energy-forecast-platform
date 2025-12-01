@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { RefreshCw, Sun, TrendingUp } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from "recharts";
-import { Sun, TrendingUp, RefreshCw } from "lucide-react";
 
 interface SolarDataPoint {
   time: string;
@@ -34,14 +34,15 @@ function generateMockSolarData(): SolarDataPoint[] {
     // Solar curve (bell curve centered at noon)
     let basePower = 0;
     if (hour >= 6 && hour <= 18) {
-      const hourFactor = Math.exp(-0.5 * Math.pow((hour - 12) / 2.5, 2));
+      const hourFactor = Math.exp(-0.5 * ((hour - 12) / 2.5) ** 2);
       basePower = 4500 * hourFactor * (0.9 + Math.random() * 0.2);
     }
 
     // Irradiance follows similar pattern
-    const irradiance = hour >= 6 && hour <= 18
-      ? 1000 * Math.exp(-0.5 * Math.pow((hour - 12) / 2.5, 2)) * (0.85 + Math.random() * 0.3)
-      : 0;
+    const irradiance =
+      hour >= 6 && hour <= 18
+        ? 1000 * Math.exp(-0.5 * ((hour - 12) / 2.5) ** 2) * (0.85 + Math.random() * 0.3)
+        : 0;
 
     // Prediction with slight offset
     const predicted = basePower * (0.95 + Math.random() * 0.1);
@@ -67,7 +68,7 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
   const [currentPower, setCurrentPower] = useState(0);
   const [peakPower, setPeakPower] = useState(0);
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     setIsLoading(true);
     // Simulate API call delay
     setTimeout(() => {
@@ -79,28 +80,29 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
       const currentHour = now.getHours();
       const currentIndex = Math.min(Math.floor((currentHour - 6) * 12), mockData.length - 1);
       setCurrentPower(currentIndex >= 0 ? mockData[Math.max(0, currentIndex)].power_kw : 0);
-      setPeakPower(Math.max(...mockData.map(d => d.power_kw)));
+      setPeakPower(Math.max(...mockData.map((d) => d.power_kw)));
 
       setIsLoading(false);
     }, 500);
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
     // Refresh every 5 minutes
     const interval = setInterval(loadData, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadData]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
+    <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-[#C7911B]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
-          <Sun className="w-5 h-5 text-amber-500 mr-2" />
+          <Sun className="w-5 h-5 text-[#C7911B] mr-2" />
           <h3 className="text-lg font-semibold text-gray-800">Solar Power Forecast</h3>
         </div>
         <button
+          type="button"
           onClick={loadData}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           title="Refresh data"
@@ -109,15 +111,15 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
         </button>
       </div>
 
-      {/* Stats Row */}
+      {/* Stats Row - PEA Brand Colors */}
       <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="bg-amber-50 rounded-lg p-3">
-          <p className="text-xs text-amber-600 font-medium">Current Output</p>
-          <p className="text-xl font-bold text-amber-700">{currentPower.toLocaleString()} kW</p>
+        <div className="bg-[#FEF3C7] rounded-lg p-3">
+          <p className="text-xs text-[#A67814] font-medium">Current Output</p>
+          <p className="text-xl font-bold text-[#C7911B]">{currentPower.toLocaleString()} kW</p>
         </div>
-        <div className="bg-blue-50 rounded-lg p-3">
-          <p className="text-xs text-blue-600 font-medium">Peak Today</p>
-          <p className="text-xl font-bold text-blue-700">{peakPower.toLocaleString()} kW</p>
+        <div className="bg-[#F3E8FF] rounded-lg p-3">
+          <p className="text-xs text-[#74045F] font-medium">Peak Today</p>
+          <p className="text-xl font-bold text-[#74045F]">{peakPower.toLocaleString()} kW</p>
         </div>
         <div className="bg-green-50 rounded-lg p-3">
           <p className="text-xs text-green-600 font-medium">Accuracy</p>
@@ -137,13 +139,15 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
         <ResponsiveContainer width="100%" height={height}>
           <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <defs>
+              {/* PEA Gold gradient for actual power */}
               <linearGradient id="colorPower" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1} />
+                <stop offset="5%" stopColor="#C7911B" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#C7911B" stopOpacity={0.1} />
               </linearGradient>
+              {/* PEA Purple gradient for predicted power */}
               <linearGradient id="colorPredicted" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.6} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
+                <stop offset="5%" stopColor="#74045F" stopOpacity={0.6} />
+                <stop offset="95%" stopColor="#74045F" stopOpacity={0.1} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -160,10 +164,15 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
               label={{ value: "Power (kW)", angle: -90, position: "insideLeft", fontSize: 11 }}
             />
             <Tooltip
-              contentStyle={{ backgroundColor: "white", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}
+              contentStyle={{
+                backgroundColor: "white",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                borderLeft: "4px solid #C7911B",
+              }}
               formatter={(value: number, name: string) => [
                 `${value.toLocaleString()} kW`,
-                name === "power_kw" ? "Actual" : "Predicted"
+                name === "power_kw" ? "Actual" : "Predicted",
               ]}
             />
             <Legend />
@@ -171,7 +180,7 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
               type="monotone"
               dataKey="predicted_kw"
               name="Predicted"
-              stroke="#3b82f6"
+              stroke="#74045F"
               strokeWidth={2}
               strokeDasharray="5 5"
               fillOpacity={1}
@@ -181,7 +190,7 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
               type="monotone"
               dataKey="power_kw"
               name="Actual"
-              stroke="#f59e0b"
+              stroke="#C7911B"
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorPower)"

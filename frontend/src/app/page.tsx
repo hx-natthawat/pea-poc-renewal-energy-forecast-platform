@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Sun, Zap, AlertTriangle, Activity, BarChart3, Settings } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, Settings, Sun, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 import { SolarForecastChart, VoltageMonitorChart } from "@/components/charts";
 
 interface HealthStatus {
@@ -36,8 +36,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-700 to-blue-900 text-white shadow-lg">
+      {/* Header - PEA Brand Purple */}
+      <header className="bg-gradient-to-r from-[#74045F] to-[#5A0349] text-white shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -46,7 +46,7 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-xl font-bold">PEA RE Forecast Platform</h1>
-                <p className="text-blue-200 text-sm">
+                <p className="text-[#D4A43D] text-sm font-medium">
                   แพลตฟอร์มศูนย์ข้อมูลพยากรณ์พลังงานหมุนเวียน
                 </p>
               </div>
@@ -79,15 +79,15 @@ export default function Home() {
               { id: "overview", label: "Overview", icon: BarChart3 },
               { id: "solar", label: "Solar Forecast", icon: Sun },
               { id: "voltage", label: "Voltage Monitor", icon: Zap },
-            ].map(tab => (
+            ].map((tab) => (
               <button
                 type="button"
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? "bg-white text-blue-700 rounded-t-lg"
-                    : "text-blue-200 hover:text-white hover:bg-white/10 rounded-t-lg"
+                    ? "bg-white text-[#74045F] rounded-t-lg"
+                    : "text-[#D4A43D] hover:text-white hover:bg-white/10 rounded-t-lg"
                 }`}
               >
                 <tab.icon className="w-4 h-4 mr-2" />
@@ -108,7 +108,10 @@ export default function Home() {
               <span className="font-medium">{error}</span>
             </div>
             <p className="text-sm mt-1 text-amber-600">
-              Run: <code className="bg-amber-100 px-1 rounded">docker compose -f docker/docker-compose.yml up -d</code>
+              Run:{" "}
+              <code className="bg-amber-100 px-1 rounded">
+                docker compose -f docker/docker-compose.yml up -d
+              </code>
             </p>
           </div>
         )}
@@ -118,25 +121,25 @@ export default function Home() {
           <>
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-amber-500">
+              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-[#C7911B]">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-500 text-sm">Solar Output</p>
                     <p className="text-2xl font-bold text-gray-800">3,542 kW</p>
                     <p className="text-xs text-green-600">+12% from avg</p>
                   </div>
-                  <Sun className="w-10 h-10 text-amber-500 opacity-80" />
+                  <Sun className="w-10 h-10 text-[#C7911B] opacity-80" />
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-[#74045F]">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-500 text-sm">Avg Voltage</p>
                     <p className="text-2xl font-bold text-gray-800">228.5 V</p>
                     <p className="text-xs text-gray-500">7 prosumers</p>
                   </div>
-                  <Zap className="w-10 h-10 text-blue-500 opacity-80" />
+                  <Zap className="w-10 h-10 text-[#74045F] opacity-80" />
                 </div>
               </div>
 
@@ -176,27 +179,27 @@ export default function Home() {
             </div>
 
             {/* Model Performance */}
-            <div className="mt-6 bg-white rounded-lg shadow p-6">
+            <div className="mt-6 bg-white rounded-lg shadow p-6 border-l-4 border-[#74045F]">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Model Performance</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-500">Solar MAPE</p>
-                  <p className="text-2xl font-bold text-amber-600">8.2%</p>
+                  <p className="text-2xl font-bold text-[#C7911B]">8.2%</p>
                   <p className="text-xs text-green-600">Target: &lt;10%</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-500">Solar RMSE</p>
-                  <p className="text-2xl font-bold text-amber-600">78 kW</p>
+                  <p className="text-2xl font-bold text-[#C7911B]">78 kW</p>
                   <p className="text-xs text-green-600">Target: &lt;100kW</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-500">Voltage MAE</p>
-                  <p className="text-2xl font-bold text-blue-600">1.4 V</p>
+                  <p className="text-2xl font-bold text-[#74045F]">1.4 V</p>
                   <p className="text-xs text-green-600">Target: &lt;2V</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-500">Voltage R²</p>
-                  <p className="text-2xl font-bold text-blue-600">0.94</p>
+                  <p className="text-2xl font-bold text-[#74045F]">0.94</p>
                   <p className="text-xs text-green-600">Target: &gt;0.90</p>
                 </div>
               </div>
@@ -270,11 +273,12 @@ export default function Home() {
         )}
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-gray-400 py-6 mt-8">
+      {/* Footer - PEA Brand Purple */}
+      <footer className="bg-[#5A0349] text-white py-6 mt-8">
         <div className="container mx-auto px-4 text-center text-sm">
-          <p>PEA RE Forecast Platform - Provincial Electricity Authority of Thailand</p>
-          <p className="mt-1">Version 0.1.0 (POC) | TOR Compliant</p>
+          <p className="font-medium">PEA RE Forecast Platform - การไฟฟ้าส่วนภูมิภาค</p>
+          <p className="mt-1 text-[#D4A43D]">Provincial Electricity Authority of Thailand</p>
+          <p className="mt-2 text-gray-300">Version 0.1.0 (POC) | TOR Compliant</p>
         </div>
       </footer>
     </main>
