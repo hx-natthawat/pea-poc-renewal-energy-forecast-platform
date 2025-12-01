@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th">
+    <html lang="th" suppressHydrationWarning>
       <body className={prompt.className}>
         <div className="min-h-screen bg-[var(--pea-gray-50)]">{children}</div>
       </body>

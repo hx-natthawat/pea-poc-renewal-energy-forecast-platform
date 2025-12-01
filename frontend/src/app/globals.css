@@ -1,11 +1,9 @@
 @import "tailwindcss";
 
-/* Google Fonts - Prompt for Thai language support */
-@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
-
 /* =============================================================================
    PEA RE Forecast Platform - Custom Theme
    Based on PEA Brand Bible 2022
+   Note: Prompt font is loaded via Next.js next/font in layout.tsx
    ============================================================================= */
 
 :root {

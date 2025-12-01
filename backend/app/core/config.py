@@ -28,8 +28,8 @@ class Settings(BaseSettings):
     # API
     API_V1_PREFIX: str = "/api/v1"
 
-    # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/pea_forecast"
+    # Database (TimescaleDB on port 5433)
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast"
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"

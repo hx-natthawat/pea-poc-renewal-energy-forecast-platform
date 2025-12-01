@@ -28,7 +28,10 @@
       "Bash(npx biome migrate:*)",
       "Bash(pnpm run check:*)",
       "Bash(pnpm run type-check:*)",
-      "Bash(pnpm run check:fix:*)"
+      "Bash(pnpm run check:fix:*)",
+      "Bash(./venv/bin/pip install:*)",
+      "Bash(./venv/bin/python:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5433/pea_forecast\" ./venv/bin/python:*)"
     ],
     "deny": [],
     "ask": []
