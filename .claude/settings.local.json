@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/ml/data/processed/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/ml/data/simulated/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/ml/models/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/backend/tests/unit/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/backend/tests/integration/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/components/ui/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/components/dashboard/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/components/charts/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/hooks/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/lib/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/stores/.gitkeep )",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/types/.gitkeep)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

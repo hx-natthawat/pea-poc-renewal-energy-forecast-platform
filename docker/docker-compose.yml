@@ -1,0 +1,166 @@
+version: "3.9"
+
+# =============================================================================
+# PEA RE Forecast Platform - Local Development Stack
+# =============================================================================
+# Usage:
+#   docker-compose -f docker/docker-compose.yml up -d
+#   docker-compose -f docker/docker-compose.yml logs -f
+#   docker-compose -f docker/docker-compose.yml down -v
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # DATABASE - TimescaleDB (PostgreSQL + TimescaleDB extension)
+  # ===========================================================================
+  timescaledb:
+    image: timescale/timescaledb:2.13.1-pg15
+    container_name: pea-timescaledb
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-pea_forecast}
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pea-network
+
+  # ===========================================================================
+  # CACHE - Redis
+  # ===========================================================================
+  redis:
+    image: redis:7.2-alpine
+    container_name: pea-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pea-network
+
+  # ===========================================================================
+  # BACKEND - FastAPI
+  # ===========================================================================
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: pea-backend
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@timescaledb:5432/${DB_NAME:-pea_forecast}
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../backend:/app
+      - ../shared:/app/shared
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pea-network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ===========================================================================
+  # FRONTEND - Next.js
+  # ===========================================================================
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: pea-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - pea-network
+    command: npm run dev
+
+  # ===========================================================================
+  # ML SERVICE - Model Inference
+  # ===========================================================================
+  ml-service:
+    build:
+      context: ../ml
+      dockerfile: Dockerfile
+    container_name: pea-ml-service
+    environment:
+      - MODEL_REGISTRY_PATH=/app/models
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@timescaledb:5432/${DB_NAME:-pea_forecast}
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8001:8001"
+    volumes:
+      - ../ml:/app
+      - ../shared:/app/shared
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - pea-network
+
+  # ===========================================================================
+  # MONITORING - Grafana (Optional for development)
+  # ===========================================================================
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: pea-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - pea-network
+    profiles:
+      - monitoring
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  pea-network:
+    driver: bridge
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+volumes:
+  timescaledb_data:
+  redis_data:
+  grafana_data:

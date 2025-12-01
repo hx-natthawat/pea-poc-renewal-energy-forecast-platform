@@ -117,6 +117,38 @@ Update plan MD files when tasks are completed:
 6. Push only when all checks pass
 ```
 
+### Rule 7: Monorepo Architecture
+
+**ONE repository for ALL components**. Never split into multiple repositories.
+
+```text
+pea-re-forecast-platform/          # Single repository
+├── backend/                       # FastAPI backend
+├── frontend/                      # React/Next.js frontend
+├── ml/                           # ML training & models
+├── infrastructure/               # K8s, Helm, Terraform
+├── docker/                       # Docker configurations
+├── docs/                         # All documentation
+├── scripts/                      # Utility scripts
+└── shared/                       # Shared types, configs
+```
+
+**Benefits:**
+
+- Single source of truth
+- Atomic commits across components
+- Simplified CI/CD
+- Consistent versioning
+- Easier code sharing
+
+**Rules:**
+
+1. All code changes in ONE commit when related
+2. Shared types/interfaces in `shared/`
+3. Single `docker-compose.yml` for full stack
+4. Single CI/CD pipeline in `.gitlab-ci.yml`
+5. Unified versioning across all components
+
 ---
 
 ## Claude Subagents (Slash Commands)
