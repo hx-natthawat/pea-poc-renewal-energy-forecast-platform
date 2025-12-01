@@ -30,6 +30,157 @@
 
 ---
 
+## Claude Code Development Rules
+
+> **IMPORTANT**: These rules MUST be followed for all development activities.
+
+### Rule 1: Documentation Location
+
+All documentation MUST be stored in the `docs/*` directory structure:
+
+```
+docs/
+├── architecture/          # System architecture, ADRs
+│   └── adr/              # Architecture Decision Records
+├── plans/                # Development plans, sprint tracking
+├── specs/                # Technical specifications
+├── guides/               # User and developer guides
+├── api/                  # API documentation
+└── data-dictionary/      # Data definitions and analysis
+```
+
+### Rule 2: Version Management
+
+**ALWAYS** research and use the latest stable versions:
+
+```bash
+# Before implementing, run /research-latest to check:
+- Library versions (pip, npm packages)
+- Framework versions (FastAPI, React, etc.)
+- Infrastructure versions (K8s, Helm, etc.)
+- Security patches and CVEs
+```
+
+### Rule 3: Local Testing First
+
+**ALWAYS** test locally using containers before any deployment:
+
+```bash
+# Priority order for local testing:
+1. Docker Compose (for simple tests)
+2. Kind cluster (for K8s-specific tests)
+3. Integration tests in containers
+
+# Never deploy untested code!
+docker-compose -f docker/docker-compose.test.yml up --build
+```
+
+### Rule 4: Test-Fix-Pass Cycle
+
+Code MUST pass all tests before commit:
+
+```
+┌─────────┐    ┌──────┐    ┌──────┐    ┌────────┐
+│ Develop │───▶│ Test │───▶│ Fix  │───▶│ Pass?  │
+└─────────┘    └──────┘    └──────┘    └────┬───┘
+                  ▲                         │
+                  │         No              │
+                  └─────────────────────────┘
+                            │ Yes
+                            ▼
+                      ┌──────────┐
+                      │  Commit  │
+                      └──────────┘
+```
+
+### Rule 5: Plan Updates
+
+Update plan MD files when tasks are completed:
+
+```bash
+# After completing a task:
+1. Mark task as DONE in docs/plans/poc-progress.md
+2. Update docs/plans/sprint-current.md
+3. Add notes to docs/plans/deployment-log.md (if applicable)
+4. Then commit the code
+```
+
+### Rule 6: Commit Workflow
+
+```bash
+# Standard commit flow:
+1. Run all tests locally
+2. Fix any failures
+3. Update plan files
+4. Stage changes
+5. Commit with descriptive message
+6. Push only when all checks pass
+```
+
+---
+
+## Claude Subagents (Slash Commands)
+
+Custom slash commands are available to invoke specialized agents for this project.
+
+### Available Commands
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/analyze-poc-data` | Analyze POC Data.xlsx | Data exploration and quality assessment |
+| `/simulate-solar` | Generate solar simulation data | When POC data is insufficient |
+| `/simulate-voltage` | Generate voltage simulation data | When POC data is insufficient |
+| `/validate-model` | Validate ML model accuracy | Before marking model as production-ready |
+| `/deploy-local` | Deploy to Kind cluster | For integration testing |
+| `/test-api` | Test all API endpoints | Before deployment |
+| `/review-arch` | Review architecture decisions | For architecture reviews |
+| `/research-latest` | Research latest library versions | Before starting new features |
+| `/update-plan` | Update project plan files | After completing tasks |
+
+### Command Usage Examples
+
+```bash
+# Analyze the POC data
+/analyze-poc-data
+
+# Generate simulation data for solar
+/simulate-solar
+
+# Validate that model meets TOR accuracy requirements
+/validate-model
+
+# Deploy to local Kind cluster for testing
+/deploy-local
+
+# Research latest versions before implementation
+/research-latest
+```
+
+### Creating New Commands
+
+Add new commands to `.claude/commands/`:
+
+```markdown
+# .claude/commands/my-command.md
+
+# Command Title
+
+You are a [role] for the PEA RE Forecast Platform.
+
+## Task
+[What this command does]
+
+## Instructions
+1. Step 1
+2. Step 2
+...
+
+## Output
+- Save results to docs/[appropriate-folder]/
+```
+
+---
+
 ## Project Overview
 
 ### Platform Description

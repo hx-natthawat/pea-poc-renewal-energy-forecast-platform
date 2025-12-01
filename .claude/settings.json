@@ -1,0 +1,25 @@
+{
+  "project": {
+    "name": "PEA RE Forecast Platform",
+    "code": "PEA-REF-2024",
+    "version": "0.1.0"
+  },
+  "permissions": {
+    "allow_bash": true,
+    "allow_file_write": true,
+    "allow_mcp": true
+  },
+  "rules": {
+    "documentation_path": "docs/*",
+    "require_local_test": true,
+    "test_environment": ["docker-compose", "kind"],
+    "require_test_pass_before_commit": true,
+    "update_plan_on_completion": true
+  },
+  "model_preferences": {
+    "planning": "opus",
+    "coding": "sonnet",
+    "review": "opus",
+    "quick_tasks": "haiku"
+  }
+}
