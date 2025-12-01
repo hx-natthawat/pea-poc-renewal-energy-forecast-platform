@@ -17,7 +17,12 @@
       "Bash(docker:*)",
       "Bash(docker compose:*)",
       "Bash(lsof:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(npm run type-check:*)"
     ],
     "deny": [],
     "ask": []

@@ -17,14 +17,12 @@
 
 | Task | Priority | Estimate |
 |------|----------|----------|
-| Initialize Git repository | P0 | 1h |
-| Create Docker Compose for local dev | P0 | 4h |
-| Setup TimescaleDB with schema | P0 | 4h |
-| Load POC data into database | P0 | 2h |
-| Create FastAPI skeleton | P0 | 4h |
-| Create React project skeleton | P0 | 4h |
+| Start Docker and load data to DB | P0 | 1h |
+| Implement solar forecast chart (frontend) | P0 | 4h |
+| Connect frontend to backend API | P0 | 2h |
 | Setup Kind cluster | P1 | 4h |
 | Basic Helm charts | P1 | 8h |
+| Train ML model (solar forecast) | P1 | 8h |
 
 ### Done
 
@@ -33,6 +31,9 @@
 | Create CLAUDE.md | 2024-12-01 | Development rules added |
 | Setup .claude commands | 2024-12-01 | 9 slash commands created |
 | Create docs structure | 2024-12-01 | Architecture, plans, specs |
+| Analyze POC Data.xlsx | 2024-12-01 | Solar/1-Phase/3-Phase (1 day each) |
+| Create data loading script | 2024-12-01 | ml/scripts/load_poc_data.py |
+| Generate simulation data | 2024-12-01 | 30 days solar + voltage data |
 
 ## Daily Standup Notes
 

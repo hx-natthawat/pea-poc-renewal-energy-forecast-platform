@@ -36,6 +36,7 @@ uvicorn==0.27.0
 # Database
 asyncpg==0.29.0
 sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
 
 # Utilities
 joblib==1.3.2
