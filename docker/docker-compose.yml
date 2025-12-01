@@ -1,27 +1,25 @@
-version: "3.9"
-
 # =============================================================================
 # PEA RE Forecast Platform - Local Development Stack
 # =============================================================================
 # Usage:
-#   docker-compose -f docker/docker-compose.yml up -d
-#   docker-compose -f docker/docker-compose.yml logs -f
-#   docker-compose -f docker/docker-compose.yml down -v
+#   docker compose -f docker/docker-compose.yml up -d
+#   docker compose -f docker/docker-compose.yml logs -f
+#   docker compose -f docker/docker-compose.yml down -v
 # =============================================================================
 
 services:
   # ===========================================================================
-  # DATABASE - TimescaleDB (PostgreSQL + TimescaleDB extension)
+  # DATABASE - TimescaleDB (PostgreSQL 18 + TimescaleDB 2.23)
   # ===========================================================================
   timescaledb:
-    image: timescale/timescaledb:2.13.1-pg15
+    image: timescale/timescaledb:2.23.1-pg18-oss
     container_name: pea-timescaledb
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-pea_forecast}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
       - ./init-db:/docker-entrypoint-initdb.d
@@ -37,7 +35,7 @@ services:
   # CACHE - Redis
   # ===========================================================================
   redis:
-    image: redis:7.2-alpine
+    image: redis:7.4-alpine
     container_name: pea-redis
     ports:
       - "6379:6379"
@@ -84,12 +82,13 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   # ===========================================================================
-  # FRONTEND - Next.js
+  # FRONTEND - Next.js 15 with Turbopack
   # ===========================================================================
   frontend:
     build:
       context: ../frontend
       dockerfile: Dockerfile
+      target: development
     container_name: pea-frontend
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
@@ -104,7 +103,6 @@ services:
       - backend
     networks:
       - pea-network
-    command: npm run dev
 
   # ===========================================================================
   # ML SERVICE - Model Inference

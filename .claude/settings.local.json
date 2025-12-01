@@ -12,7 +12,12 @@
       "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/hooks/.gitkeep )",
       "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/lib/.gitkeep )",
       "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/stores/.gitkeep )",
-      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/types/.gitkeep)"
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/frontend/src/types/.gitkeep)",
+      "Bash(chmod:*)",
+      "Bash(docker:*)",
+      "Bash(docker compose:*)",
+      "Bash(lsof:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

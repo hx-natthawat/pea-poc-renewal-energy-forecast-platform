@@ -1,8 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* =============================================================================
+   PEA RE Forecast Platform - Custom Theme
+   ============================================================================= */
 
 :root {
+  /* PEA Brand Colors */
+  --color-pea-primary: #1e40af;
+  --color-pea-secondary: #059669;
+  --color-pea-accent: #f59e0b;
+  --color-pea-dark: #1e293b;
+  --color-pea-light: #f8fafc;
+
+  /* Status Colors */
+  --color-status-normal: #22c55e;
+  --color-status-warning: #eab308;
+  --color-status-critical: #ef4444;
+
+  /* Chart Colors */
+  --color-chart-solar: #f59e0b;
+  --color-chart-voltage: #3b82f6;
+  --color-chart-power: #10b981;
+
+  /* Base Colors */
   --foreground-rgb: 0, 0, 0;
   --background-rgb: 248, 250, 252;
 }
@@ -12,7 +32,10 @@ body {
   background: rgb(var(--background-rgb));
 }
 
-/* Custom scrollbar */
+/* =============================================================================
+   Custom Scrollbar
+   ============================================================================= */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

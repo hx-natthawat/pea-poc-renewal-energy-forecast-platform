@@ -314,7 +314,7 @@ Platform must support data import from:
 │  │                     │  │                     │  │                     │  │
 │  │  ┌───────────────┐  │  │  ┌───────────────┐  │  │  ┌───────────────┐  │  │
 │  │  │ Nginx        │  │  │  │ ML Models     │  │  │  │ TimescaleDB   │  │  │
-│  │  │ React SPA    │  │  │  │ TensorFlow    │  │  │  │ PostgreSQL 15 │  │  │
+│  │  │ React SPA    │  │  │  │ TensorFlow    │  │  │  │ PostgreSQL 18 │  │  │
 │  │  │ Kong API GW  │  │  │  │ XGBoost       │  │  │  │ Redis 7       │  │  │
 │  │  │ FastAPI      │  │  │  │ MLflow        │  │  │  │               │  │  │
 │  │  └───────────────┘  │  │  └───────────────┘  │  │  └───────────────┘  │  │
@@ -412,8 +412,8 @@ runtime:
 
 # Databases (TOR: Microsoft SQL, PostgreSQL, Redis)
 databases:
-  postgresql: "15.x"
-  timescaledb: "2.13.x"  # PostgreSQL extension
+  postgresql: "18.x"
+  timescaledb: "2.23.x"  # PostgreSQL extension
   redis: "7.2.x"
 
 # Kubernetes Stack (TOR: Kubernetes, Containerd, Helm)
@@ -476,7 +476,7 @@ proxy:
 
 | Component | TOR Requirement | Implementation | Justification |
 |-----------|-----------------|----------------|---------------|
-| Primary DB | PostgreSQL | **TimescaleDB 2.13** | PostgreSQL extension, optimized for time-series, hypertables for solar/voltage data |
+| Primary DB | PostgreSQL | **TimescaleDB 2.23** | PostgreSQL extension, optimized for time-series, hypertables for solar/voltage data |
 | Cache | Redis | **Redis 7.2** | Per TOR, prediction caching |
 | Backend | Not specified | **FastAPI + Python 3.11** | Async, auto-docs, ML ecosystem |
 | Frontend | Not specified | **React 18 + TypeScript** | Industry standard, rich ecosystem |
@@ -690,7 +690,7 @@ pea-re-forecast/
 ```sql
 -- ============================================================
 -- PEA RE Forecast Platform - Database Schema
--- TimescaleDB (PostgreSQL 15 + TimescaleDB 2.13)
+-- TimescaleDB (PostgreSQL 18 + TimescaleDB 2.23)
 -- ============================================================
 
 -- Enable extensions
