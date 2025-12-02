@@ -16,8 +16,8 @@
 | Phase | Progress | Status |
 |-------|----------|--------|
 | Phase 1: Foundation | 80% | IN PROGRESS |
-| Phase 2: Data & ML | 90% | IN PROGRESS |
-| Phase 3: Application | 80% | IN PROGRESS |
+| Phase 2: Data & ML | 100% | COMPLETE |
+| Phase 3: Application | 90% | IN PROGRESS |
 | Phase 4: Deployment | 0% | NOT STARTED |
 
 ---
@@ -96,7 +96,7 @@
 - [x] Implement solar forecast view (recharts)
 - [x] Implement voltage monitoring view (recharts)
 - [x] Configure Biome 2.3.8 linter/formatter
-- [ ] Add alert management
+- [x] Add alert management (backend API: /api/v1/alerts)
 
 ### 3.3 Integration
 

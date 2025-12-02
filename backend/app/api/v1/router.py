@@ -4,7 +4,7 @@ API v1 Router - Aggregates all API endpoints.
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import forecast, health, data
+from app.api.v1.endpoints import forecast, health, data, alerts
 
 api_router = APIRouter()
 
@@ -26,4 +26,11 @@ api_router.include_router(
     data.router,
     prefix="/data",
     tags=["data"],
+)
+
+# Alert management endpoints
+api_router.include_router(
+    alerts.router,
+    prefix="/alerts",
+    tags=["alerts"],
 )
