@@ -1,6 +1,6 @@
 "use client";
 
-import { RefreshCw, Sun, TrendingUp } from "lucide-react";
+import { Radio, RefreshCw, Sun, TrendingUp } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   Area,
@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useSolarWebSocket } from "@/hooks";
 
 interface SolarDataPoint {
   time: string;
@@ -22,16 +23,45 @@ interface SolarDataPoint {
 
 interface SolarForecastChartProps {
   height?: number;
+  enableRealtime?: boolean;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export default function SolarForecastChart({ height = 300 }: SolarForecastChartProps) {
+export default function SolarForecastChart({ height = 300, enableRealtime = true }: SolarForecastChartProps) {
   const [data, setData] = useState<SolarDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPower, setCurrentPower] = useState(0);
   const [peakPower, setPeakPower] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [liveUpdateCount, setLiveUpdateCount] = useState(0);
+
+  // WebSocket connection for real-time updates
+  const { isConnected: wsConnected } = useSolarWebSocket(
+    enableRealtime
+      ? (update) => {
+          // Update current power from real-time data
+          setCurrentPower(update.power_kw);
+          if (update.power_kw > peakPower) {
+            setPeakPower(update.power_kw);
+          }
+          setLiveUpdateCount((prev) => prev + 1);
+
+          // Add new data point to chart (keep last 288 points = 24 hours at 5-min intervals)
+          const newPoint: SolarDataPoint = {
+            time: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+            power_kw: update.power_kw,
+            predicted_kw: update.prediction || update.power_kw,
+            irradiance: update.irradiance,
+          };
+
+          setData((prevData) => {
+            const newData = [...prevData, newPoint];
+            return newData.slice(-288); // Keep last 24 hours
+          });
+        }
+      : undefined
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -73,6 +103,19 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
         <div className="flex items-center">
           <Sun className="w-5 h-5 text-[#C7911B] mr-2" />
           <h3 className="text-lg font-semibold text-gray-800">Solar Power Forecast</h3>
+          {enableRealtime && (
+            <span
+              className={`ml-2 flex items-center text-xs px-2 py-0.5 rounded-full ${
+                wsConnected
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-500"
+              }`}
+              title={wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."}
+            >
+              <Radio className={`w-3 h-3 mr-1 ${wsConnected ? "animate-pulse" : ""}`} />
+              {wsConnected ? "LIVE" : "..."}
+            </span>
+          )}
         </div>
         <button
           type="button"
@@ -181,6 +224,9 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
       <div className="mt-3 pt-3 border-t border-gray-100">
         <p className="text-xs text-gray-500">
           Target: MAPE &lt; 10% | Data from TimescaleDB | {data.length} data points
+          {enableRealtime && liveUpdateCount > 0 && (
+            <span className="ml-2 text-green-600">| {liveUpdateCount} live updates</span>
+          )}
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, RefreshCw, Zap } from "lucide-react";
+import { AlertTriangle, Radio, RefreshCw, Zap } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useVoltageWebSocket } from "@/hooks";
 
 interface VoltageDataPoint {
   time: string;
@@ -57,9 +58,10 @@ const PROSUMER_CONFIG: Record<string, { phase: string; position: number }> = {
 
 interface VoltageMonitorChartProps {
   height?: number;
+  enableRealtime?: boolean;
 }
 
-export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChartProps) {
+export default function VoltageMonitorChart({ height = 300, enableRealtime = true }: VoltageMonitorChartProps) {
   const [data, setData] = useState<VoltageDataPoint[]>([]);
   const [prosumerStatus, setProsumerStatus] = useState<ProsumerStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,8 +72,44 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
     "prosumer5",
     "prosumer7",
   ]);
-
   const [error, setError] = useState<string | null>(null);
+  const [liveUpdateCount, setLiveUpdateCount] = useState(0);
+
+  // WebSocket connection for real-time updates
+  const { isConnected: wsConnected } = useVoltageWebSocket(
+    enableRealtime
+      ? (update) => {
+          // Update prosumer status from real-time data
+          setProsumerStatus((prev) =>
+            prev.map((ps) =>
+              ps.id === update.prosumer_id
+                ? { ...ps, voltage: update.voltage, status: update.status as ProsumerStatus["status"] }
+                : ps
+            )
+          );
+
+          // Check for violations
+          if (update.status === "warning" || update.status === "critical") {
+            setViolations((prev) => prev + 1);
+          }
+
+          setLiveUpdateCount((prev) => prev + 1);
+
+          // Add new data point
+          const time = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+          setData((prevData) => {
+            const lastPoint = prevData[prevData.length - 1];
+            const newPoint: VoltageDataPoint = {
+              ...lastPoint,
+              time,
+              [update.prosumer_id]: update.voltage,
+            };
+            const newData = [...prevData, newPoint];
+            return newData.slice(-120); // Keep last 2 hours at 1-min intervals
+          });
+        }
+      : undefined
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -118,6 +156,19 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
         <div className="flex items-center">
           <Zap className="w-5 h-5 text-[#74045F] mr-2" />
           <h3 className="text-lg font-semibold text-gray-800">Voltage Monitoring</h3>
+          {enableRealtime && (
+            <span
+              className={`ml-2 flex items-center text-xs px-2 py-0.5 rounded-full ${
+                wsConnected
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-500"
+              }`}
+              title={wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."}
+            >
+              <Radio className={`w-3 h-3 mr-1 ${wsConnected ? "animate-pulse" : ""}`} />
+              {wsConnected ? "LIVE" : "..."}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {violations > 0 && (
@@ -242,6 +293,9 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
       <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
         <p className="text-xs text-gray-500">
           Target: MAE &lt; 2V | Limits: 218V - 242V (±5%) | {data.length} data points
+          {enableRealtime && liveUpdateCount > 0 && (
+            <span className="ml-2 text-green-600">| {liveUpdateCount} live updates</span>
+          )}
         </p>
         <div className="flex gap-2">
           {["A", "B", "C"].map((phase) => (
