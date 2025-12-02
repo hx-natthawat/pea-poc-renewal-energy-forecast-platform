@@ -89,6 +89,8 @@ class SolarFeatureEngineer:
         # Average irradiance from two sensors
         df["pyrano_avg"] = (df["pyrano1"] + df["pyrano2"]) / 2
         df["pyrano_diff"] = abs(df["pyrano1"] - df["pyrano2"])
+        df["pyrano_max"] = df[["pyrano1", "pyrano2"]].max(axis=1)
+        df["pyrano_min"] = df[["pyrano1", "pyrano2"]].min(axis=1)
 
         # Average PV temperature
         df["pvtemp_avg"] = (df["pvtemp1"] + df["pvtemp2"]) / 2
@@ -105,6 +107,29 @@ class SolarFeatureEngineer:
         # Max theoretical irradiance ~1000 W/m² at noon
         df["clear_sky_index"] = df["pyrano_avg"] / 1000.0
         df["clear_sky_index"] = df["clear_sky_index"].clip(0, 1)
+
+        # === Physics-Based Power Estimation Features ===
+        # Theoretical power = Irradiance * Area * Efficiency * Temperature Factor
+        # Using normalized irradiance as proxy
+        df["theoretical_power"] = df["pyrano_avg"] * df["temp_efficiency"]
+        df["theoretical_power_squared"] = df["theoretical_power"] ** 2
+
+        # Irradiance squared (captures non-linear relationship)
+        df["pyrano_squared"] = df["pyrano_avg"] ** 2 / 1000.0  # Scale down
+
+        # Wind cooling effect on panels
+        df["wind_cooling"] = df["windspeed"] * df["temp_delta"]
+
+        # Irradiance stability (sensor agreement indicates clear sky)
+        df["irradiance_stability"] = 1 - (df["pyrano_diff"] / (df["pyrano_avg"] + 1))
+        df["irradiance_stability"] = df["irradiance_stability"].clip(0, 1)
+
+        # Power density indicator
+        df["power_density"] = df["pyrano_avg"] * df["is_peak_hour"]
+
+        # Morning/afternoon asymmetry
+        df["is_morning"] = ((df["hour"] >= 6) & (df["hour"] < 12)).astype(int)
+        df["is_afternoon"] = ((df["hour"] >= 12) & (df["hour"] <= 18)).astype(int)
 
         # === Lag Features ===
         for lag in self.lag_periods:
@@ -149,6 +174,8 @@ class SolarFeatureEngineer:
             "doy_cos",
             "is_peak_hour",
             "is_daylight",
+            "is_morning",
+            "is_afternoon",
             # Raw sensors
             "pyrano1",
             "pyrano2",
@@ -159,11 +186,20 @@ class SolarFeatureEngineer:
             # Derived
             "pyrano_avg",
             "pyrano_diff",
+            "pyrano_max",
+            "pyrano_min",
             "pvtemp_avg",
             "pvtemp_diff",
             "temp_delta",
             "temp_efficiency",
             "clear_sky_index",
+            # Physics-based
+            "theoretical_power",
+            "theoretical_power_squared",
+            "pyrano_squared",
+            "wind_cooling",
+            "irradiance_stability",
+            "power_density",
             # Rate of change
             "pyrano_change",
             "temp_change",

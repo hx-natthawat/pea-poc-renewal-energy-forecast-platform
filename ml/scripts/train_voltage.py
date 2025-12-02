@@ -28,6 +28,14 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sqlalchemy import create_engine, text
 
+# Try XGBoost, fallback to sklearn
+try:
+    import xgboost as xgb
+    USE_XGBOOST = True
+except (ImportError, Exception):
+    USE_XGBOOST = False
+    print("⚠️  XGBoost not available, using sklearn models")
+
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -73,20 +81,41 @@ def load_voltage_data(engine) -> pd.DataFrame:
 
 
 def train_model(X_train: pd.DataFrame, y_train: pd.Series):
-    """Train model with optimized hyperparameters."""
-    print("\n🎯 Training RandomForestRegressor...")
-
-    # Use RandomForest for voltage prediction (handles non-linear patterns well)
-    model = RandomForestRegressor(
-        n_estimators=150,
-        max_depth=12,
-        min_samples_leaf=5,
-        min_samples_split=10,
-        max_features="sqrt",
-        random_state=42,
-        n_jobs=-1,
-    )
-    model.fit(X_train, y_train)
+    """Train model with optimized hyperparameters for R² > 0.90."""
+    if USE_XGBOOST:
+        print("\n🎯 Training XGBoost model...")
+        model = xgb.XGBRegressor(
+            n_estimators=400,
+            max_depth=8,
+            learning_rate=0.05,
+            subsample=0.85,
+            colsample_bytree=0.85,
+            min_child_weight=3,
+            reg_alpha=0.1,
+            reg_lambda=1.0,
+            gamma=0.05,
+            random_state=42,
+            n_jobs=-1,
+            verbosity=0,
+        )
+        model.fit(
+            X_train,
+            y_train,
+            eval_set=[(X_train, y_train)],
+            verbose=False
+        )
+    else:
+        print("\n🎯 Training RandomForestRegressor...")
+        model = RandomForestRegressor(
+            n_estimators=300,
+            max_depth=15,
+            min_samples_leaf=2,
+            min_samples_split=4,
+            max_features=0.8,
+            random_state=42,
+            n_jobs=-1,  # Parallelize
+        )
+        model.fit(X_train, y_train)
 
     return model
 
@@ -99,17 +128,28 @@ def evaluate_model(model, X: pd.DataFrame, y: pd.Series, split_name: str = "Test
     rmse = np.sqrt(mean_squared_error(y, y_pred))
     r2 = r2_score(y, y_pred)
 
+    # Additional voltage-specific metrics
+    max_error = np.max(np.abs(y - y_pred))
+    within_1v = np.mean(np.abs(y - y_pred) < 1.0) * 100
+    within_2v = np.mean(np.abs(y - y_pred) < 2.0) * 100
+
     metrics = {
-        "mae": round(mae, 3),
-        "rmse": round(rmse, 3),
+        "mae": round(mae, 4),
+        "rmse": round(rmse, 4),
         "r2": round(r2, 4),
+        "max_error": round(max_error, 2),
+        "within_1v_pct": round(within_1v, 2),
+        "within_2v_pct": round(within_2v, 2),
         "samples": len(y),
     }
 
     print(f"\n📈 {split_name} Metrics:")
-    print(f"   MAE:   {metrics['mae']:.3f} V (target: <{TARGET_MAE} V)")
-    print(f"   RMSE:  {metrics['rmse']:.3f} V (target: <{TARGET_RMSE} V)")
+    print(f"   MAE:   {metrics['mae']:.4f} V (target: <{TARGET_MAE} V)")
+    print(f"   RMSE:  {metrics['rmse']:.4f} V (target: <{TARGET_RMSE} V)")
     print(f"   R²:    {metrics['r2']:.4f} (target: >{TARGET_R2})")
+    print(f"   Max Error: {metrics['max_error']:.2f} V")
+    print(f"   Within 1V: {metrics['within_1v_pct']:.1f}%")
+    print(f"   Within 2V: {metrics['within_2v_pct']:.1f}%")
 
     return metrics
 
@@ -131,14 +171,17 @@ def cross_validate(X: pd.DataFrame, y: pd.Series, n_splits: int = 5) -> tuple[li
 
     # Calculate average metrics
     avg_metrics = {
-        "mae": round(np.mean([r["mae"] for r in cv_results]), 3),
-        "rmse": round(np.mean([r["rmse"] for r in cv_results]), 3),
+        "mae": round(np.mean([r["mae"] for r in cv_results]), 4),
+        "rmse": round(np.mean([r["rmse"] for r in cv_results]), 4),
         "r2": round(np.mean([r["r2"] for r in cv_results]), 4),
+        "max_error": round(np.mean([r["max_error"] for r in cv_results]), 2),
+        "within_1v_pct": round(np.mean([r["within_1v_pct"] for r in cv_results]), 2),
+        "within_2v_pct": round(np.mean([r["within_2v_pct"] for r in cv_results]), 2),
     }
 
     print(f"\n📊 Cross-Validation Average:")
-    print(f"   MAE:   {avg_metrics['mae']:.3f} V")
-    print(f"   RMSE:  {avg_metrics['rmse']:.3f} V")
+    print(f"   MAE:   {avg_metrics['mae']:.4f} V")
+    print(f"   RMSE:  {avg_metrics['rmse']:.4f} V")
     print(f"   R²:    {avg_metrics['r2']:.4f}")
 
     return cv_results, avg_metrics
@@ -192,7 +235,7 @@ def save_model(model, feature_engineer: VoltageFeatureEngineer, metrics: dict, o
     # Save metadata as JSON
     metadata_path = output_path.with_suffix(".json")
     metadata = {
-        "model_type": "random_forest",
+        "model_type": "xgboost" if USE_XGBOOST else "sklearn_random_forest",
         "task": "voltage_prediction",
         "feature_columns": feature_engineer.get_feature_columns(),
         "metrics": metrics,
@@ -218,7 +261,7 @@ def main():
     parser.add_argument(
         "--output",
         type=str,
-        default="models/voltage_rf_v1.joblib",
+        default="models/voltage_xgb_v1.joblib",
         help="Output path for trained model"
     )
     parser.add_argument(
@@ -255,8 +298,8 @@ def main():
     # Feature engineering
     print("\n🔧 Applying feature engineering...")
     feature_engineer = VoltageFeatureEngineer(
-        lag_periods=[1, 2, 3, 6],
-        rolling_windows=[6, 12]
+        lag_periods=[1, 2, 3, 6, 12],
+        rolling_windows=[6, 12, 24]
     )
 
     X, y = feature_engineer.prepare_train_data(df)

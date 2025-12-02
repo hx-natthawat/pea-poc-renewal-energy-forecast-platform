@@ -42,7 +42,9 @@
       "Bash(ml/venv/bin/pip list:*)",
       "Bash(ml/venv/bin/pip install:*)",
       "Bash(backend/venv/bin/pip install:*)",
-      "Bash(xargs kill -9)"
+      "Bash(xargs kill -9)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5433/pea_forecast\" ml/venv/bin/python ml/scripts/load_poc_data.py:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []
