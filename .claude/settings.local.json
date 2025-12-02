@@ -67,7 +67,8 @@
       "Bash(kubectl rollout status:*)",
       "Bash(kubectl wait:*)",
       "Bash(brew list:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(timeout 3 websocat:*)"
     ],
     "deny": [],
     "ask": []

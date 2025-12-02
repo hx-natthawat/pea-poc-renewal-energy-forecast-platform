@@ -80,16 +80,22 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
+  const connectingRef = useRef(false);
 
   const connect = useCallback(() => {
+    // Prevent duplicate connections (handles React Strict Mode double-render)
+    if (connectingRef.current || (wsRef.current && wsRef.current.readyState === WebSocket.OPEN)) {
+      return;
+    }
+
     // Clear any existing reconnect timeout
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
 
-    // Close existing connection
-    if (wsRef.current) {
+    // Close existing connection only if it's not connecting
+    if (wsRef.current && wsRef.current.readyState !== WebSocket.CONNECTING) {
       wsRef.current.close();
     }
 
@@ -99,17 +105,23 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     const url = `${wsBaseUrl}?channels=${channelParam}`;
 
     try {
+      connectingRef.current = true;
       const ws = new WebSocket(url);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        if (!mountedRef.current) return;
+        connectingRef.current = false;
+        if (!mountedRef.current) {
+          ws.close();
+          return;
+        }
         setIsConnected(true);
         setConnectionError(null);
         onConnected?.();
       };
 
       ws.onclose = () => {
+        connectingRef.current = false;
         if (!mountedRef.current) return;
         setIsConnected(false);
         onDisconnected?.();
@@ -124,10 +136,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         }
       };
 
-      ws.onerror = (event) => {
+      ws.onerror = () => {
+        connectingRef.current = false;
         if (!mountedRef.current) return;
         setConnectionError("WebSocket connection error");
-        onError?.(event);
+        onError?.(new Event("error"));
       };
 
       ws.onmessage = (event) => {
@@ -173,6 +186,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         }
       };
     } catch (error) {
+      connectingRef.current = false;
       setConnectionError("Failed to create WebSocket connection");
       console.error("WebSocket connection error:", error);
     }
@@ -207,22 +221,34 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
   }, []);
 
   const reconnect = useCallback(() => {
+    // Force reconnect by clearing the connecting flag and closing existing connection
+    connectingRef.current = false;
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
     connect();
   }, [connect]);
 
-  // Connect on mount
+  // Connect on mount with small delay to handle React Strict Mode
   useEffect(() => {
     mountedRef.current = true;
-    connect();
+
+    // Small delay to prevent React Strict Mode double-connection issue
+    const connectTimeout = setTimeout(() => {
+      if (mountedRef.current) {
+        connect();
+      }
+    }, 100);
 
     return () => {
       mountedRef.current = false;
+      clearTimeout(connectTimeout);
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
+      // Don't close WebSocket during Strict Mode unmount - let it connect
+      // The onopen handler will close it if component is unmounted
     };
   }, [connect]);
 
