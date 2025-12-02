@@ -1,0 +1,33 @@
+# ConfigMap for PEA RE Forecast Platform
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pea-forecast-config
+  namespace: pea-forecast
+  labels:
+    app.kubernetes.io/name: pea-forecast
+data:
+  # Application settings
+  APP_ENV: "development"
+  APP_NAME: "PEA RE Forecast Platform"
+  APP_VERSION: "0.1.0"
+
+  # API settings
+  API_V1_PREFIX: "/api/v1"
+
+  # Database settings (service discovery)
+  DATABASE_URL: "postgresql+asyncpg://postgres:postgres@timescaledb:5432/pea_forecast"
+
+  # Redis settings
+  REDIS_URL: "redis://redis:6379/0"
+
+  # ML Model settings
+  MODEL_PATH: "/app/models"
+  SOLAR_MODEL_VERSION: "v1.0.0"
+  VOLTAGE_MODEL_VERSION: "v1.0.0"
+
+  # CORS settings (comma-separated string)
+  CORS_ORIGINS_STR: "http://localhost:3000,http://frontend:3000,http://localhost:30443"
+
+  # Logging
+  LOG_LEVEL: "INFO"

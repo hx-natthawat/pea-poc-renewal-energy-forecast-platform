@@ -1,0 +1,9 @@
+# Namespace for PEA RE Forecast Platform
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pea-forecast
+  labels:
+    app.kubernetes.io/name: pea-forecast
+    app.kubernetes.io/part-of: pea-re-forecast-platform
+    environment: development

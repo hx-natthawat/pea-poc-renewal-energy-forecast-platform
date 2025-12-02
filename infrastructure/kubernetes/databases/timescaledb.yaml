@@ -1,0 +1,101 @@
+# TimescaleDB Deployment for PEA RE Forecast Platform
+# Per TOR: PostgreSQL with TimescaleDB extension
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: timescaledb-pvc
+  namespace: pea-forecast
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timescaledb
+  namespace: pea-forecast
+  labels:
+    app: timescaledb
+    app.kubernetes.io/name: timescaledb
+    app.kubernetes.io/part-of: pea-re-forecast-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: timescaledb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: timescaledb
+    spec:
+      containers:
+        - name: timescaledb
+          image: timescale/timescaledb:latest-pg16
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pea-forecast-secrets
+                  key: DB_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pea-forecast-secrets
+                  key: DB_PASSWORD
+            - name: POSTGRES_DB
+              value: "pea_forecast"
+          volumeMounts:
+            - name: timescaledb-data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: timescaledb-data
+          persistentVolumeClaim:
+            claimName: timescaledb-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescaledb
+  namespace: pea-forecast
+  labels:
+    app: timescaledb
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
+  selector:
+    app: timescaledb

@@ -1,0 +1,116 @@
+# Backend API Deployment for PEA RE Forecast Platform
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: pea-forecast
+  labels:
+    app: backend
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: pea-re-forecast-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: pea-forecast/backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: pea-forecast-config
+                  key: APP_ENV
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: pea-forecast-config
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: pea-forecast-config
+                  key: REDIS_URL
+            - name: MODEL_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: pea-forecast-config
+                  key: MODEL_PATH
+            - name: CORS_ORIGINS_STR
+              valueFrom:
+                configMapKeyRef:
+                  name: pea-forecast-config
+                  key: CORS_ORIGINS_STR
+          volumeMounts:
+            - name: models
+              mountPath: /app/models
+              readOnly: true
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: models
+          configMap:
+            name: ml-models
+            optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: pea-forecast
+  labels:
+    app: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+      name: http
+  selector:
+    app: backend
+---
+# NodePort service for external access during development
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-nodeport
+  namespace: pea-forecast
+  labels:
+    app: backend
+spec:
+  type: NodePort
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30080
+      name: http
+  selector:
+    app: backend
