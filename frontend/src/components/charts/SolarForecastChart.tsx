@@ -20,70 +20,43 @@ interface SolarDataPoint {
   irradiance: number;
 }
 
-// Generate mock solar data for visualization
-function generateMockSolarData(): SolarDataPoint[] {
-  const data: SolarDataPoint[] = [];
-  const now = new Date();
-  now.setHours(6, 0, 0, 0); // Start at 6 AM
-
-  for (let i = 0; i < 48; i++) {
-    // 4 hours of data at 5-min intervals
-    const time = new Date(now.getTime() + i * 5 * 60 * 1000);
-    const hour = time.getHours() + time.getMinutes() / 60;
-
-    // Solar curve (bell curve centered at noon)
-    let basePower = 0;
-    if (hour >= 6 && hour <= 18) {
-      const hourFactor = Math.exp(-0.5 * ((hour - 12) / 2.5) ** 2);
-      basePower = 4500 * hourFactor * (0.9 + Math.random() * 0.2);
-    }
-
-    // Irradiance follows similar pattern
-    const irradiance =
-      hour >= 6 && hour <= 18
-        ? 1000 * Math.exp(-0.5 * ((hour - 12) / 2.5) ** 2) * (0.85 + Math.random() * 0.3)
-        : 0;
-
-    // Prediction with slight offset
-    const predicted = basePower * (0.95 + Math.random() * 0.1);
-
-    data.push({
-      time: time.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }),
-      power_kw: Math.round(basePower),
-      predicted_kw: Math.round(predicted),
-      irradiance: Math.round(irradiance),
-    });
-  }
-
-  return data;
-}
-
 interface SolarForecastChartProps {
   height?: number;
 }
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function SolarForecastChart({ height = 300 }: SolarForecastChartProps) {
   const [data, setData] = useState<SolarDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPower, setCurrentPower] = useState(0);
   const [peakPower, setPeakPower] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadData = useCallback(() => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
-    // Simulate API call delay
-    setTimeout(() => {
-      const mockData = generateMockSolarData();
-      setData(mockData);
+    setError(null);
 
-      // Calculate current and peak
-      const now = new Date();
-      const currentHour = now.getHours();
-      const currentIndex = Math.min(Math.floor((currentHour - 6) * 12), mockData.length - 1);
-      setCurrentPower(currentIndex >= 0 ? mockData[Math.max(0, currentIndex)].power_kw : 0);
-      setPeakPower(Math.max(...mockData.map((d) => d.power_kw)));
+    try {
+      const response = await fetch(`${API_URL}/api/v1/data/solar/latest?hours=24`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch solar data");
+      }
 
+      const result = await response.json();
+
+      if (result.status === "success" && result.data?.chart_data) {
+        setData(result.data.chart_data);
+        setCurrentPower(result.data.summary?.current_power || 0);
+        setPeakPower(result.data.summary?.peak_power || 0);
+      }
+    } catch (err) {
+      console.error("Error fetching solar data:", err);
+      setError("Could not load data from API");
+      // Keep existing data if available
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   }, []);
 
   useEffect(() => {
@@ -130,8 +103,13 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
         </div>
       </div>
 
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-amber-50 text-amber-700 px-3 py-2 rounded mb-4 text-sm">{error}</div>
+      )}
+
       {/* Chart */}
-      {isLoading ? (
+      {isLoading && data.length === 0 ? (
         <div className="h-[300px] flex items-center justify-center">
           <div className="animate-pulse text-gray-400">Loading chart data...</div>
         </div>
@@ -202,7 +180,7 @@ export default function SolarForecastChart({ height = 300 }: SolarForecastChartP
       {/* Footer */}
       <div className="mt-3 pt-3 border-t border-gray-100">
         <p className="text-xs text-gray-500">
-          Target: MAPE &lt; 10% | Data updates every 5 minutes
+          Target: MAPE &lt; 10% | Data from TimescaleDB | {data.length} data points
         </p>
       </div>
     </div>

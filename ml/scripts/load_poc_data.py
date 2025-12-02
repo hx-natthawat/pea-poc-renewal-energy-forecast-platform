@@ -148,7 +148,9 @@ def generate_solar_simulation(engine, days: int = 365) -> int:
     print(f"\n🌞 Generating {days} days of solar simulation data...")
 
     np.random.seed(42)
-    start_date = datetime(2024, 1, 1)
+    # Align with POC data date (June 15, 2024) - go back 'days' from that date
+    poc_date = datetime(2024, 6, 15)
+    start_date = poc_date - timedelta(days=days - 1)
     records = []
 
     for day in range(days):
@@ -244,7 +246,9 @@ def generate_voltage_simulation(engine, days: int = 365) -> int:
     print(f"\n⚡ Generating {days} days of voltage simulation data...")
 
     np.random.seed(43)
-    start_date = datetime(2024, 1, 1)
+    # Align with POC data date (June 15, 2024) - go back 'days' from that date
+    poc_date = datetime(2024, 6, 15)
+    start_date = poc_date - timedelta(days=days - 1)
     records = []
 
     for day in range(days):

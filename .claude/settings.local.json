@@ -31,7 +31,17 @@
       "Bash(pnpm run check:fix:*)",
       "Bash(./venv/bin/pip install:*)",
       "Bash(./venv/bin/python:*)",
-      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5433/pea_forecast\" ./venv/bin/python:*)"
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5433/pea_forecast\" ./venv/bin/python:*)",
+      "Bash(./venv/bin/pip:*)",
+      "Bash(cat:*)",
+      "Bash(DATABASE_URL=\"postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast\" ./venv/bin/python:*)",
+      "Bash(PGPASSWORD=postgres psql:*)",
+      "Bash(backend/venv/bin/python:*)",
+      "Bash(ml/venv/bin/python:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5433/pea_forecast\" ml/venv/bin/python:*)",
+      "Bash(ml/venv/bin/pip list:*)",
+      "Bash(ml/venv/bin/pip install:*)",
+      "Bash(backend/venv/bin/pip install:*)"
     ],
     "deny": [],
     "ask": []

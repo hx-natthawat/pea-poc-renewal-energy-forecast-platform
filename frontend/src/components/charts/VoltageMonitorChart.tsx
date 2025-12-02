@@ -15,13 +15,13 @@ import {
 
 interface VoltageDataPoint {
   time: string;
-  prosumer1: number;
-  prosumer2: number;
-  prosumer3: number;
-  prosumer4: number;
-  prosumer5: number;
-  prosumer6: number;
-  prosumer7: number;
+  prosumer1?: number;
+  prosumer2?: number;
+  prosumer3?: number;
+  prosumer4?: number;
+  prosumer5?: number;
+  prosumer6?: number;
+  prosumer7?: number;
 }
 
 interface ProsumerStatus {
@@ -32,39 +32,7 @@ interface ProsumerStatus {
   status: "normal" | "warning" | "critical";
 }
 
-// Generate mock voltage data
-function generateMockVoltageData(): VoltageDataPoint[] {
-  const data: VoltageDataPoint[] = [];
-  const now = new Date();
-  now.setMinutes(Math.floor(now.getMinutes() / 5) * 5, 0, 0);
-
-  // Go back 2 hours
-  const startTime = new Date(now.getTime() - 2 * 60 * 60 * 1000);
-
-  for (let i = 0; i < 24; i++) {
-    const time = new Date(startTime.getTime() + i * 5 * 60 * 1000);
-    const hour = time.getHours() + time.getMinutes() / 60;
-
-    // Base voltage with time-of-day variation
-    const loadFactor = hour >= 18 && hour <= 21 ? 1.3 : hour >= 7 && hour <= 9 ? 1.15 : 1.0;
-
-    // PV generation effect (raises voltage during day)
-    const pvFactor = hour >= 9 && hour <= 15 ? 0.5 * Math.sin((Math.PI * (hour - 9)) / 6) : 0;
-
-    data.push({
-      time: time.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }),
-      prosumer1: 230 - 4.5 * loadFactor + pvFactor * 1.5 + (Math.random() - 0.5) * 2,
-      prosumer2: 230 - 3.0 * loadFactor + pvFactor * 2.0 + (Math.random() - 0.5) * 2,
-      prosumer3: 230 - 1.5 * loadFactor + pvFactor * 2.5 + (Math.random() - 0.5) * 2,
-      prosumer4: 230 - 3.0 * loadFactor + pvFactor * 2.0 + (Math.random() - 0.5) * 2,
-      prosumer5: 230 - 4.5 * loadFactor + pvFactor * 1.5 + (Math.random() - 0.5) * 2,
-      prosumer6: 230 - 1.5 * loadFactor + pvFactor * 2.5 + (Math.random() - 0.5) * 2,
-      prosumer7: 230 - 1.5 * loadFactor + pvFactor * 2.5 + (Math.random() - 0.5) * 2,
-    });
-  }
-
-  return data;
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // PEA Brand-inspired color scheme for prosumer phases
 const PROSUMER_COLORS: Record<string, string> = {
@@ -103,33 +71,32 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
     "prosumer7",
   ]);
 
-  const loadData = useCallback(() => {
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      const mockData = generateMockVoltageData();
-      setData(mockData);
+    setError(null);
 
-      // Calculate current status for each prosumer
-      const latestData = mockData[mockData.length - 1];
-      const statuses: ProsumerStatus[] = Object.keys(PROSUMER_CONFIG).map((id) => {
-        const voltage = latestData[id as keyof VoltageDataPoint] as number;
-        let status: "normal" | "warning" | "critical" = "normal";
-        if (voltage < 220 || voltage > 240) status = "critical";
-        else if (voltage < 222 || voltage > 238) status = "warning";
+    try {
+      const response = await fetch(`${API_URL}/api/v1/data/voltage/latest?hours=2`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch voltage data");
+      }
 
-        return {
-          id,
-          name: `Prosumer ${id.slice(-1)}`,
-          phase: PROSUMER_CONFIG[id].phase,
-          voltage: Math.round(voltage * 10) / 10,
-          status,
-        };
-      });
+      const result = await response.json();
 
-      setProsumerStatus(statuses);
-      setViolations(statuses.filter((s) => s.status !== "normal").length);
+      if (result.status === "success" && result.data) {
+        setData(result.data.chart_data || []);
+        setProsumerStatus(result.data.prosumer_status || []);
+        setViolations(result.data.summary?.violations || 0);
+      }
+    } catch (err) {
+      console.error("Error fetching voltage data:", err);
+      setError("Could not load data from API");
+      // Keep existing data if available
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   }, []);
 
   useEffect(() => {
@@ -170,6 +137,11 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
         </div>
       </div>
 
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-amber-50 text-amber-700 px-3 py-2 rounded mb-4 text-sm">{error}</div>
+      )}
+
       {/* Prosumer Status Grid */}
       <div className="grid grid-cols-7 gap-2 mb-4">
         {prosumerStatus.map((ps) => (
@@ -196,7 +168,7 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
       </div>
 
       {/* Chart */}
-      {isLoading ? (
+      {isLoading && data.length === 0 ? (
         <div className="h-[300px] flex items-center justify-center">
           <div className="animate-pulse text-gray-400">Loading voltage data...</div>
         </div>
@@ -268,7 +240,9 @@ export default function VoltageMonitorChart({ height = 300 }: VoltageMonitorChar
 
       {/* Footer */}
       <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
-        <p className="text-xs text-gray-500">Target: MAE &lt; 2V | Limits: 218V - 242V (±5%)</p>
+        <p className="text-xs text-gray-500">
+          Target: MAE &lt; 2V | Limits: 218V - 242V (±5%) | {data.length} data points
+        </p>
         <div className="flex gap-2">
           {["A", "B", "C"].map((phase) => (
             <span key={phase} className="text-xs text-gray-400">

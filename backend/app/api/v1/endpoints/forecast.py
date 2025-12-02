@@ -2,11 +2,14 @@
 Forecast endpoints for solar power and voltage prediction.
 """
 
+import time
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+
+from app.ml import get_solar_inference
 
 router = APIRouter()
 
@@ -97,17 +100,28 @@ async def predict_solar_power(request: SolarForecastRequest) -> SolarForecastRes
     - RMSE < 100 kW
     - R² > 0.95
     """
-    # TODO: Implement actual ML model prediction
-    # For now, return a mock prediction
+    start_time = time.time()
 
-    # Mock prediction based on irradiance
-    avg_irradiance = (request.features.pyrano1 + request.features.pyrano2) / 2
-    mock_power = avg_irradiance * 4.0  # Simple linear approximation
+    # Get inference service
+    inference = get_solar_inference()
+
+    # Make prediction using trained model
+    result = inference.predict(
+        timestamp=request.timestamp,
+        pyrano1=request.features.pyrano1,
+        pyrano2=request.features.pyrano2,
+        pvtemp1=request.features.pvtemp1,
+        pvtemp2=request.features.pvtemp2,
+        ambtemp=request.features.ambtemp,
+        windspeed=request.features.windspeed,
+    )
+
+    prediction_time_ms = int((time.time() - start_time) * 1000)
 
     prediction = SolarPrediction(
-        power_kw=mock_power,
-        confidence_lower=mock_power * 0.9,
-        confidence_upper=mock_power * 1.1,
+        power_kw=result["power_kw"],
+        confidence_lower=result["confidence_lower"],
+        confidence_upper=result["confidence_upper"],
     )
 
     return SolarForecastResponse(
@@ -116,10 +130,11 @@ async def predict_solar_power(request: SolarForecastRequest) -> SolarForecastRes
             "timestamp": request.timestamp.isoformat(),
             "station_id": request.station_id,
             "prediction": prediction.model_dump(),
-            "model_version": "mock-v0.1.0",
+            "model_version": result["model_version"],
+            "is_ml_prediction": result["is_ml_prediction"],
         },
         meta={
-            "prediction_time_ms": 45,
+            "prediction_time_ms": prediction_time_ms,
             "cached": False,
         },
     )
