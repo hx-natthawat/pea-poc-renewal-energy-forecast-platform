@@ -60,7 +60,14 @@
       "Bash(kind delete cluster:*)",
       "Bash(xargs:*)",
       "Bash(open -a OrbStack)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(kubectl set env:*)",
+      "Bash(kubectl exec:*)",
+      "Bash(/Users/fero/Desktop/PEA/pea-re-forecast-platform/backend/venv/bin/python:*)",
+      "Bash(kubectl rollout status:*)",
+      "Bash(kubectl wait:*)",
+      "Bash(brew list:*)",
+      "Bash(kill:*)"
     ],
     "deny": [],
     "ask": []

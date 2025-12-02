@@ -3,6 +3,7 @@
 import { Activity, AlertTriangle, BarChart3, Settings, Sun, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SolarForecastChart, VoltageMonitorChart } from "@/components/charts";
+import { getApiBaseUrl } from "@/lib/api";
 
 interface HealthStatus {
   status: string;
@@ -18,8 +19,7 @@ export default function Home() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const response = await fetch(`${apiUrl}/api/v1/health`);
+        const response = await fetch(`${getApiBaseUrl()}/api/v1/health`);
         const data = await response.json();
         setHealth(data);
         setError(null);

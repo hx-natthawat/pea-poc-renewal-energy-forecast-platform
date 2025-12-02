@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { useSolarWebSocket } from "@/hooks";
+import { getApiBaseUrl } from "@/lib/api";
 
 interface SolarDataPoint {
   time: string;
@@ -25,8 +26,6 @@ interface SolarForecastChartProps {
   height?: number;
   enableRealtime?: boolean;
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function SolarForecastChart({ height = 300, enableRealtime = true }: SolarForecastChartProps) {
   const [data, setData] = useState<SolarDataPoint[]>([]);
@@ -68,7 +67,7 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/data/solar/latest?hours=24`);
+      const response = await fetch(`${getApiBaseUrl()}/api/v1/data/solar/latest?hours=24`);
       if (!response.ok) {
         throw new Error("Failed to fetch solar data");
       }

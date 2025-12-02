@@ -58,7 +58,7 @@ interface UseWebSocketReturn {
   reconnect: () => void;
 }
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/v1/ws";
+import { getWebSocketBaseUrl } from "@/lib/api";
 
 export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketReturn {
   const {
@@ -93,9 +93,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       wsRef.current.close();
     }
 
-    // Build URL with channels
+    // Build URL with channels - call getWebSocketBaseUrl() here to ensure browser context
     const channelParam = channels.join(",");
-    const url = `${WS_URL}?channels=${channelParam}`;
+    const wsBaseUrl = getWebSocketBaseUrl();
+    const url = `${wsBaseUrl}?channels=${channelParam}`;
 
     try {
       const ws = new WebSocket(url);

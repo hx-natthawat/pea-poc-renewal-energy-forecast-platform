@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { useVoltageWebSocket } from "@/hooks";
+import { getApiBaseUrl } from "@/lib/api";
 
 interface VoltageDataPoint {
   time: string;
@@ -32,8 +33,6 @@ interface ProsumerStatus {
   voltage: number;
   status: "normal" | "warning" | "critical";
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // PEA Brand-inspired color scheme for prosumer phases
 const PROSUMER_COLORS: Record<string, string> = {
@@ -116,7 +115,7 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/data/voltage/latest?hours=2`);
+      const response = await fetch(`${getApiBaseUrl()}/api/v1/data/voltage/latest?hours=2`);
       if (!response.ok) {
         throw new Error("Failed to fetch voltage data");
       }
