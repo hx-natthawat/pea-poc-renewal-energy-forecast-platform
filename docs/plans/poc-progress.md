@@ -2,7 +2,7 @@
 
 > **Project**: PEA RE Forecast Platform
 > **Phase**: POC Development
-> **Last Updated**: 2024-12-02
+> **Last Updated**: 2025-12-02
 
 ## POC Objectives
 
@@ -68,13 +68,13 @@
 
 ### 2.3 ML Models
 
-- [x] Feature engineering - Solar (45 features: temporal, derived, lag, rolling)
-- [x] Train solar model (GradientBoosting, 200 estimators)
-- [x] Validate solar model (CV: MAPE 18.58%, RMSE 37.61kW, R² 0.9666)
+- [x] Feature engineering - Solar (59 features: temporal, physics-based, lag, rolling)
+- [x] Train solar model (RandomForest, 500 estimators, max_depth=20)
+- [x] ✅ Validate solar model (CV: **MAPE 9.74%** <10%, RMSE 35.60kW, R² 0.9686) - **ALL TARGETS MET**
 - [x] Integrate model with API (app/ml/solar_inference.py)
-- [x] Feature engineering - Voltage (38 features: temporal, prosumer, electrical)
-- [x] Train voltage model (RandomForest, 150 estimators)
-- [x] Validate voltage model (CV: MAE 0.557V, RMSE 0.725V, R² 0.7989)
+- [x] Feature engineering - Voltage (47 features: temporal, prosumer, electrical, lag, rolling)
+- [x] Train voltage model (RandomForest, 300 estimators, max_depth=15)
+- [x] ✅ Validate voltage model (CV: MAE 0.0357V, RMSE 0.1008V, **R² 0.9949** >0.90) - **ALL TARGETS MET**
 - [x] Integrate model with API (app/ml/voltage_inference.py)
 
 ---
