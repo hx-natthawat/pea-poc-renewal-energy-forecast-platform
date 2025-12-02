@@ -16,8 +16,8 @@
 | Phase | Progress | Status |
 |-------|----------|--------|
 | Phase 1: Foundation | 80% | IN PROGRESS |
-| Phase 2: Data & ML | 60% | IN PROGRESS |
-| Phase 3: Application | 70% | IN PROGRESS |
+| Phase 2: Data & ML | 90% | IN PROGRESS |
+| Phase 3: Application | 80% | IN PROGRESS |
 | Phase 4: Deployment | 0% | NOT STARTED |
 
 ---
@@ -72,9 +72,10 @@
 - [x] Train solar model (GradientBoosting, 200 estimators)
 - [x] Validate solar model (CV: MAPE 18.58%, RMSE 37.61kW, R² 0.9666)
 - [x] Integrate model with API (app/ml/solar_inference.py)
-- [ ] Feature engineering - Voltage
-- [ ] Train voltage model
-- [ ] Validate voltage model (MAE < 2V)
+- [x] Feature engineering - Voltage (38 features: temporal, prosumer, electrical)
+- [x] Train voltage model (RandomForest, 150 estimators)
+- [x] Validate voltage model (CV: MAE 0.557V, RMSE 0.725V, R² 0.7989)
+- [x] Integrate model with API (app/ml/voltage_inference.py)
 
 ---
 

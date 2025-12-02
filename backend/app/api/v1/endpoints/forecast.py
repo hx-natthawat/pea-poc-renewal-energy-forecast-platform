@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from app.ml import get_solar_inference
+from app.ml import get_solar_inference, get_voltage_inference
 
 router = APIRouter()
 
@@ -153,37 +153,30 @@ async def predict_voltage(request: VoltageForecastRequest) -> VoltageForecastRes
     - RMSE < 3V
     - R² > 0.90
     """
-    # TODO: Implement actual ML model prediction
-    # For now, return mock predictions
+    start_time = time.time()
 
-    # Prosumer phase mapping
-    prosumer_phases = {
-        "prosumer1": "A",
-        "prosumer2": "A",
-        "prosumer3": "A",
-        "prosumer4": "B",
-        "prosumer5": "B",
-        "prosumer6": "B",
-        "prosumer7": "C",
-    }
+    # Get inference service
+    inference = get_voltage_inference()
 
     predictions = []
+    model_version = "not_loaded"
+
     for prosumer_id in request.prosumer_ids:
-        phase = prosumer_phases.get(prosumer_id, "A")
+        result = inference.predict(
+            timestamp=request.timestamp,
+            prosumer_id=prosumer_id,
+        )
 
-        # Mock voltage around 230V nominal
-        import random
-
-        base_voltage = 230.0 + random.uniform(-5, 5)
+        model_version = result["model_version"]
 
         prediction = VoltagePrediction(
             prosumer_id=prosumer_id,
-            phase=phase,
-            predicted_voltage=round(base_voltage, 1),
-            confidence_lower=round(base_voltage - 2, 1),
-            confidence_upper=round(base_voltage + 2, 1),
-            status="normal" if 218 <= base_voltage <= 242 else "warning",
-            violation_probability=0.05,
+            phase=result["phase"],
+            predicted_voltage=result["predicted_voltage"],
+            confidence_lower=result["confidence_lower"],
+            confidence_upper=result["confidence_upper"],
+            status=result["status"],
+            violation_probability=0.1 if result["status"] != "normal" else 0.02,
         )
         predictions.append(prediction.model_dump())
 
@@ -192,7 +185,8 @@ async def predict_voltage(request: VoltageForecastRequest) -> VoltageForecastRes
         data={
             "timestamp": request.timestamp.isoformat(),
             "predictions": predictions,
-            "model_version": "mock-v0.1.0",
+            "model_version": model_version,
+            "is_ml_prediction": inference.is_loaded,
         },
     )
 
