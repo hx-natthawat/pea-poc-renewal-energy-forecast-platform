@@ -1,0 +1,68 @@
+# Staging environment values
+
+global:
+  namespace: pea-forecast-staging
+
+backend:
+  replicaCount: 2
+  env:
+    APP_ENV: staging
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilization: 70
+
+frontend:
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 3
+    targetCPUUtilization: 70
+
+timescaledb:
+  persistence:
+    size: 50Gi
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+
+redis:
+  persistence:
+    enabled: true
+    size: 5Gi
+  config:
+    maxmemory: "512mb"
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  hosts:
+    - host: staging.pea-forecast.go.th
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend: backend
+        - path: /
+          pathType: Prefix
+          backend: frontend
+
+cors:
+  origins:
+    - "https://staging.pea-forecast.go.th"
+
+monitoring:
+  enabled: true

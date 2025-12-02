@@ -1,0 +1,16 @@
+apiVersion: v2
+name: pea-re-forecast
+description: PEA Renewable Energy Forecast Platform Helm Chart
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - pea
+  - renewable-energy
+  - forecast
+  - timescaledb
+  - fastapi
+  - nextjs
+maintainers:
+  - name: PEA Development Team
+    email: dev@pea.co.th

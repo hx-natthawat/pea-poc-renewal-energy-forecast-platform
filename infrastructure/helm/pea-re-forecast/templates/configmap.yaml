@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pea-re-forecast.fullname" . }}-config
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+data:
+  APP_ENV: {{ .Values.backend.env.APP_ENV | quote }}
+  DATABASE_URL: {{ include "pea-re-forecast.databaseUrl" . | quote }}
+  REDIS_URL: {{ include "pea-re-forecast.redisUrl" . | quote }}
+  MODEL_PATH: {{ .Values.backend.env.MODEL_PATH | quote }}
+  CORS_ORIGINS_STR: {{ include "pea-re-forecast.corsOrigins" . | quote }}
+  NEXT_PUBLIC_API_URL: {{ .Values.frontend.env.NEXT_PUBLIC_API_URL | quote }}

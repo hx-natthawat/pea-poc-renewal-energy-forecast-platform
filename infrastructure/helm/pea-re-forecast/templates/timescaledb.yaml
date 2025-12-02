@@ -1,0 +1,110 @@
+{{- if .Values.timescaledb.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timescaledb
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: timescaledb
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: timescaledb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: timescaledb
+        {{- include "pea-re-forecast.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: timescaledb
+          image: "{{ .Values.timescaledb.image.repository }}:{{ .Values.timescaledb.image.tag }}"
+          imagePullPolicy: {{ .Values.timescaledb.image.pullPolicy }}
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.timescaledb.auth.database | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.timescaledb.auth.username | quote }}
+            {{- if .Values.timescaledb.auth.existingSecret }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.timescaledb.auth.existingSecret }}
+                  key: password
+            {{- else }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.timescaledb.auth.password | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.timescaledb.resources | nindent 12 }}
+          {{- if .Values.timescaledb.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          {{- end }}
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - {{ .Values.timescaledb.auth.username }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - {{ .Values.timescaledb.auth.username }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      {{- if .Values.timescaledb.persistence.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: timescaledb-data
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescaledb
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: timescaledb
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.timescaledb.service.type }}
+  ports:
+    - port: {{ .Values.timescaledb.service.port }}
+      targetPort: 5432
+      name: postgres
+  selector:
+    app: timescaledb
+{{- if .Values.timescaledb.persistence.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: timescaledb-data
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.timescaledb.persistence.storageClass }}
+  storageClassName: {{ .Values.timescaledb.persistence.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.timescaledb.persistence.size }}
+{{- end }}
+{{- end }}

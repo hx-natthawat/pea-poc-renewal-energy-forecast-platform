@@ -1,0 +1,99 @@
+# Production environment values
+
+global:
+  namespace: pea-forecast-prod
+
+backend:
+  replicaCount: 3
+  env:
+    APP_ENV: production
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "4Gi"
+      cpu: "4000m"
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilization: 60
+    targetMemoryUtilization: 70
+
+frontend:
+  replicaCount: 3
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilization: 60
+
+timescaledb:
+  persistence:
+    enabled: true
+    size: 200Gi
+    storageClass: "longhorn"
+  resources:
+    requests:
+      memory: "8Gi"
+      cpu: "2000m"
+    limits:
+      memory: "24Gi"
+      cpu: "6000m"
+  auth:
+    existingSecret: "timescaledb-credentials"
+
+redis:
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "longhorn"
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  config:
+    maxmemory: "1gb"
+    maxmemoryPolicy: "allkeys-lru"
+
+ingress:
+  enabled: true
+  className: kong
+  annotations:
+    konghq.com/strip-path: "false"
+    konghq.com/plugins: rate-limiting,cors
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: pea-forecast.go.th
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend: backend
+        - path: /
+          pathType: Prefix
+          backend: frontend
+  tls:
+    - secretName: pea-forecast-tls
+      hosts:
+        - pea-forecast.go.th
+
+cors:
+  origins:
+    - "https://pea-forecast.go.th"
+    - "https://www.pea-forecast.go.th"
+
+monitoring:
+  enabled: true
+  prometheus:
+    scrape: true
