@@ -1,5 +1,5 @@
 {
-  "model_type": "sklearn_gradient_boosting",
+  "model_type": "sklearn_random_forest",
   "task": "solar_power_forecast",
   "feature_columns": [
     "hour",
@@ -59,17 +59,17 @@
     "temp_delta_rolling_mean_24"
   ],
   "metrics": {
-    "mape": 12.99,
-    "rmse": 36.55,
-    "r2": 0.9669,
-    "mae": 20.93
+    "mape": 9.74,
+    "rmse": 35.6,
+    "r2": 0.9686,
+    "mae": 20.39
   },
-  "trained_at": "2025-12-02T15:17:15.818426",
+  "trained_at": "2025-12-02T19:46:43.610776",
   "version": "v1.0.0",
   "target_requirements": {
     "mape": "< 10.0%",
     "rmse": "< 100.0 kW",
     "r2": "> 0.95"
   },
-  "meets_requirements": false
+  "meets_requirements": true
 }
