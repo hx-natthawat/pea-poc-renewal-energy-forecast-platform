@@ -217,6 +217,26 @@ SELECT create_hypertable('audit_log', 'time',
     if_not_exists => TRUE);
 
 -- =============================================================================
+-- DATA INGESTION LOG (Track file ingestion history)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS data_ingestion_log (
+    id BIGSERIAL PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    file_hash VARCHAR(64) NOT NULL UNIQUE,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('success', 'partial', 'failed', 'skipped')),
+    records_total INTEGER DEFAULT 0,
+    records_inserted INTEGER DEFAULT 0,
+    records_updated INTEGER DEFAULT 0,
+    records_skipped INTEGER DEFAULT 0,
+    errors TEXT,
+    duration_seconds DOUBLE PRECISION,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_ingestion_log_hash ON data_ingestion_log (file_hash);
+CREATE INDEX IF NOT EXISTS idx_ingestion_log_created ON data_ingestion_log (created_at DESC);
+
+-- =============================================================================
 -- Grant permissions
 -- =============================================================================
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;

@@ -131,6 +131,11 @@
 
 - [x] Prepare demo scenarios (docs/guides/demo-scenarios.md)
 - [x] Create test data for demo (30-day simulated data)
+- [x] Data ingestion pipeline (ml/scripts/ingest_data.py)
+  - Schema validation for solar, 1-phase, 3-phase data
+  - File hash deduplication
+  - Ingestion logging
+  - Model retrain trigger
 - [ ] Practice demo flow
 - [ ] Create presentation materials
 

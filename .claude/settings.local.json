@@ -71,7 +71,8 @@
       "Bash(timeout 3 websocat:*)",
       "Bash(helm lint:*)",
       "Bash(helm template:*)",
-      "Bash(helm install:*)"
+      "Bash(helm install:*)",
+      "Bash(docker-compose:*)"
     ],
     "deny": [],
     "ask": []
