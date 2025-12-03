@@ -1303,13 +1303,24 @@ async def test_ramp_rate_endpoint():
 
 ## Deployment Checklist
 
-- [ ] TMD API credentials configured
-- [ ] Database migration applied
-- [ ] Backend weather endpoints deployed
-- [ ] Frontend components integrated
-- [ ] Monitoring dashboards updated
-- [ ] Alert notifications configured
-- [ ] Documentation updated
+- [ ] TMD API credentials configured (using mock data for POC)
+- [x] Database migration applied (`docker/init-db/01-init.sql` - weather_events table)
+- [x] Backend weather endpoints deployed
+  - `/api/v1/weather/alerts` - Weather alerts
+  - `/api/v1/weather/condition` - Current condition
+  - `/api/v1/weather/ramp-rate/current` - Ramp rate status
+  - `/api/v1/weather/ramp-rate/events` - Ramp events history
+  - `/api/v1/weather/clear-sky` - Clear sky irradiance
+  - `/api/v1/weather/uncertainty-factors` - Uncertainty multipliers
+  - `/api/v1/weather/classify` - Weather classification
+  - `/api/v1/weather/events` - Historical weather events
+- [x] Frontend components integrated
+  - `WeatherAlertBanner.tsx` - Alert display with severity colors
+  - `ProbabilisticChart.tsx` - P10/P50/P90 confidence bands
+  - `RampRateMonitor.tsx` - Real-time ramp rate gauge
+- [ ] Monitoring dashboards updated (Grafana panels)
+- [ ] Alert notifications configured (Prometheus rules)
+- [x] Documentation updated
 
 ---
 
