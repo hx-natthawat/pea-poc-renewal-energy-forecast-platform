@@ -2,15 +2,15 @@
 
 import {
   AlertTriangle,
-  ArrowDownRight,
-  ArrowRightFromLine,
   Battery,
   Car,
-  Eye,
-  EyeOff,
   Home,
+  Info,
+  List,
+  Map as MapIcon,
   Maximize,
   Radio,
+  RotateCcw,
   Sun,
   Zap,
 } from "lucide-react";
@@ -533,20 +533,26 @@ interface NetworkGraphViewProps {
 // Inner Flow Component (needs to be inside ReactFlowProvider)
 // ============================================================================
 
+interface ViewOptions {
+  showLegend: boolean;
+  showMinimap: boolean;
+  showStats: boolean;
+}
+
 function FlowContent({
   topology,
   onNodeSelect,
   layout,
   setLayout,
-  focusMode,
-  setFocusMode,
+  viewOptions,
+  setViewOptions,
 }: {
   topology: TopologyData;
   onNodeSelect?: (nodeId: string | null) => void;
   layout: LayoutDirection;
   setLayout: (layout: LayoutDirection) => void;
-  focusMode: boolean;
-  setFocusMode: (focus: boolean) => void;
+  viewOptions: ViewOptions;
+  setViewOptions: (options: ViewOptions) => void;
 }) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -646,6 +652,19 @@ function FlowContent({
     []
   );
 
+  // Toggle handler for view options
+  const toggleOption = useCallback(
+    (option: keyof ViewOptions) => {
+      setViewOptions({ ...viewOptions, [option]: !viewOptions[option] });
+    },
+    [viewOptions, setViewOptions]
+  );
+
+  // Toggle layout direction
+  const toggleLayout = useCallback(() => {
+    setLayout(layout === "horizontal" ? "vertical" : "horizontal");
+  }, [layout, setLayout]);
+
   return (
     <>
       <ReactFlow
@@ -663,13 +682,11 @@ function FlowContent({
         }}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#E5E7EB" />
-        {!focusMode && (
-          <Controls
-            className="!bg-white !shadow-lg !rounded-lg !border !border-gray-200"
-            showInteractive={false}
-          />
-        )}
-        {!focusMode && (
+        <Controls
+          className="!bg-white !shadow-lg !rounded-lg !border !border-gray-200"
+          showInteractive={false}
+        />
+        {viewOptions.showMinimap && (
           <MiniMap
             nodeColor={nodeColor}
             nodeStrokeWidth={3}
@@ -680,83 +697,80 @@ function FlowContent({
 
         {/* Custom Panel for Layout Controls - nodrag nopan to enable clicks */}
         <Panel position="top-left" className="!m-2">
-          <div className="nodrag nopan bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2 flex items-center gap-2">
+          <div className="nodrag nopan bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-1.5 flex items-center gap-1.5">
             {/* Auto Fit Button */}
             <button
               type="button"
               onClick={handleFitView}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#74045F] text-white rounded-md hover:bg-[#5a0349] transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium bg-[#74045F] text-white rounded-md hover:bg-[#5a0349] transition-colors cursor-pointer"
               title="Fit to screen"
             >
-              <Maximize className="w-4 h-4" />
-              Auto Fit
+              <Maximize className="w-3.5 h-3.5" />
+              Fit
             </button>
 
-            {/* Layout Toggle */}
-            <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setLayout("vertical")}
-                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                  layout === "vertical"
-                    ? "bg-[#74045F] text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-50"
-                }`}
-                title="Vertical layout (top to bottom)"
-              >
-                <ArrowDownRight className="w-3.5 h-3.5" />
-                Vertical
-              </button>
-              <button
-                type="button"
-                onClick={() => setLayout("horizontal")}
-                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                  layout === "horizontal"
-                    ? "bg-[#74045F] text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-50"
-                }`}
-                title="Horizontal layout (left to right)"
-              >
-                <ArrowRightFromLine className="w-3.5 h-3.5" />
-                Horizontal
-              </button>
-            </div>
-
-            {/* Divider */}
-            <div className="w-px h-6 bg-gray-200" />
-
-            {/* Focus Mode Toggle */}
+            {/* Layout Toggle - Single Button */}
             <button
               type="button"
-              onClick={() => setFocusMode(!focusMode)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
-                focusMode
-                  ? "bg-amber-500 text-white hover:bg-amber-600"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-              title={focusMode ? "Show overlays" : "Hide overlays (Focus mode)"}
+              onClick={toggleLayout}
+              className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
+              title={`Switch to ${layout === "horizontal" ? "vertical" : "horizontal"} layout`}
             >
-              {focusMode ? (
-                <>
-                  <Eye className="w-4 h-4" />
-                  Show
-                </>
-              ) : (
-                <>
-                  <EyeOff className="w-4 h-4" />
-                  Focus
-                </>
-              )}
+              <RotateCcw className="w-3.5 h-3.5" />
+              {layout === "horizontal" ? "H" : "V"}
+            </button>
+
+            {/* Divider */}
+            <div className="w-px h-5 bg-gray-300" />
+
+            {/* Compact View Toggles */}
+            <button
+              type="button"
+              onClick={() => toggleOption("showLegend")}
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                viewOptions.showLegend
+                  ? "bg-[#74045F] text-white"
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+              }`}
+              title={viewOptions.showLegend ? "Hide legend" : "Show legend"}
+            >
+              <List className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggleOption("showMinimap")}
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                viewOptions.showMinimap
+                  ? "bg-[#74045F] text-white"
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+              }`}
+              title={viewOptions.showMinimap ? "Hide minimap" : "Show minimap"}
+            >
+              <MapIcon className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggleOption("showStats")}
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                viewOptions.showStats
+                  ? "bg-[#74045F] text-white"
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+              }`}
+              title={viewOptions.showStats ? "Hide stats" : "Show stats"}
+            >
+              <Info className="w-4 h-4" />
             </button>
           </div>
         </Panel>
       </ReactFlow>
 
-      {/* Legend - hidden in focus mode */}
-      {!focusMode && Legend}
+      {/* Legend - toggleable */}
+      {viewOptions.showLegend && Legend}
 
-      {/* Stats overlay - hidden in focus mode */}
-      {!focusMode && (
+      {/* Stats overlay - toggleable */}
+      {viewOptions.showStats && (
         <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 z-10">
           <h4 className="text-xs font-bold text-gray-700 mb-2">Network Status</h4>
           <div className="grid grid-cols-2 gap-2 text-xs">
@@ -793,7 +807,11 @@ function FlowContent({
 
 export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGraphViewProps) {
   const [layout, setLayout] = useState<LayoutDirection>("horizontal");
-  const [focusMode, setFocusMode] = useState(false);
+  const [viewOptions, setViewOptions] = useState<ViewOptions>({
+    showLegend: true,
+    showMinimap: true,
+    showStats: true,
+  });
 
   // Show loading state if no topology
   if (!topology) {
@@ -815,8 +833,8 @@ export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGrap
           onNodeSelect={onNodeSelect}
           layout={layout}
           setLayout={setLayout}
-          focusMode={focusMode}
-          setFocusMode={setFocusMode}
+          viewOptions={viewOptions}
+          setViewOptions={setViewOptions}
         />
       </ReactFlowProvider>
     </div>
