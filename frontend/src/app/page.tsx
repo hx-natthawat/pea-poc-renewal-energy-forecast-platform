@@ -1,9 +1,9 @@
 "use client";
 
-import { Activity, AlertTriangle, BarChart3, Bell, Settings, Sun, Zap } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, Bell, Calendar, Settings, Sun, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SolarForecastChart, VoltageMonitorChart } from "@/components/charts";
-import { AlertDashboard, ForecastComparison, NetworkTopology } from "@/components/dashboard";
+import { AlertDashboard, DayAheadReport, ForecastComparison, HistoricalAnalysis, ModelPerformance, NetworkTopology } from "@/components/dashboard";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface HealthStatus {
@@ -15,7 +15,7 @@ interface HealthStatus {
 export default function Home() {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "solar" | "voltage" | "alerts">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "solar" | "voltage" | "alerts" | "history">("overview");
 
   useEffect(() => {
     const checkHealth = async () => {
@@ -81,6 +81,7 @@ export default function Home() {
               { id: "solar", label: "Solar Forecast", icon: Sun },
               { id: "voltage", label: "Voltage Monitor", icon: Zap },
               { id: "alerts", label: "Alerts", icon: Bell },
+              { id: "history", label: "History", icon: Calendar },
             ].map((tab) => (
               <button
                 type="button"
@@ -181,30 +182,8 @@ export default function Home() {
             </div>
 
             {/* Model Performance */}
-            <div className="mt-6 bg-white rounded-lg shadow p-6 border-l-4 border-[#74045F]">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Model Performance</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-500">Solar MAPE</p>
-                  <p className="text-2xl font-bold text-[#C7911B]">8.2%</p>
-                  <p className="text-xs text-green-600">Target: &lt;10%</p>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-500">Solar RMSE</p>
-                  <p className="text-2xl font-bold text-[#C7911B]">78 kW</p>
-                  <p className="text-xs text-green-600">Target: &lt;100kW</p>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-500">Voltage MAE</p>
-                  <p className="text-2xl font-bold text-[#74045F]">1.4 V</p>
-                  <p className="text-xs text-green-600">Target: &lt;2V</p>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-500">Voltage R²</p>
-                  <p className="text-2xl font-bold text-[#74045F]">0.94</p>
-                  <p className="text-xs text-green-600">Target: &gt;0.90</p>
-                </div>
-              </div>
+            <div className="mt-6">
+              <ModelPerformance height={250} />
             </div>
           </>
         )}
@@ -251,6 +230,14 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* History Tab */}
+        {activeTab === "history" && (
+          <div className="space-y-6">
+            <DayAheadReport height={280} />
+            <HistoricalAnalysis height={280} />
           </div>
         )}
       </div>
