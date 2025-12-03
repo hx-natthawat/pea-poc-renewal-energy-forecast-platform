@@ -192,7 +192,7 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
               }}
               formatter={(value: number, name: string) => [
                 `${value.toLocaleString()} kW`,
-                name === "power_kw" ? "Actual" : "Predicted",
+                name,
               ]}
             />
             <Legend />

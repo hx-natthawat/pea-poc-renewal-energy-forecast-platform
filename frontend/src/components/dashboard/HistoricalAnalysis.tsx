@@ -364,8 +364,8 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
                   <YAxis tick={{ fontSize: 10 }} />
                   <Tooltip
                     formatter={(value: number, name: string) => [
-                      `${value.toFixed(1)} ${name === "energy_kwh" ? "kWh" : "kW"}`,
-                      name === "energy_kwh" ? "Energy" : name === "peak_power" ? "Peak" : "Avg",
+                      `${value.toFixed(1)} ${name.includes("kWh") ? "kWh" : "kW"}`,
+                      name,
                     ]}
                     labelFormatter={formatDate}
                     contentStyle={{

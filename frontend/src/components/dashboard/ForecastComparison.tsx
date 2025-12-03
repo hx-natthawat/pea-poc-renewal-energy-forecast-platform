@@ -306,7 +306,7 @@ export default function ForecastComparison({
                 }}
                 formatter={(value: number, name: string) => [
                   `${value.toFixed(1)} ${config.unit}`,
-                  name === "actual" ? "Actual" : "Predicted",
+                  name,
                 ]}
               />
               <Legend />
