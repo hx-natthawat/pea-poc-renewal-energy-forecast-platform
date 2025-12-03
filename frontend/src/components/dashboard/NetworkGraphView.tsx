@@ -2,24 +2,32 @@
 
 import {
   AlertTriangle,
+  ArrowDownRight,
+  ArrowRightFromLine,
   Battery,
   Car,
+  Eye,
+  EyeOff,
   Home,
+  Maximize,
   Radio,
   Sun,
   Zap,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Background,
   BackgroundVariant,
   Controls,
   Handle,
   MiniMap,
+  Panel,
   Position,
   ReactFlow,
+  ReactFlowProvider,
   useEdgesState,
   useNodesState,
+  useReactFlow,
   type Edge,
   type Node,
   type NodeProps,
@@ -91,6 +99,7 @@ interface TransformerNodeData extends Record<string, unknown> {
   capacity_kva: number;
   voltage_primary: number;
   voltage_secondary: number;
+  layout: "vertical" | "horizontal";
 }
 
 interface PhaseNodeData extends Record<string, unknown> {
@@ -99,6 +108,7 @@ interface PhaseNodeData extends Record<string, unknown> {
   avg_voltage: number | null;
   total_power: number | null;
   prosumerCount: number;
+  layout: "vertical" | "horizontal";
 }
 
 interface ProsumerGraphNodeData extends Record<string, unknown> {
@@ -112,7 +122,14 @@ interface ProsumerGraphNodeData extends Record<string, unknown> {
   voltage: number | null;
   power: number | null;
   status: "normal" | "warning" | "critical" | "unknown";
+  layout: "vertical" | "horizontal";
 }
+
+// ============================================================================
+// Layout type
+// ============================================================================
+
+type LayoutDirection = "vertical" | "horizontal";
 
 // ============================================================================
 // Status colors following PEA brand
@@ -140,8 +157,16 @@ const PEA_GOLD = "#C7911B";
 // ============================================================================
 
 function TransformerNode({ data }: NodeProps<Node<TransformerNodeData>>) {
+  const isHorizontal = data.layout === "horizontal";
+
   return (
     <div className="relative group">
+      <Handle
+        type="target"
+        position={isHorizontal ? Position.Left : Position.Top}
+        className="!bg-gray-400 !w-2 !h-2 !opacity-0"
+      />
+
       <div
         className="flex flex-col items-center p-4 rounded-xl shadow-xl transition-transform hover:scale-105"
         style={{
@@ -167,7 +192,11 @@ function TransformerNode({ data }: NodeProps<Node<TransformerNodeData>>) {
         </span>
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="!bg-[#D4A43D] !w-3 !h-3" />
+      <Handle
+        type="source"
+        position={isHorizontal ? Position.Right : Position.Bottom}
+        className="!bg-[#D4A43D] !w-3 !h-3"
+      />
 
       {/* Tooltip */}
       <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
@@ -183,10 +212,15 @@ function TransformerNode({ data }: NodeProps<Node<TransformerNodeData>>) {
 
 function PhaseNode({ data }: NodeProps<Node<PhaseNodeData>>) {
   const colors = PHASE_COLORS[data.phase as keyof typeof PHASE_COLORS] || PHASE_COLORS.A;
+  const isHorizontal = data.layout === "horizontal";
 
   return (
     <div className="relative group">
-      <Handle type="target" position={Position.Top} className="!bg-gray-400 !w-2 !h-2" />
+      <Handle
+        type="target"
+        position={isHorizontal ? Position.Left : Position.Top}
+        className="!bg-gray-400 !w-2 !h-2"
+      />
 
       <div
         className="flex flex-col items-center p-3 rounded-lg shadow-md transition-transform hover:scale-105"
@@ -207,7 +241,11 @@ function PhaseNode({ data }: NodeProps<Node<PhaseNodeData>>) {
         </span>
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="!bg-gray-400 !w-2 !h-2" />
+      <Handle
+        type="source"
+        position={isHorizontal ? Position.Right : Position.Bottom}
+        className="!bg-gray-400 !w-2 !h-2"
+      />
 
       {/* Tooltip */}
       <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
@@ -223,6 +261,7 @@ function PhaseNode({ data }: NodeProps<Node<PhaseNodeData>>) {
 
 function ProsumerGraphNode({ data }: NodeProps<Node<ProsumerGraphNodeData>>) {
   const statusColor = STATUS_COLORS[data.status];
+  const isHorizontal = data.layout === "horizontal";
 
   const getPositionLabel = (pos: number) => {
     if (pos === 1) return "Near";
@@ -232,7 +271,11 @@ function ProsumerGraphNode({ data }: NodeProps<Node<ProsumerGraphNodeData>>) {
 
   return (
     <div className="relative group">
-      <Handle type="target" position={Position.Top} className="!bg-gray-400 !w-2 !h-2" />
+      <Handle
+        type="target"
+        position={isHorizontal ? Position.Left : Position.Top}
+        className="!bg-gray-400 !w-2 !h-2"
+      />
 
       <div
         className="flex flex-col items-center p-3 rounded-xl shadow-lg bg-white transition-transform hover:scale-105"
@@ -289,6 +332,12 @@ function ProsumerGraphNode({ data }: NodeProps<Node<ProsumerGraphNodeData>>) {
         </span>
       </div>
 
+      <Handle
+        type="source"
+        position={isHorizontal ? Position.Right : Position.Bottom}
+        className="!bg-gray-400 !w-2 !h-2 !opacity-0"
+      />
+
       {/* Tooltip */}
       <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
         {data.name} | Phase {data.phase} | {data.status}
@@ -311,28 +360,48 @@ const nodeTypes = {
 // Helper function to create nodes and edges from topology data
 // ============================================================================
 
-function createNodesAndEdges(topology: TopologyData): { nodes: Node[]; edges: Edge[] } {
+function createNodesAndEdges(
+  topology: TopologyData,
+  layout: LayoutDirection
+): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  // Layout constants
-  const TRANSFORMER_Y = 50;
-  const PHASE_Y = 180;
-  const PROSUMER_START_Y = 320;
-  const PROSUMER_ROW_HEIGHT = 140;
-  const CENTER_X = 400;
-  const PHASE_SPACING = 250;
+  const isHorizontal = layout === "horizontal";
+
+  // Layout constants for vertical (top-to-bottom)
+  const VERTICAL = {
+    TRANSFORMER_X: 400,
+    TRANSFORMER_Y: 50,
+    PHASE_Y: 180,
+    PROSUMER_START_Y: 320,
+    PROSUMER_ROW_HEIGHT: 140,
+    PHASE_SPACING: 250,
+  };
+
+  // Layout constants for horizontal (left-to-right)
+  const HORIZONTAL = {
+    TRANSFORMER_X: 50,
+    TRANSFORMER_Y: 250,
+    PHASE_X: 250,
+    PROSUMER_START_X: 420,
+    PROSUMER_COL_WIDTH: 140,
+    PHASE_SPACING: 180,
+  };
 
   // 1. Add Transformer node
   nodes.push({
     id: "transformer",
     type: "transformer",
-    position: { x: CENTER_X - 80, y: TRANSFORMER_Y },
+    position: isHorizontal
+      ? { x: HORIZONTAL.TRANSFORMER_X, y: HORIZONTAL.TRANSFORMER_Y }
+      : { x: VERTICAL.TRANSFORMER_X - 80, y: VERTICAL.TRANSFORMER_Y },
     data: {
       label: topology.transformer.name,
       capacity_kva: topology.transformer.capacity_kva,
       voltage_primary: topology.transformer.voltage_primary,
       voltage_secondary: topology.transformer.voltage_secondary,
+      layout,
     },
   });
 
@@ -343,20 +412,31 @@ function createNodesAndEdges(topology: TopologyData): { nodes: Node[]; edges: Ed
   );
 
   sortedPhases.forEach((phase, phaseIndex) => {
-    const phaseX = CENTER_X + (phaseIndex - 1) * PHASE_SPACING;
     const phaseId = `phase-${phase.phase}`;
+
+    let phasePosition: { x: number; y: number };
+    if (isHorizontal) {
+      phasePosition = {
+        x: HORIZONTAL.PHASE_X,
+        y: HORIZONTAL.TRANSFORMER_Y - 150 + phaseIndex * HORIZONTAL.PHASE_SPACING
+      };
+    } else {
+      const phaseX = VERTICAL.TRANSFORMER_X + (phaseIndex - 1) * VERTICAL.PHASE_SPACING;
+      phasePosition = { x: phaseX - 50, y: VERTICAL.PHASE_Y };
+    }
 
     // Add phase node
     nodes.push({
       id: phaseId,
       type: "phase",
-      position: { x: phaseX - 50, y: PHASE_Y },
+      position: phasePosition,
       data: {
         label: `Phase ${phase.phase}`,
         phase: phase.phase,
         avg_voltage: phase.avg_voltage,
         total_power: phase.total_power,
         prosumerCount: phase.prosumers.length,
+        layout,
       },
     });
 
@@ -373,13 +453,24 @@ function createNodesAndEdges(topology: TopologyData): { nodes: Node[]; edges: Ed
     const sortedProsumers = [...phase.prosumers].sort((a, b) => a.position - b.position);
 
     sortedProsumers.forEach((prosumer, prosumerIndex) => {
-      const prosumerX = phaseX - 45;
-      const prosumerY = PROSUMER_START_Y + prosumerIndex * PROSUMER_ROW_HEIGHT;
+      let prosumerPosition: { x: number; y: number };
+      if (isHorizontal) {
+        prosumerPosition = {
+          x: HORIZONTAL.PROSUMER_START_X + prosumerIndex * HORIZONTAL.PROSUMER_COL_WIDTH,
+          y: phasePosition.y + 10
+        };
+      } else {
+        const phaseX = VERTICAL.TRANSFORMER_X + (phaseIndex - 1) * VERTICAL.PHASE_SPACING;
+        prosumerPosition = {
+          x: phaseX - 45,
+          y: VERTICAL.PROSUMER_START_Y + prosumerIndex * VERTICAL.PROSUMER_ROW_HEIGHT
+        };
+      }
 
       nodes.push({
         id: prosumer.id,
         type: "prosumer",
-        position: { x: prosumerX, y: prosumerY },
+        position: prosumerPosition,
         data: {
           label: prosumer.id,
           name: prosumer.name,
@@ -391,6 +482,7 @@ function createNodesAndEdges(topology: TopologyData): { nodes: Node[]; edges: Ed
           voltage: prosumer.current_voltage,
           power: prosumer.active_power,
           status: prosumer.voltage_status,
+          layout,
         },
       });
 
@@ -436,21 +528,38 @@ interface NetworkGraphViewProps {
 }
 
 // ============================================================================
-// Main Component
+// Inner Flow Component (needs to be inside ReactFlowProvider)
 // ============================================================================
 
-export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGraphViewProps) {
+function FlowContent({
+  topology,
+  onNodeSelect,
+  layout,
+  setLayout,
+  focusMode,
+  setFocusMode,
+}: {
+  topology: TopologyData;
+  onNodeSelect?: (nodeId: string | null) => void;
+  layout: LayoutDirection;
+  setLayout: (layout: LayoutDirection) => void;
+  focusMode: boolean;
+  setFocusMode: (focus: boolean) => void;
+}) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const { fitView } = useReactFlow();
 
-  // Update nodes and edges when topology changes
+  // Update nodes and edges when topology or layout changes
   useEffect(() => {
     if (topology) {
-      const { nodes: newNodes, edges: newEdges } = createNodesAndEdges(topology);
+      const { nodes: newNodes, edges: newEdges } = createNodesAndEdges(topology, layout);
       setNodes(newNodes);
       setEdges(newEdges);
+      // Fit view after layout change
+      setTimeout(() => fitView({ padding: 0.2, duration: 300 }), 50);
     }
-  }, [topology, setNodes, setEdges]);
+  }, [topology, layout, setNodes, setEdges, fitView]);
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
@@ -461,6 +570,11 @@ export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGrap
     },
     [onNodeSelect]
   );
+
+  // Auto fit handler
+  const handleFitView = useCallback(() => {
+    fitView({ padding: 0.2, duration: 300 });
+  }, [fitView]);
 
   // Custom minimap node color
   const nodeColor = useCallback((node: Node) => {
@@ -530,20 +644,8 @@ export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGrap
     []
   );
 
-  // Show loading state if no topology
-  if (!topology) {
-    return (
-      <div className="relative w-full h-[600px] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-400 flex items-center">
-          <AlertTriangle className="w-5 h-5 mr-2" />
-          No topology data available
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="relative w-full h-[600px] rounded-lg overflow-hidden border border-gray-200">
+    <>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -559,46 +661,162 @@ export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGrap
         }}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#E5E7EB" />
-        <Controls
-          className="!bg-white !shadow-lg !rounded-lg !border !border-gray-200"
-          showInteractive={false}
-        />
-        <MiniMap
-          nodeColor={nodeColor}
-          nodeStrokeWidth={3}
-          className="!bg-white/80 !rounded-lg !shadow-lg !border !border-gray-200"
-          maskColor="rgba(116, 4, 95, 0.1)"
-        />
+        {!focusMode && (
+          <Controls
+            className="!bg-white !shadow-lg !rounded-lg !border !border-gray-200"
+            showInteractive={false}
+          />
+        )}
+        {!focusMode && (
+          <MiniMap
+            nodeColor={nodeColor}
+            nodeStrokeWidth={3}
+            className="!bg-white/80 !rounded-lg !shadow-lg !border !border-gray-200"
+            maskColor="rgba(116, 4, 95, 0.1)"
+          />
+        )}
+
+        {/* Custom Panel for Layout Controls - nodrag nopan to enable clicks */}
+        <Panel position="top-left" className="!m-2">
+          <div className="nodrag nopan bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2 flex items-center gap-2">
+            {/* Auto Fit Button */}
+            <button
+              type="button"
+              onClick={handleFitView}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#74045F] text-white rounded-md hover:bg-[#5a0349] transition-colors cursor-pointer"
+              title="Fit to screen"
+            >
+              <Maximize className="w-4 h-4" />
+              Auto Fit
+            </button>
+
+            {/* Layout Toggle */}
+            <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setLayout("vertical")}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                  layout === "vertical"
+                    ? "bg-[#74045F] text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-50"
+                }`}
+                title="Vertical layout (top to bottom)"
+              >
+                <ArrowDownRight className="w-3.5 h-3.5" />
+                Vertical
+              </button>
+              <button
+                type="button"
+                onClick={() => setLayout("horizontal")}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                  layout === "horizontal"
+                    ? "bg-[#74045F] text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-50"
+                }`}
+                title="Horizontal layout (left to right)"
+              >
+                <ArrowRightFromLine className="w-3.5 h-3.5" />
+                Horizontal
+              </button>
+            </div>
+
+            {/* Divider */}
+            <div className="w-px h-6 bg-gray-200" />
+
+            {/* Focus Mode Toggle */}
+            <button
+              type="button"
+              onClick={() => setFocusMode(!focusMode)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                focusMode
+                  ? "bg-amber-500 text-white hover:bg-amber-600"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+              title={focusMode ? "Show overlays" : "Hide overlays (Focus mode)"}
+            >
+              {focusMode ? (
+                <>
+                  <Eye className="w-4 h-4" />
+                  Show
+                </>
+              ) : (
+                <>
+                  <EyeOff className="w-4 h-4" />
+                  Focus
+                </>
+              )}
+            </button>
+          </div>
+        </Panel>
       </ReactFlow>
 
-      {Legend}
+      {/* Legend - hidden in focus mode */}
+      {!focusMode && Legend}
 
-      {/* Stats overlay */}
-      <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 z-10">
-        <h4 className="text-xs font-bold text-gray-700 mb-2">Network Status</h4>
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div>
-            <span className="text-gray-500">Prosumers:</span>{" "}
-            <span className="font-semibold">{topology.summary.total_prosumers}</span>
-          </div>
-          <div>
-            <span className="text-gray-500">With PV:</span>{" "}
-            <span className="font-semibold text-amber-600">{topology.summary.prosumers_with_pv}</span>
-          </div>
-          <div>
-            <span className="text-gray-500">Avg V:</span>{" "}
-            <span className="font-semibold">
-              {topology.summary.voltage_stats.avg_voltage?.toFixed(1) || "--"}V
-            </span>
-          </div>
-          <div>
-            <span className="text-gray-500">Critical:</span>{" "}
-            <span className="font-semibold text-red-600">
-              {topology.summary.voltage_stats.critical_count}
-            </span>
+      {/* Stats overlay - hidden in focus mode */}
+      {!focusMode && (
+        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 z-10">
+          <h4 className="text-xs font-bold text-gray-700 mb-2">Network Status</h4>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="text-gray-500">Prosumers:</span>{" "}
+              <span className="font-semibold">{topology.summary.total_prosumers}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">With PV:</span>{" "}
+              <span className="font-semibold text-amber-600">{topology.summary.prosumers_with_pv}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">Avg V:</span>{" "}
+              <span className="font-semibold">
+                {topology.summary.voltage_stats.avg_voltage?.toFixed(1) || "--"}V
+              </span>
+            </div>
+            <div>
+              <span className="text-gray-500">Critical:</span>{" "}
+              <span className="font-semibold text-red-600">
+                {topology.summary.voltage_stats.critical_count}
+              </span>
+            </div>
           </div>
         </div>
+      )}
+    </>
+  );
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGraphViewProps) {
+  const [layout, setLayout] = useState<LayoutDirection>("vertical");
+  const [focusMode, setFocusMode] = useState(false);
+
+  // Show loading state if no topology
+  if (!topology) {
+    return (
+      <div className="relative w-full h-[600px] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-400 flex items-center">
+          <AlertTriangle className="w-5 h-5 mr-2" />
+          No topology data available
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-[600px] rounded-lg overflow-hidden border border-gray-200">
+      <ReactFlowProvider>
+        <FlowContent
+          topology={topology}
+          onNodeSelect={onNodeSelect}
+          layout={layout}
+          setLayout={setLayout}
+          focusMode={focusMode}
+          setFocusMode={setFocusMode}
+        />
+      </ReactFlowProvider>
     </div>
   );
 }
