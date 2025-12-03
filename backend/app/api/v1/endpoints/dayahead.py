@@ -182,7 +182,7 @@ async def get_solar_day_ahead_forecast(
             "forecast_date": str(forecast_date),
             "station_id": station_id,
             "generated_at": datetime.now().isoformat(),
-            "model_version": inference.model_version if inference.is_loaded else "historical_avg",
+            "model_version": inference.version if inference.is_loaded else "historical_avg",
             "hourly_forecasts": hourly_forecasts,
             "summary": {
                 "total_energy_kwh": round(total_energy, 1),
@@ -331,7 +331,7 @@ async def get_voltage_day_ahead_forecast(
         "data": {
             "forecast_date": str(forecast_date),
             "generated_at": datetime.now().isoformat(),
-            "model_version": inference.model_version if inference.is_loaded else "historical_avg",
+            "model_version": inference.version if inference.is_loaded else "historical_avg",
             "prosumer_forecasts": prosumer_forecasts,
             "summary": {
                 "total_prosumers": len(prosumers),

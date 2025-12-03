@@ -101,6 +101,7 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string>("");
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -142,6 +143,7 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
       setError("Could not load model monitoring data");
     } finally {
       setIsLoading(false);
+      setLastUpdated(new Date().toLocaleString());
     }
   }, [selectedModel]);
 
@@ -548,7 +550,7 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
       <div className="mt-4 pt-3 border-t border-gray-100">
         <p className="text-xs text-gray-500 flex items-center">
           <Clock className="w-3 h-3 mr-1" />
-          Last updated: {new Date().toLocaleString()} | Auto-refresh: 60s
+          Last updated: {lastUpdated || "Loading..."} | Auto-refresh: 60s
         </p>
       </div>
     </div>

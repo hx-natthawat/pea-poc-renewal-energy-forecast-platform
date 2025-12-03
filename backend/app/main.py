@@ -14,6 +14,13 @@ from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.metrics import (
+    PrometheusMiddleware,
+    init_metrics,
+    metrics_endpoint,
+    set_model_loaded,
+)
+from app.core.rate_limit import RateLimitConfig, RateLimitMiddleware
 
 
 @asynccontextmanager
@@ -21,6 +28,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager for startup/shutdown events."""
     # Startup
     print(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
+
+    # Initialize Prometheus metrics
+    init_metrics(settings.APP_NAME, settings.APP_VERSION)
+
+    # Set initial model status (will be updated when models are loaded)
+    set_model_loaded("solar", "v1.0.0", False)
+    set_model_loaded("voltage", "v1.0.0", False)
+
     # TODO: Initialize database connections
     # TODO: Initialize Redis connection
     # TODO: Load ML models
@@ -50,8 +65,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Prometheus metrics middleware
+app.add_middleware(PrometheusMiddleware)
+
+# Rate limiting middleware
+rate_limit_config = RateLimitConfig(
+    requests_per_minute=120,
+    requests_per_second=20,
+    exempt_paths=["/metrics", "/api/v1/health", "/api/v1/docs", "/api/v1/openapi.json"],
+)
+app.add_middleware(RateLimitMiddleware, config=rate_limit_config)
+
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+# Prometheus metrics endpoint
+app.add_api_route("/metrics", metrics_endpoint, methods=["GET"], include_in_schema=False)
 
 
 # Global exception handler to ensure CORS headers on errors
