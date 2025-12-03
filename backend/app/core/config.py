@@ -46,10 +46,25 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.CORS_ORIGINS_STR.split(",") if origin.strip()]
 
     # Authentication (Keycloak)
+    AUTH_ENABLED: bool = False  # Set to True to require authentication
     KEYCLOAK_URL: str = "http://localhost:8080"
     KEYCLOAK_REALM: str = "pea-forecast"
-    KEYCLOAK_CLIENT_ID: str = "pea-forecast-api"
+    KEYCLOAK_CLIENT_ID: str = "pea-forecast-web"
     KEYCLOAK_CLIENT_SECRET: str = ""
+    JWT_ALGORITHM: str = "RS256"
+    JWKS_CACHE_TTL: int = 3600  # 1 hour
+
+    @computed_field
+    @property
+    def KEYCLOAK_ISSUER(self) -> str:
+        """Get Keycloak issuer URL."""
+        return f"{self.KEYCLOAK_URL}/realms/{self.KEYCLOAK_REALM}"
+
+    @computed_field
+    @property
+    def KEYCLOAK_JWKS_URL(self) -> str:
+        """Get Keycloak JWKS URL."""
+        return f"{self.KEYCLOAK_URL}/realms/{self.KEYCLOAK_REALM}/protocol/openid-connect/certs"
 
     # ML Models
     MODEL_REGISTRY_PATH: str = "/app/models"

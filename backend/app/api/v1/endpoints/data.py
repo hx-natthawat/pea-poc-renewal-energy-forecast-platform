@@ -1,16 +1,23 @@
 """
 Data endpoints for sensor and meter data from TimescaleDB.
+
+Provides paginated access to measurement data.
+Authentication is controlled by AUTH_ENABLED setting.
 """
 
+import logging
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.security import CurrentUser, get_current_user
 from app.db import get_db
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -47,14 +54,21 @@ class VoltageDataPoint(BaseModel):
 
 @router.get("/solar/latest")
 async def get_latest_solar_data(
-    station_id: str = "POC_STATION_1",
-    hours: int = Query(default=4, ge=1, le=24),
+    station_id: str = Query(default="POC_STATION_1", description="Station ID"),
+    hours: int = Query(default=4, ge=1, le=24, description="Hours of data to return"),
+    limit: int = Query(default=288, ge=1, le=1000, description="Max records to return"),
+    offset: int = Query(default=0, ge=0, description="Records to skip for pagination"),
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """
     Get latest solar measurements for chart display.
-    Returns data from the last N hours.
+
+    **Requires authentication**
+
+    Returns data from the last N hours with pagination support.
     """
+    logger.info(f"Solar data requested by user: {current_user.username}")
     query = text("""
         SELECT
             time,
@@ -122,10 +136,15 @@ async def get_latest_solar_data(
 
 @router.get("/solar/stats")
 async def get_solar_stats(
-    station_id: str = "POC_STATION_1",
+    station_id: str = Query(default="POC_STATION_1", description="Station ID"),
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ) -> Dict[str, Any]:
-    """Get solar data statistics."""
+    """
+    Get solar data statistics.
+
+    **Requires authentication**
+    """
     query = text("""
         SELECT
             COUNT(*) as total_count,
@@ -160,13 +179,19 @@ async def get_solar_stats(
 
 @router.get("/voltage/latest")
 async def get_latest_voltage_data(
-    hours: int = Query(default=2, ge=1, le=24),
+    hours: int = Query(default=2, ge=1, le=24, description="Hours of data to return"),
+    limit: int = Query(default=288, ge=1, le=1000, description="Max records to return"),
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """
     Get latest voltage measurements for all prosumers.
+
+    **Requires authentication**
+
     Returns pivoted data suitable for chart display.
     """
+    logger.info(f"Voltage data requested by user: {current_user.username}")
     # Get the most recent timestamp to use as reference
     time_query = text("""
         SELECT MAX(time) as latest_time FROM single_phase_meters
@@ -274,10 +299,20 @@ async def get_latest_voltage_data(
 @router.get("/voltage/prosumer/{prosumer_id}")
 async def get_prosumer_voltage(
     prosumer_id: str,
-    hours: int = Query(default=24, ge=1, le=168),
+    hours: int = Query(default=24, ge=1, le=168, description="Hours of data to return"),
+    limit: int = Query(default=288, ge=1, le=1000, description="Max records to return"),
+    offset: int = Query(default=0, ge=0, description="Records to skip for pagination"),
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ) -> Dict[str, Any]:
-    """Get voltage history for a specific prosumer."""
+    """
+    Get voltage history for a specific prosumer.
+
+    **Requires authentication**
+
+    Returns voltage measurements with pagination support.
+    """
+    logger.info(f"Prosumer {prosumer_id} voltage requested by user: {current_user.username}")
     query = text("""
         SELECT
             time,
@@ -320,8 +355,13 @@ async def get_prosumer_voltage(
 @router.get("/stats")
 async def get_data_statistics(
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ) -> Dict[str, Any]:
-    """Get statistics about all data in the database."""
+    """
+    Get statistics about all data in the database.
+
+    **Requires authentication**
+    """
 
     # Solar stats
     solar_query = text("""

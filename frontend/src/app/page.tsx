@@ -1,8 +1,9 @@
 "use client";
 
-import { Activity, AlertTriangle, BarChart3, Settings, Sun, Zap } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, Bell, Settings, Sun, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SolarForecastChart, VoltageMonitorChart } from "@/components/charts";
+import { AlertDashboard, ForecastComparison, NetworkTopology } from "@/components/dashboard";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface HealthStatus {
@@ -14,7 +15,7 @@ interface HealthStatus {
 export default function Home() {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "solar" | "voltage">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "solar" | "voltage" | "alerts">("overview");
 
   useEffect(() => {
     const checkHealth = async () => {
@@ -79,6 +80,7 @@ export default function Home() {
               { id: "overview", label: "Overview", icon: BarChart3 },
               { id: "solar", label: "Solar Forecast", icon: Sun },
               { id: "voltage", label: "Voltage Monitor", icon: Zap },
+              { id: "alerts", label: "Alerts", icon: Bell },
             ].map((tab) => (
               <button
                 type="button"
@@ -210,64 +212,44 @@ export default function Home() {
         {/* Solar Tab */}
         {activeTab === "solar" && (
           <div className="space-y-6">
-            <SolarForecastChart height={400} />
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Solar Station Details</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Station ID</p>
-                  <p className="font-semibold">POC_STATION_1</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Capacity</p>
-                  <p className="font-semibold">5,000 kW</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Today&apos;s Generation</p>
-                  <p className="font-semibold">28.5 MWh</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Model Version</p>
-                  <p className="font-semibold">solar-xgb-v1.0.0</p>
-                </div>
-              </div>
-            </div>
+            <SolarForecastChart height={350} />
+            <ForecastComparison modelType="solar" height={280} />
           </div>
         )}
 
         {/* Voltage Tab */}
         {activeTab === "voltage" && (
           <div className="space-y-6">
-            <VoltageMonitorChart height={400} />
+            <VoltageMonitorChart height={350} />
+            <NetworkTopology />
+          </div>
+        )}
+
+        {/* Alerts Tab */}
+        {activeTab === "alerts" && (
+          <div className="space-y-6">
+            <AlertDashboard height={300} />
 
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Network Topology</h3>
-              <div className="bg-gray-50 p-4 rounded-lg font-mono text-sm overflow-x-auto">
-                <pre>{`
-    Transformer (50 kVA)
-          │
-    ══════╪══════════════════════════════════
-          │
-    Phase A ═══╤═══════╤═══════════════╗
-               │       │               ║
-           [P3]    [P2]           [P1+EV]
-          Near     Mid            Far
-
-    Phase B ═══╤═══════╤═══════════════╗
-               │       │               ║
-           [P6]    [P4]           [P5+EV]
-          Near     Mid            Far
-
-    Phase C ═══╤═══════════════════════════╝
-               │
-           [P7+EV]
-            Near
-                `}</pre>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Alert Configuration</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Voltage Upper Limit</p>
+                  <p className="font-semibold text-red-600">242V (+5%)</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Voltage Lower Limit</p>
+                  <p className="font-semibold text-red-600">218V (-5%)</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Warning Threshold</p>
+                  <p className="font-semibold text-amber-600">±3.5%</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Nominal Voltage</p>
+                  <p className="font-semibold">230V</p>
+                </div>
               </div>
-              <p className="text-xs text-gray-500 mt-3">
-                Voltage limits: 218V - 242V (±5% of 230V nominal)
-              </p>
             </div>
           </div>
         )}

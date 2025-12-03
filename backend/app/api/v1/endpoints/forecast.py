@@ -2,17 +2,25 @@
 Forecast endpoints for solar power and voltage prediction.
 
 Includes Redis caching for improved performance.
+Authentication is controlled by AUTH_ENABLED setting.
 """
 
+import logging
 import time
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cache import get_cache
+from app.core.security import CurrentUser, get_current_user, require_roles
+from app.db.session import get_db
 from app.ml import get_solar_inference, get_voltage_inference
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -91,18 +99,26 @@ class VoltageForecastResponse(BaseModel):
 
 
 @router.post("/solar", response_model=SolarForecastResponse)
-async def predict_solar_power(request: SolarForecastRequest) -> SolarForecastResponse:
+async def predict_solar_power(
+    request: SolarForecastRequest,
+    current_user: CurrentUser = Depends(
+        require_roles(["admin", "operator", "analyst", "api"])
+    ),
+) -> SolarForecastResponse:
     """
     Predict solar power output.
 
     Takes environmental measurements and predicts power output for the specified
     horizon. Results are cached in Redis for 5 minutes.
 
+    **Requires roles:** admin, operator, analyst, or api
+
     **Target Accuracy (per TOR):**
     - MAPE < 10%
     - RMSE < 100 kW
     - R² > 0.95
     """
+    logger.info(f"Solar prediction requested by user: {current_user.username}")
     start_time = time.time()
 
     # Prepare features dict for caching
@@ -174,18 +190,26 @@ async def predict_solar_power(request: SolarForecastRequest) -> SolarForecastRes
 
 
 @router.post("/voltage", response_model=VoltageForecastResponse)
-async def predict_voltage(request: VoltageForecastRequest) -> VoltageForecastResponse:
+async def predict_voltage(
+    request: VoltageForecastRequest,
+    current_user: CurrentUser = Depends(
+        require_roles(["admin", "operator", "analyst", "api"])
+    ),
+) -> VoltageForecastResponse:
     """
     Predict voltage levels for prosumers.
 
     Takes prosumer IDs and predicts voltage levels, identifying potential
     violations.
 
+    **Requires roles:** admin, operator, analyst, or api
+
     **Target Accuracy (per TOR):**
     - MAE < 2V
     - RMSE < 3V
     - R² > 0.90
     """
+    logger.info(f"Voltage prediction requested by user: {current_user.username}")
     start_time = time.time()
 
     # Get inference service
@@ -226,19 +250,75 @@ async def predict_voltage(request: VoltageForecastRequest) -> VoltageForecastRes
 
 @router.get("/solar/history")
 async def get_solar_forecast_history(
-    station_id: str = "POC_STATION_1",
-    limit: int = 100,
+    station_id: str = Query(default="POC_STATION_1", description="Station ID"),
+    limit: int = Query(default=100, ge=1, le=1000, description="Max records to return"),
+    offset: int = Query(default=0, ge=0, description="Records to skip for pagination"),
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:
     """
     Get historical solar power predictions for a station.
+
+    **Requires authentication**
+
+    Returns predictions with pagination support.
     """
-    # TODO: Implement database query
+    logger.info(f"Solar history requested by user: {current_user.username}")
+
+    # Query predictions from database
+    query = text("""
+        SELECT
+            time,
+            target_id,
+            predicted_value,
+            confidence_lower,
+            confidence_upper,
+            actual_value,
+            model_version
+        FROM predictions
+        WHERE model_type = 'solar'
+          AND (target_id = :station_id OR target_id IS NULL)
+        ORDER BY time DESC
+        LIMIT :limit OFFSET :offset
+    """)
+
+    result = await db.execute(
+        query,
+        {"station_id": station_id, "limit": limit, "offset": offset},
+    )
+    rows = result.fetchall()
+
+    # Count total records
+    count_query = text("""
+        SELECT COUNT(*) FROM predictions
+        WHERE model_type = 'solar'
+          AND (target_id = :station_id OR target_id IS NULL)
+    """)
+    count_result = await db.execute(count_query, {"station_id": station_id})
+    total_count = count_result.scalar() or 0
+
+    predictions = [
+        {
+            "timestamp": row[0].isoformat() if row[0] else None,
+            "station_id": row[1] or station_id,
+            "predicted_power_kw": row[2],
+            "confidence_lower": row[3],
+            "confidence_upper": row[4],
+            "actual_power_kw": row[5],
+            "model_version": row[6],
+        }
+        for row in rows
+    ]
+
     return {
         "status": "success",
         "data": {
             "station_id": station_id,
-            "predictions": [],
-            "count": 0,
+            "predictions": predictions,
+            "count": len(predictions),
+            "total": total_count,
+            "limit": limit,
+            "offset": offset,
         },
     }
 
@@ -246,26 +326,86 @@ async def get_solar_forecast_history(
 @router.get("/voltage/prosumer/{prosumer_id}")
 async def get_voltage_history(
     prosumer_id: str,
-    limit: int = 100,
+    limit: int = Query(default=100, ge=1, le=1000, description="Max records to return"),
+    offset: int = Query(default=0, ge=0, description="Records to skip for pagination"),
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:
     """
     Get historical voltage predictions for a prosumer.
+
+    **Requires authentication**
+
+    Returns predictions with pagination support.
     """
-    # TODO: Implement database query
+    logger.info(f"Voltage history for {prosumer_id} requested by user: {current_user.username}")
+
+    # Query predictions from database
+    query = text("""
+        SELECT
+            time,
+            target_id,
+            predicted_value,
+            confidence_lower,
+            confidence_upper,
+            actual_value,
+            model_version
+        FROM predictions
+        WHERE model_type = 'voltage'
+          AND target_id = :prosumer_id
+        ORDER BY time DESC
+        LIMIT :limit OFFSET :offset
+    """)
+
+    result = await db.execute(
+        query,
+        {"prosumer_id": prosumer_id, "limit": limit, "offset": offset},
+    )
+    rows = result.fetchall()
+
+    # Count total records
+    count_query = text("""
+        SELECT COUNT(*) FROM predictions
+        WHERE model_type = 'voltage'
+          AND target_id = :prosumer_id
+    """)
+    count_result = await db.execute(count_query, {"prosumer_id": prosumer_id})
+    total_count = count_result.scalar() or 0
+
+    predictions = [
+        {
+            "timestamp": row[0].isoformat() if row[0] else None,
+            "prosumer_id": row[1],
+            "predicted_voltage": row[2],
+            "confidence_lower": row[3],
+            "confidence_upper": row[4],
+            "actual_voltage": row[5],
+            "model_version": row[6],
+        }
+        for row in rows
+    ]
+
     return {
         "status": "success",
         "data": {
             "prosumer_id": prosumer_id,
-            "predictions": [],
-            "count": 0,
+            "predictions": predictions,
+            "count": len(predictions),
+            "total": total_count,
+            "limit": limit,
+            "offset": offset,
         },
     }
 
 
 @router.get("/cache/stats")
-async def get_cache_stats() -> Dict[str, Any]:
+async def get_cache_stats(
+    current_user: CurrentUser = Depends(require_roles(["admin"])),
+) -> Dict[str, Any]:
     """
     Get cache statistics for monitoring.
+
+    **Requires role:** admin
 
     Returns information about cache hits, misses, and configuration.
     """

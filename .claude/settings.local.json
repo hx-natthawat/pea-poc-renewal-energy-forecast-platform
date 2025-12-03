@@ -72,7 +72,9 @@
       "Bash(helm lint:*)",
       "Bash(helm template:*)",
       "Bash(helm install:*)",
-      "Bash(docker-compose:*)"
+      "Bash(docker-compose:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform log --oneline -20)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

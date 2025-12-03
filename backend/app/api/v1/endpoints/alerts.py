@@ -1,17 +1,23 @@
 """
 Alert management endpoints for voltage violations and system notifications.
+
+Authentication is controlled by AUTH_ENABLED setting.
 """
 
+import logging
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.security import CurrentUser, get_current_user, require_roles
 from app.db import get_db
 from app.ml import get_voltage_inference
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -66,7 +72,9 @@ async def get_alerts(
     severity: Optional[str] = None,
     acknowledged: Optional[bool] = None,
     limit: int = Query(default=50, le=200),
+    offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ) -> AlertResponse:
     """
     Get recent alerts from the database.
@@ -111,6 +119,7 @@ async def get_alerts(
 async def get_alert_stats(
     hours: int = Query(default=24, ge=1, le=168),
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ) -> AlertResponse:
     """
     Get alert statistics for the specified time period.
@@ -150,6 +159,9 @@ async def get_alert_stats(
 async def check_voltage_violations(
     request: VoltageCheckRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(
+        require_roles(["admin", "operator", "api"])
+    ),
 ) -> AlertResponse:
     """
     Check for voltage violations using ML predictions and create alerts.
@@ -224,6 +236,9 @@ async def check_voltage_violations(
 async def acknowledge_alert(
     alert_id: int,
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(
+        require_roles(["admin", "operator"])
+    ),
 ) -> AlertResponse:
     """
     Acknowledge an alert.
@@ -258,6 +273,9 @@ async def acknowledge_alert(
 async def resolve_alert(
     alert_id: int,
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(
+        require_roles(["admin", "operator"])
+    ),
 ) -> AlertResponse:
     """
     Resolve an alert.
@@ -291,6 +309,7 @@ async def resolve_alert(
 @router.get("/summary")
 async def get_alert_summary(
     db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ) -> AlertResponse:
     """
     Get a summary of current system alert status.
@@ -336,5 +355,123 @@ async def get_alert_summary(
             "by_prosumer": by_prosumer,
             "total_critical": total_critical,
             "total_warning": total_warning,
+        }
+    )
+
+
+@router.get("/timeline")
+async def get_alert_timeline(
+    hours: int = Query(default=24, ge=1, le=168, description="Hours of history"),
+    interval: str = Query(default="1h", description="Bucket interval: 15m, 1h, 6h, 1d"),
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+) -> AlertResponse:
+    """
+    Get alert timeline data for dashboard visualization.
+
+    **Requires authentication**
+
+    Returns alerts bucketed by time interval for timeline charts.
+    """
+    logger.info(f"Alert timeline requested by user: {current_user.username}")
+
+    # Map interval string to SQL interval
+    interval_map = {
+        "15m": "15 minutes",
+        "1h": "1 hour",
+        "6h": "6 hours",
+        "1d": "1 day",
+    }
+    sql_interval = interval_map.get(interval, "1 hour")
+
+    query = text(f"""
+        SELECT
+            time_bucket('{sql_interval}', time) AS bucket,
+            COUNT(*) AS total,
+            COUNT(*) FILTER (WHERE severity = 'critical') AS critical,
+            COUNT(*) FILTER (WHERE severity = 'warning') AS warning,
+            COUNT(*) FILTER (WHERE severity = 'info') AS info,
+            array_agg(DISTINCT target_id) AS affected_prosumers
+        FROM alerts
+        WHERE time >= NOW() - INTERVAL '{hours} hours'
+        GROUP BY bucket
+        ORDER BY bucket ASC
+    """)
+
+    result = await db.execute(query)
+    rows = result.fetchall()
+
+    timeline = []
+    for row in rows:
+        timeline.append({
+            "time": row.bucket.isoformat() if row.bucket else None,
+            "total": row.total,
+            "critical": row.critical,
+            "warning": row.warning,
+            "info": row.info,
+            "affected_prosumers": row.affected_prosumers or [],
+        })
+
+    return AlertResponse(
+        status="success",
+        data={
+            "timeline": timeline,
+            "period_hours": hours,
+            "interval": interval,
+            "count": len(timeline),
+        }
+    )
+
+
+@router.get("/prosumer/{prosumer_id}")
+async def get_prosumer_alerts(
+    prosumer_id: str,
+    hours: int = Query(default=24, ge=1, le=168),
+    limit: int = Query(default=50, le=200),
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+) -> AlertResponse:
+    """
+    Get alerts for a specific prosumer.
+
+    **Requires authentication**
+    """
+    logger.info(f"Alerts for {prosumer_id} requested by user: {current_user.username}")
+
+    query = text("""
+        SELECT id, time, alert_type, severity, target_id, message,
+               current_value, threshold_value, acknowledged, resolved
+        FROM alerts
+        WHERE target_id = :prosumer_id
+          AND time >= NOW() - INTERVAL ':hours hours'
+        ORDER BY time DESC
+        LIMIT :limit
+    """.replace(":hours", str(hours)))
+
+    result = await db.execute(query, {"prosumer_id": prosumer_id, "limit": limit})
+    rows = result.fetchall()
+
+    alerts = []
+    for row in rows:
+        alerts.append({
+            "id": row.id,
+            "time": row.time.isoformat(),
+            "alert_type": row.alert_type,
+            "severity": row.severity,
+            "target_id": row.target_id,
+            "message": row.message,
+            "current_value": row.current_value,
+            "threshold_value": row.threshold_value,
+            "acknowledged": row.acknowledged,
+            "resolved": row.resolved,
+        })
+
+    return AlertResponse(
+        status="success",
+        data={
+            "prosumer_id": prosumer_id,
+            "alerts": alerts,
+            "count": len(alerts),
+            "period_hours": hours,
         }
     )
