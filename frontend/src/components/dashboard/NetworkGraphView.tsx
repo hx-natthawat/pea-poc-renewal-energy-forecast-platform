@@ -3,18 +3,13 @@
 import {
   AlertTriangle,
   Battery,
-  Building2,
   Car,
-  Cloud,
-  Factory,
   Home,
   Radio,
-  Server,
   Sun,
-  Wind,
   Zap,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -31,141 +26,208 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
+// ============================================================================
+// Types matching NetworkTopology.tsx
+// ============================================================================
+
+interface ProsumerNode {
+  id: string;
+  name: string;
+  phase: string;
+  position: number;
+  has_pv: boolean;
+  has_ev: boolean;
+  has_battery: boolean;
+  pv_capacity_kw: number | null;
+  current_voltage: number | null;
+  voltage_status: "normal" | "warning" | "critical" | "unknown";
+  active_power: number | null;
+  reactive_power: number | null;
+}
+
+interface PhaseGroup {
+  phase: string;
+  prosumers: ProsumerNode[];
+  avg_voltage: number | null;
+  total_power: number | null;
+}
+
+interface TopologyData {
+  transformer: {
+    id: string;
+    name: string;
+    capacity_kva: number;
+    voltage_primary: number;
+    voltage_secondary: number;
+  };
+  phases: PhaseGroup[];
+  summary: {
+    total_prosumers: number;
+    prosumers_with_pv: number;
+    prosumers_with_ev: number;
+    voltage_stats: {
+      avg_voltage: number | null;
+      min_voltage: number | null;
+      max_voltage: number | null;
+      critical_count: number;
+      warning_count: number;
+    };
+  };
+  limits: {
+    nominal: number;
+    upper_limit: number;
+    lower_limit: number;
+    warning_upper: number;
+    warning_lower: number;
+  };
+}
+
+// ============================================================================
 // Node data interfaces - with index signature for ReactFlow compatibility
-interface RouterNodeData extends Record<string, unknown> {
+// ============================================================================
+
+interface TransformerNodeData extends Record<string, unknown> {
   label: string;
-  status: "normal" | "warning" | "critical";
-  connections: number;
+  capacity_kva: number;
+  voltage_primary: number;
+  voltage_secondary: number;
 }
 
-interface DeviceNodeData extends Record<string, unknown> {
+interface PhaseNodeData extends Record<string, unknown> {
   label: string;
-  type: "ev_station" | "solar" | "house_solar" | "house_solar_ev" | "factory" | "wind" | "battery";
-  status: "normal" | "warning" | "critical" | "offline";
-  voltage?: number;
-  power?: number;
+  phase: string;
+  avg_voltage: number | null;
+  total_power: number | null;
+  prosumerCount: number;
 }
 
-interface BrokerNodeData extends Record<string, unknown> {
+interface ProsumerGraphNodeData extends Record<string, unknown> {
   label: string;
-  status: "online" | "offline";
-  connectedDevices: number;
+  name: string;
+  phase: string;
+  position: number;
+  has_pv: boolean;
+  has_ev: boolean;
+  has_battery: boolean;
+  voltage: number | null;
+  power: number | null;
+  status: "normal" | "warning" | "critical" | "unknown";
 }
 
+// ============================================================================
 // Status colors following PEA brand
+// ============================================================================
+
 const STATUS_COLORS = {
-  normal: { bg: "#22C55E", border: "#16A34A", text: "#FFFFFF" },
-  warning: { bg: "#F59E0B", border: "#D97706", text: "#FFFFFF" },
-  critical: { bg: "#EF4444", border: "#DC2626", text: "#FFFFFF" },
-  offline: { bg: "#9CA3AF", border: "#6B7280", text: "#FFFFFF" },
-  online: { bg: "#22C55E", border: "#16A34A", text: "#FFFFFF" },
+  normal: { bg: "#22C55E", border: "#16A34A" },
+  warning: { bg: "#F59E0B", border: "#D97706" },
+  critical: { bg: "#EF4444", border: "#DC2626" },
+  unknown: { bg: "#9CA3AF", border: "#6B7280" },
+};
+
+const PHASE_COLORS = {
+  A: { bg: "#FEE2E2", border: "#EF4444", text: "#B91C1C" },
+  B: { bg: "#FEF3C7", border: "#F59E0B", text: "#B45309" },
+  C: { bg: "#DBEAFE", border: "#3B82F6", text: "#1D4ED8" },
 };
 
 // PEA Brand Colors
 const PEA_PURPLE = "#74045F";
 const PEA_GOLD = "#C7911B";
 
-// Custom Router Node Component
-function RouterNode({ data }: NodeProps<Node<RouterNodeData>>) {
-  const statusColor = STATUS_COLORS[data.status];
+// ============================================================================
+// Custom Transformer Node Component
+// ============================================================================
 
+function TransformerNode({ data }: NodeProps<Node<TransformerNodeData>>) {
   return (
     <div className="relative group">
-      <Handle type="target" position={Position.Top} className="!bg-gray-400 !w-2 !h-2" />
-      <Handle type="target" position={Position.Left} className="!bg-gray-400 !w-2 !h-2" />
-
       <div
-        className="flex flex-col items-center justify-center p-2 rounded-xl shadow-lg transition-transform hover:scale-105"
+        className="flex flex-col items-center p-4 rounded-xl shadow-xl transition-transform hover:scale-105"
         style={{
-          backgroundColor: "#E0F2FE",
-          border: `2px solid #0EA5E9`,
-          minWidth: "60px",
+          backgroundColor: PEA_PURPLE,
+          border: `3px solid ${PEA_GOLD}`,
+          minWidth: "160px",
         }}
       >
-        <div className="relative">
-          <Cloud className="w-8 h-8 text-sky-500" />
-          <Zap className="w-4 h-4 text-sky-600 absolute -bottom-1 -right-1" />
-        </div>
-        <span className="text-xs font-bold text-sky-800 mt-1">{data.label}</span>
+        {/* Antenna */}
+        <Radio className="w-5 h-5 text-white/80 absolute -top-4" />
 
-        {/* Status indicator */}
-        {data.status !== "normal" && (
-          <div
-            className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse"
-            style={{ backgroundColor: statusColor.bg }}
-          />
-        )}
+        {/* Icon */}
+        <div className="relative mb-2">
+          <Zap className="w-12 h-12 text-[#D4A43D]" />
+        </div>
+
+        <span className="text-sm font-bold text-white">{data.label}</span>
+        <span className="text-xs text-[#D4A43D]">
+          {data.capacity_kva} kVA
+        </span>
+        <span className="text-[10px] text-white/70">
+          {data.voltage_primary / 1000}kV / {data.voltage_secondary}V
+        </span>
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="!bg-gray-400 !w-2 !h-2" />
-      <Handle type="source" position={Position.Right} className="!bg-gray-400 !w-2 !h-2" />
+      <Handle type="source" position={Position.Bottom} className="!bg-[#D4A43D] !w-3 !h-3" />
 
-      {/* Tooltip on hover */}
-      <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-        Connections: {data.connections} | Status: {data.status}
+      {/* Tooltip */}
+      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+        Distribution Transformer
       </div>
     </div>
   );
 }
 
-// Custom Device Node Component
-function DeviceNode({ data }: NodeProps<Node<DeviceNodeData>>) {
+// ============================================================================
+// Custom Phase Node Component
+// ============================================================================
+
+function PhaseNode({ data }: NodeProps<Node<PhaseNodeData>>) {
+  const colors = PHASE_COLORS[data.phase as keyof typeof PHASE_COLORS] || PHASE_COLORS.A;
+
+  return (
+    <div className="relative group">
+      <Handle type="target" position={Position.Top} className="!bg-gray-400 !w-2 !h-2" />
+
+      <div
+        className="flex flex-col items-center p-3 rounded-lg shadow-md transition-transform hover:scale-105"
+        style={{
+          backgroundColor: colors.bg,
+          border: `2px solid ${colors.border}`,
+          minWidth: "100px",
+        }}
+      >
+        <span className="text-sm font-bold" style={{ color: colors.text }}>
+          Phase {data.phase}
+        </span>
+        <span className="text-xs text-gray-600">
+          {data.avg_voltage?.toFixed(1) || "--"}V avg
+        </span>
+        <span className="text-[10px] text-gray-500">
+          {data.prosumerCount} prosumers
+        </span>
+      </div>
+
+      <Handle type="source" position={Position.Bottom} className="!bg-gray-400 !w-2 !h-2" />
+
+      {/* Tooltip */}
+      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+        Total: {data.total_power?.toFixed(2) || "--"} kW
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Custom Prosumer Node Component
+// ============================================================================
+
+function ProsumerGraphNode({ data }: NodeProps<Node<ProsumerGraphNodeData>>) {
   const statusColor = STATUS_COLORS[data.status];
 
-  const getDeviceIcon = () => {
-    switch (data.type) {
-      case "ev_station":
-        return (
-          <div className="flex flex-col items-center">
-            <div className="bg-blue-100 p-2 rounded-lg mb-1">
-              <Zap className="w-6 h-6 text-blue-600" />
-            </div>
-            <Car className="w-8 h-8 text-amber-500" />
-          </div>
-        );
-      case "solar":
-        return (
-          <div className="bg-amber-50 p-3 rounded-lg">
-            <Sun className="w-10 h-10 text-amber-500" />
-          </div>
-        );
-      case "house_solar":
-        return (
-          <div className="relative">
-            <Home className="w-12 h-12 text-amber-600" />
-            <Sun className="w-5 h-5 text-amber-400 absolute -top-1 -right-1" />
-          </div>
-        );
-      case "house_solar_ev":
-        return (
-          <div className="relative">
-            <Home className="w-12 h-12 text-amber-600" />
-            <Sun className="w-5 h-5 text-amber-400 absolute -top-1 -right-1" />
-            <Car className="w-5 h-5 text-blue-500 absolute -bottom-1 -right-1" />
-          </div>
-        );
-      case "factory":
-        return (
-          <div className="relative">
-            <Factory className="w-12 h-12 text-gray-600" />
-            <Sun className="w-5 h-5 text-amber-400 absolute -top-1 -right-1" />
-          </div>
-        );
-      case "wind":
-        return (
-          <div className="bg-sky-50 p-3 rounded-lg">
-            <Wind className="w-10 h-10 text-sky-500" />
-          </div>
-        );
-      case "battery":
-        return (
-          <div className="bg-green-50 p-3 rounded-lg">
-            <Battery className="w-10 h-10 text-green-500" />
-          </div>
-        );
-      default:
-        return <Home className="w-10 h-10 text-gray-500" />;
-    }
+  const getPositionLabel = (pos: number) => {
+    if (pos === 1) return "Near";
+    if (pos === 2) return "Mid";
+    return "Far";
   };
 
   return (
@@ -174,193 +236,242 @@ function DeviceNode({ data }: NodeProps<Node<DeviceNodeData>>) {
 
       <div
         className="flex flex-col items-center p-3 rounded-xl shadow-lg bg-white transition-transform hover:scale-105"
-        style={{ border: `2px solid ${statusColor.border}` }}
+        style={{ border: `2px solid ${statusColor.border}`, minWidth: "90px" }}
       >
-        {/* Cloud icon at top */}
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <Cloud className="w-6 h-6 text-sky-400" />
+        {/* Status indicator */}
+        <div
+          className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${
+            data.status === "critical" || data.status === "warning" ? "animate-pulse" : ""
+          }`}
+          style={{ backgroundColor: statusColor.bg }}
+        />
+
+        {/* Device icon with equipment indicators */}
+        <div className="relative mb-1">
+          <Home className="w-10 h-10 text-gray-600" />
+          {data.has_pv && (
+            <Sun className="w-4 h-4 text-amber-500 absolute -top-1 -right-1" />
+          )}
+          {data.has_ev && (
+            <Car className="w-4 h-4 text-blue-500 absolute -bottom-1 -right-1" />
+          )}
+          {data.has_battery && (
+            <Battery className="w-4 h-4 text-green-500 absolute -bottom-1 -left-1" />
+          )}
         </div>
 
-        {/* Device icon */}
-        {getDeviceIcon()}
-
         {/* Label */}
-        <span className="text-xs font-bold text-gray-700 mt-2">{data.label}</span>
+        <span className="text-xs font-bold text-gray-700">{data.name}</span>
 
-        {/* Voltage/Power display */}
-        {data.voltage !== undefined && (
+        {/* Voltage display */}
+        <span
+          className={`text-sm font-bold ${
+            data.status === "critical"
+              ? "text-red-600"
+              : data.status === "warning"
+                ? "text-amber-600"
+                : "text-green-600"
+          }`}
+        >
+          {data.voltage !== null ? `${data.voltage.toFixed(1)}V` : "--"}
+        </span>
+
+        {/* Power display */}
+        {data.power !== null && (
           <span className="text-[10px] text-gray-500">
-            {data.voltage.toFixed(1)}V
+            {data.power.toFixed(2)} kW
           </span>
         )}
 
-        {/* Status indicator */}
-        <div
-          className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-          style={{ backgroundColor: statusColor.bg }}
-        />
+        {/* Position indicator */}
+        <span className="text-[9px] text-gray-400 mt-1">
+          {getPositionLabel(data.position)}
+        </span>
       </div>
 
       {/* Tooltip */}
       <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-        {data.label} | {data.status}
-        {data.power !== undefined && ` | ${data.power.toFixed(1)} kW`}
+        {data.name} | Phase {data.phase} | {data.status}
       </div>
     </div>
   );
 }
 
-// Custom Broker Node Component
-function BrokerNode({ data }: NodeProps<Node<BrokerNodeData>>) {
-  return (
-    <div className="relative group">
-      <Handle type="target" position={Position.Left} className="!bg-gray-400 !w-3 !h-3" />
-
-      <div
-        className="flex flex-col items-center p-4 rounded-xl shadow-xl transition-transform hover:scale-105"
-        style={{
-          backgroundColor: "#FEF3C7",
-          border: `3px solid ${PEA_GOLD}`,
-          minWidth: "120px",
-        }}
-      >
-        {/* Antenna */}
-        <Radio className="w-6 h-6 text-gray-600 absolute -top-5" />
-
-        {/* Building */}
-        <div className="relative">
-          <Building2 className="w-16 h-16 text-gray-700" />
-          <Server className="w-5 h-5 text-blue-500 absolute bottom-2 right-2" />
-        </div>
-
-        <span className="text-sm font-bold text-gray-800 mt-2">{data.label}</span>
-        <span className="text-xs text-gray-500">
-          {data.connectedDevices} devices
-        </span>
-
-        {/* Status indicator */}
-        <div
-          className={`absolute -top-1 -right-1 w-4 h-4 rounded-full ${
-            data.status === "online" ? "bg-green-500 animate-pulse" : "bg-gray-400"
-          }`}
-        />
-      </div>
-    </div>
-  );
-}
-
+// ============================================================================
 // Node types registration
+// ============================================================================
+
 const nodeTypes = {
-  router: RouterNode,
-  device: DeviceNode,
-  broker: BrokerNode,
+  transformer: TransformerNode,
+  phase: PhaseNode,
+  prosumer: ProsumerGraphNode,
 };
 
-// Initial nodes and edges based on the provided diagram
-const createInitialNodes = (): Node[] => [
-  // Broker node
-  {
-    id: "broker",
-    type: "broker",
-    position: { x: 900, y: 50 },
-    data: { label: "The Broker", status: "online", connectedDevices: 7 },
-  },
+// ============================================================================
+// Helper function to create nodes and edges from topology data
+// ============================================================================
 
-  // Router nodes (R1-R17)
-  { id: "R1", type: "router", position: { x: 450, y: 450 }, data: { label: "R1", status: "critical", connections: 4 } },
-  { id: "R2", type: "router", position: { x: 450, y: 300 }, data: { label: "R2", status: "normal", connections: 3 } },
-  { id: "R3", type: "router", position: { x: 550, y: 370 }, data: { label: "R3", status: "normal", connections: 3 } },
-  { id: "R4", type: "router", position: { x: 500, y: 150 }, data: { label: "R4", status: "normal", connections: 3 } },
-  { id: "R5", type: "router", position: { x: 650, y: 220 }, data: { label: "R5", status: "critical", connections: 2 } },
-  { id: "R6", type: "router", position: { x: 780, y: 220 }, data: { label: "R6", status: "critical", connections: 3 } },
-  { id: "R7", type: "router", position: { x: 700, y: 370 }, data: { label: "R7", status: "normal", connections: 3 } },
-  { id: "R8", type: "router", position: { x: 780, y: 450 }, data: { label: "R8", status: "critical", connections: 2 } },
-  { id: "R9", type: "router", position: { x: 600, y: 520 }, data: { label: "R9", status: "normal", connections: 3 } },
-  { id: "R10", type: "router", position: { x: 350, y: 200 }, data: { label: "R10", status: "normal", connections: 2 } },
-  { id: "R11", type: "router", position: { x: 280, y: 300 }, data: { label: "R11", status: "critical", connections: 2 } },
-  { id: "R12", type: "router", position: { x: 450, y: 580 }, data: { label: "R12", status: "critical", connections: 2 } },
-  { id: "R13", type: "router", position: { x: 880, y: 350 }, data: { label: "R13", status: "critical", connections: 2 } },
-  { id: "R14", type: "router", position: { x: 320, y: 420 }, data: { label: "R14", status: "critical", connections: 2 } },
-  { id: "R15", type: "router", position: { x: 200, y: 350 }, data: { label: "R15", status: "normal", connections: 2 } },
-  { id: "R16", type: "router", position: { x: 350, y: 520 }, data: { label: "R16", status: "normal", connections: 2 } },
-  { id: "R17", type: "router", position: { x: 350, y: 340 }, data: { label: "R17", status: "normal", connections: 2 } },
+function createNodesAndEdges(topology: TopologyData): { nodes: Node[]; edges: Edge[] } {
+  const nodes: Node[] = [];
+  const edges: Edge[] = [];
 
-  // Device nodes (D1-D7)
-  { id: "D1", type: "device", position: { x: 480, y: 30 }, data: { label: "D1", type: "ev_station", status: "normal", voltage: 230.5, power: 7.2 } },
-  { id: "D2", type: "device", position: { x: 650, y: 580 }, data: { label: "D2", type: "solar", status: "normal", voltage: 229.8, power: 5.5 } },
-  { id: "D3", type: "device", position: { x: 280, y: 120 }, data: { label: "D3", type: "house_solar_ev", status: "warning", voltage: 235.2, power: 3.8 } },
-  { id: "D4", type: "device", position: { x: 920, y: 280 }, data: { label: "D4", type: "factory", status: "normal", voltage: 228.9, power: 45.0 } },
-  { id: "D5", type: "device", position: { x: 100, y: 280 }, data: { label: "D5", type: "house_solar", status: "normal", voltage: 231.2, power: 2.5 } },
-  { id: "D6", type: "device", position: { x: 250, y: 580 }, data: { label: "D6", type: "wind", status: "normal", voltage: 230.0, power: 15.0 } },
-  { id: "D7", type: "device", position: { x: 350, y: 280 }, data: { label: "D7", type: "house_solar", status: "normal", voltage: 229.5, power: 2.8 } },
-];
+  // Layout constants
+  const TRANSFORMER_Y = 50;
+  const PHASE_Y = 180;
+  const PROSUMER_START_Y = 320;
+  const PROSUMER_ROW_HEIGHT = 140;
+  const CENTER_X = 400;
+  const PHASE_SPACING = 250;
 
-const createInitialEdges = (): Edge[] => [
-  // Broker connections
-  { id: "broker-R4", source: "R4", target: "broker", animated: true, style: { stroke: "#22C55E", strokeWidth: 2 } },
-  { id: "broker-R5", source: "R5", target: "broker", animated: true, style: { stroke: "#22C55E", strokeWidth: 2 } },
-  { id: "broker-R6", source: "R6", target: "broker", animated: true, style: { stroke: "#22C55E", strokeWidth: 2 } },
+  // 1. Add Transformer node
+  nodes.push({
+    id: "transformer",
+    type: "transformer",
+    position: { x: CENTER_X - 80, y: TRANSFORMER_Y },
+    data: {
+      label: topology.transformer.name,
+      capacity_kva: topology.transformer.capacity_kva,
+      voltage_primary: topology.transformer.voltage_primary,
+      voltage_secondary: topology.transformer.voltage_secondary,
+    },
+  });
 
-  // Router interconnections
-  { id: "R1-R2", source: "R1", target: "R2", style: { stroke: "#94A3B8" } },
-  { id: "R1-R3", source: "R1", target: "R3", style: { stroke: "#94A3B8" } },
-  { id: "R1-R9", source: "R1", target: "R9", style: { stroke: "#94A3B8" } },
-  { id: "R1-R14", source: "R1", target: "R14", style: { stroke: "#94A3B8" } },
-  { id: "R2-R3", source: "R2", target: "R3", style: { stroke: "#94A3B8" } },
-  { id: "R2-R4", source: "R2", target: "R4", style: { stroke: "#94A3B8" } },
-  { id: "R2-R17", source: "R2", target: "R17", style: { stroke: "#94A3B8" } },
-  { id: "R3-R7", source: "R3", target: "R7", style: { stroke: "#94A3B8" } },
-  { id: "R3-R5", source: "R3", target: "R5", style: { stroke: "#94A3B8" } },
-  { id: "R4-R5", source: "R4", target: "R5", style: { stroke: "#94A3B8" } },
-  { id: "R4-R10", source: "R4", target: "R10", style: { stroke: "#94A3B8" } },
-  { id: "R5-R6", source: "R5", target: "R6", style: { stroke: "#94A3B8" } },
-  { id: "R6-R7", source: "R6", target: "R7", style: { stroke: "#94A3B8" } },
-  { id: "R6-R13", source: "R6", target: "R13", style: { stroke: "#94A3B8" } },
-  { id: "R7-R8", source: "R7", target: "R8", style: { stroke: "#94A3B8" } },
-  { id: "R8-R9", source: "R8", target: "R9", style: { stroke: "#94A3B8" } },
-  { id: "R8-R13", source: "R8", target: "R13", style: { stroke: "#94A3B8" } },
-  { id: "R9-R12", source: "R9", target: "R12", style: { stroke: "#94A3B8" } },
-  { id: "R10-R11", source: "R10", target: "R11", style: { stroke: "#94A3B8" } },
-  { id: "R11-R15", source: "R11", target: "R15", style: { stroke: "#94A3B8" } },
-  { id: "R11-R17", source: "R11", target: "R17", style: { stroke: "#94A3B8" } },
-  { id: "R12-R16", source: "R12", target: "R16", style: { stroke: "#94A3B8" } },
-  { id: "R14-R15", source: "R14", target: "R15", style: { stroke: "#94A3B8" } },
-  { id: "R14-R16", source: "R14", target: "R16", style: { stroke: "#94A3B8" } },
-  { id: "R14-R17", source: "R14", target: "R17", style: { stroke: "#94A3B8" } },
+  // 2. Add Phase nodes and prosumer nodes
+  const phaseOrder = ["A", "B", "C"];
+  const sortedPhases = [...topology.phases].sort(
+    (a, b) => phaseOrder.indexOf(a.phase) - phaseOrder.indexOf(b.phase)
+  );
 
-  // Device connections
-  { id: "D1-R4", source: "D1", target: "R4", style: { stroke: "#94A3B8" } },
-  { id: "D2-R9", source: "D2", target: "R9", style: { stroke: "#94A3B8" } },
-  { id: "D3-R10", source: "D3", target: "R10", style: { stroke: "#94A3B8" } },
-  { id: "D4-R13", source: "D4", target: "R13", style: { stroke: "#94A3B8" } },
-  { id: "D5-R15", source: "D5", target: "R15", style: { stroke: "#94A3B8" } },
-  { id: "D6-R16", source: "D6", target: "R16", style: { stroke: "#94A3B8" } },
-  { id: "D7-R17", source: "D7", target: "R17", style: { stroke: "#94A3B8" } },
-];
+  sortedPhases.forEach((phase, phaseIndex) => {
+    const phaseX = CENTER_X + (phaseIndex - 1) * PHASE_SPACING;
+    const phaseId = `phase-${phase.phase}`;
+
+    // Add phase node
+    nodes.push({
+      id: phaseId,
+      type: "phase",
+      position: { x: phaseX - 50, y: PHASE_Y },
+      data: {
+        label: `Phase ${phase.phase}`,
+        phase: phase.phase,
+        avg_voltage: phase.avg_voltage,
+        total_power: phase.total_power,
+        prosumerCount: phase.prosumers.length,
+      },
+    });
+
+    // Edge from transformer to phase
+    edges.push({
+      id: `transformer-${phaseId}`,
+      source: "transformer",
+      target: phaseId,
+      style: { stroke: "#6B7280", strokeWidth: 2 },
+      animated: false,
+    });
+
+    // Add prosumer nodes for this phase
+    const sortedProsumers = [...phase.prosumers].sort((a, b) => a.position - b.position);
+
+    sortedProsumers.forEach((prosumer, prosumerIndex) => {
+      const prosumerX = phaseX - 45;
+      const prosumerY = PROSUMER_START_Y + prosumerIndex * PROSUMER_ROW_HEIGHT;
+
+      nodes.push({
+        id: prosumer.id,
+        type: "prosumer",
+        position: { x: prosumerX, y: prosumerY },
+        data: {
+          label: prosumer.id,
+          name: prosumer.name,
+          phase: prosumer.phase,
+          position: prosumer.position,
+          has_pv: prosumer.has_pv,
+          has_ev: prosumer.has_ev,
+          has_battery: prosumer.has_battery,
+          voltage: prosumer.current_voltage,
+          power: prosumer.active_power,
+          status: prosumer.voltage_status,
+        },
+      });
+
+      // Edge from phase to prosumer (or prosumer to prosumer for chain)
+      if (prosumerIndex === 0) {
+        edges.push({
+          id: `${phaseId}-${prosumer.id}`,
+          source: phaseId,
+          target: prosumer.id,
+          style: {
+            stroke: prosumer.voltage_status === "critical" ? "#EF4444" :
+                   prosumer.voltage_status === "warning" ? "#F59E0B" : "#94A3B8",
+            strokeWidth: 1.5,
+          },
+        });
+      } else {
+        // Chain prosumers together
+        const prevProsumer = sortedProsumers[prosumerIndex - 1];
+        edges.push({
+          id: `${prevProsumer.id}-${prosumer.id}`,
+          source: prevProsumer.id,
+          target: prosumer.id,
+          style: {
+            stroke: prosumer.voltage_status === "critical" ? "#EF4444" :
+                   prosumer.voltage_status === "warning" ? "#F59E0B" : "#94A3B8",
+            strokeWidth: 1.5,
+          },
+        });
+      }
+    });
+  });
+
+  return { nodes, edges };
+}
+
+// ============================================================================
+// Component Props
+// ============================================================================
 
 interface NetworkGraphViewProps {
+  topology?: TopologyData | null;
   onNodeSelect?: (nodeId: string | null) => void;
 }
 
-export default function NetworkGraphView({ onNodeSelect }: NetworkGraphViewProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState(createInitialNodes());
-  const [edges, setEdges, onEdgesChange] = useEdgesState(createInitialEdges());
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGraphViewProps) {
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+
+  // Update nodes and edges when topology changes
+  useEffect(() => {
+    if (topology) {
+      const { nodes: newNodes, edges: newEdges } = createNodesAndEdges(topology);
+      setNodes(newNodes);
+      setEdges(newEdges);
+    }
+  }, [topology, setNodes, setEdges]);
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      setSelectedNode(node.id === selectedNode ? null : node.id);
-      onNodeSelect?.(node.id === selectedNode ? null : node.id);
+      // Only select prosumer nodes
+      if (node.type === "prosumer") {
+        onNodeSelect?.(node.id);
+      }
     },
-    [selectedNode, onNodeSelect]
+    [onNodeSelect]
   );
 
   // Custom minimap node color
   const nodeColor = useCallback((node: Node) => {
-    if (node.type === "broker") return PEA_GOLD;
-    if (node.type === "router") {
-      const data = node.data as RouterNodeData;
-      return data.status === "critical" ? "#EF4444" : data.status === "warning" ? "#F59E0B" : "#0EA5E9";
+    if (node.type === "transformer") return PEA_PURPLE;
+    if (node.type === "phase") {
+      const phase = (node.data as PhaseNodeData).phase;
+      return PHASE_COLORS[phase as keyof typeof PHASE_COLORS]?.border || "#6B7280";
+    }
+    if (node.type === "prosumer") {
+      const status = (node.data as ProsumerGraphNodeData).status;
+      return STATUS_COLORS[status]?.bg || "#6B7280";
     }
     return "#6B7280";
   }, []);
@@ -372,16 +483,33 @@ export default function NetworkGraphView({ onNodeSelect }: NetworkGraphViewProps
         <h4 className="text-xs font-bold text-gray-700 mb-2">Legend</h4>
         <div className="space-y-1.5">
           <div className="flex items-center text-xs">
-            <Cloud className="w-4 h-4 text-sky-500 mr-2" />
-            <span className="text-gray-600">Router Node</span>
+            <Zap className="w-4 h-4 text-[#74045F] mr-2" />
+            <span className="text-gray-600">Transformer</span>
           </div>
           <div className="flex items-center text-xs">
-            <Home className="w-4 h-4 text-amber-600 mr-2" />
-            <span className="text-gray-600">Device/Prosumer</span>
+            <div className="w-4 h-4 rounded bg-red-100 border border-red-400 mr-2" />
+            <span className="text-gray-600">Phase A</span>
           </div>
           <div className="flex items-center text-xs">
-            <Building2 className="w-4 h-4 text-gray-700 mr-2" />
-            <span className="text-gray-600">Broker/Data Center</span>
+            <div className="w-4 h-4 rounded bg-yellow-100 border border-yellow-400 mr-2" />
+            <span className="text-gray-600">Phase B</span>
+          </div>
+          <div className="flex items-center text-xs">
+            <div className="w-4 h-4 rounded bg-blue-100 border border-blue-400 mr-2" />
+            <span className="text-gray-600">Phase C</span>
+          </div>
+          <div className="border-t border-gray-200 my-2" />
+          <div className="flex items-center text-xs">
+            <Home className="w-4 h-4 text-gray-600 mr-2" />
+            <span className="text-gray-600">Prosumer</span>
+          </div>
+          <div className="flex items-center text-xs">
+            <Sun className="w-3 h-3 text-amber-500 mr-1" />
+            <span className="text-gray-500 mr-2">PV</span>
+            <Car className="w-3 h-3 text-blue-500 mr-1" />
+            <span className="text-gray-500 mr-2">EV</span>
+            <Battery className="w-3 h-3 text-green-500 mr-1" />
+            <span className="text-gray-500">Battery</span>
           </div>
           <div className="border-t border-gray-200 my-2" />
           <div className="flex items-center text-xs">
@@ -401,6 +529,18 @@ export default function NetworkGraphView({ onNodeSelect }: NetworkGraphViewProps
     ),
     []
   );
+
+  // Show loading state if no topology
+  if (!topology) {
+    return (
+      <div className="relative w-full h-[600px] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-400 flex items-center">
+          <AlertTriangle className="w-5 h-5 mr-2" />
+          No topology data available
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-[600px] rounded-lg overflow-hidden border border-gray-200">
@@ -433,55 +573,32 @@ export default function NetworkGraphView({ onNodeSelect }: NetworkGraphViewProps
 
       {Legend}
 
-      {/* Selected node info panel */}
-      {selectedNode && (
-        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4 z-10 min-w-[200px]">
-          <h4 className="text-sm font-bold text-gray-800 mb-2 flex items-center">
-            <AlertTriangle className="w-4 h-4 mr-2 text-[#74045F]" />
-            Node Details
-          </h4>
-          <div className="space-y-1 text-xs">
-            <p>
-              <span className="text-gray-500">ID:</span>{" "}
-              <span className="font-semibold">{selectedNode}</span>
-            </p>
-            {nodes.find((n) => n.id === selectedNode)?.data && (
-              <>
-                <p>
-                  <span className="text-gray-500">Type:</span>{" "}
-                  <span className="font-semibold capitalize">
-                    {nodes.find((n) => n.id === selectedNode)?.type}
-                  </span>
-                </p>
-                <p>
-                  <span className="text-gray-500">Status:</span>{" "}
-                  <span
-                    className={`font-semibold ${
-                      (nodes.find((n) => n.id === selectedNode)?.data as RouterNodeData | DeviceNodeData).status === "critical"
-                        ? "text-red-600"
-                        : (nodes.find((n) => n.id === selectedNode)?.data as RouterNodeData | DeviceNodeData).status === "warning"
-                          ? "text-amber-600"
-                          : "text-green-600"
-                    }`}
-                  >
-                    {(nodes.find((n) => n.id === selectedNode)?.data as RouterNodeData | DeviceNodeData).status}
-                  </span>
-                </p>
-              </>
-            )}
+      {/* Stats overlay */}
+      <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 z-10">
+        <h4 className="text-xs font-bold text-gray-700 mb-2">Network Status</h4>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <span className="text-gray-500">Prosumers:</span>{" "}
+            <span className="font-semibold">{topology.summary.total_prosumers}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedNode(null);
-              onNodeSelect?.(null);
-            }}
-            className="mt-3 w-full text-xs text-gray-500 hover:text-gray-700 underline"
-          >
-            Clear selection
-          </button>
+          <div>
+            <span className="text-gray-500">With PV:</span>{" "}
+            <span className="font-semibold text-amber-600">{topology.summary.prosumers_with_pv}</span>
+          </div>
+          <div>
+            <span className="text-gray-500">Avg V:</span>{" "}
+            <span className="font-semibold">
+              {topology.summary.voltage_stats.avg_voltage?.toFixed(1) || "--"}V
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-500">Critical:</span>{" "}
+            <span className="font-semibold text-red-600">
+              {topology.summary.voltage_stats.critical_count}
+            </span>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

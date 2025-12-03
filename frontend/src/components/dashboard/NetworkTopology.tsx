@@ -343,7 +343,7 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
 
       {/* Graph View */}
       {viewMode === "graph" && (
-        <NetworkGraphView onNodeSelect={setSelectedProsumer} />
+        <NetworkGraphView topology={topology} onNodeSelect={setSelectedProsumer} />
       )}
 
       {/* Grid View - Network Diagram */}
