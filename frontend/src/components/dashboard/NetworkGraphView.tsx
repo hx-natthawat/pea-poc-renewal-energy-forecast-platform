@@ -380,13 +380,15 @@ function createNodesAndEdges(
   };
 
   // Layout constants for horizontal (left-to-right)
+  // Designed for 600px height container, centered vertically
   const HORIZONTAL = {
-    TRANSFORMER_X: 50,
-    TRANSFORMER_Y: 250,
-    PHASE_X: 250,
-    PROSUMER_START_X: 420,
-    PROSUMER_COL_WIDTH: 140,
-    PHASE_SPACING: 180,
+    TRANSFORMER_X: 80,
+    TRANSFORMER_Y: 220,           // Centered vertically for 600px height
+    PHASE_X: 280,                 // More space from transformer
+    PHASE_START_Y: 80,            // Start phases from top with padding
+    PROSUMER_START_X: 450,        // More space from phase nodes
+    PROSUMER_COL_WIDTH: 150,      // More space between prosumers
+    PHASE_SPACING: 200,           // More space between phases to prevent overlap
   };
 
   // 1. Add Transformer node
@@ -418,7 +420,7 @@ function createNodesAndEdges(
     if (isHorizontal) {
       phasePosition = {
         x: HORIZONTAL.PHASE_X,
-        y: HORIZONTAL.TRANSFORMER_Y - 150 + phaseIndex * HORIZONTAL.PHASE_SPACING
+        y: HORIZONTAL.PHASE_START_Y + phaseIndex * HORIZONTAL.PHASE_SPACING
       };
     } else {
       const phaseX = VERTICAL.TRANSFORMER_X + (phaseIndex - 1) * VERTICAL.PHASE_SPACING;
@@ -457,7 +459,7 @@ function createNodesAndEdges(
       if (isHorizontal) {
         prosumerPosition = {
           x: HORIZONTAL.PROSUMER_START_X + prosumerIndex * HORIZONTAL.PROSUMER_COL_WIDTH,
-          y: phasePosition.y + 10
+          y: phasePosition.y - 5  // Center align with phase node
         };
       } else {
         const phaseX = VERTICAL.TRANSFORMER_X + (phaseIndex - 1) * VERTICAL.PHASE_SPACING;
@@ -790,7 +792,7 @@ function FlowContent({
 // ============================================================================
 
 export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGraphViewProps) {
-  const [layout, setLayout] = useState<LayoutDirection>("vertical");
+  const [layout, setLayout] = useState<LayoutDirection>("horizontal");
   const [focusMode, setFocusMode] = useState(false);
 
   // Show loading state if no topology
