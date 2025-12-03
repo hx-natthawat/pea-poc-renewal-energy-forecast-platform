@@ -153,16 +153,17 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
     return () => clearInterval(interval);
   }, [loadData]);
 
-  const getHealthIcon = (status: string) => {
+  const getHealthIcon = (status: string, small = false) => {
+    const sizeClass = small ? "w-3 h-3 sm:w-4 sm:h-4" : "w-4 h-4 sm:w-5 sm:h-5";
     switch (status) {
       case "good":
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className={`${sizeClass} text-green-500`} />;
       case "warning":
-        return <AlertTriangle className="w-5 h-5 text-amber-500" />;
+        return <AlertTriangle className={`${sizeClass} text-amber-500`} />;
       case "degraded":
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return <XCircle className={`${sizeClass} text-red-500`} />;
       default:
-        return <Activity className="w-5 h-5 text-gray-400" />;
+        return <Activity className={`${sizeClass} text-gray-400`} />;
     }
   };
 
@@ -176,17 +177,17 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
   const selectedHealth = modelHealth.find((m) => m.model_type === selectedModel);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-[#74045F]">
+    <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 border-[#74045F]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <BarChart2 className="w-5 h-5 text-[#74045F] mr-2" />
-          <h3 className="text-lg font-semibold text-gray-800">Model Performance</h3>
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center min-w-0">
+          <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#74045F] mr-1 sm:mr-2 flex-shrink-0" />
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800 truncate">Model Performance</h3>
         </div>
         <button
           type="button"
           onClick={loadData}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation flex-shrink-0"
           title="Refresh"
         >
           <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`} />
@@ -194,36 +195,38 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
       </div>
 
       {/* Model Selector */}
-      <div className="flex items-center space-x-4 mb-4">
+      <div className="flex items-center flex-wrap gap-2 sm:gap-4 mb-3 sm:mb-4">
         <div className="flex rounded-lg border border-gray-200 overflow-hidden">
           <button
             type="button"
             onClick={() => setSelectedModel("solar")}
-            className={`px-4 py-2 text-sm font-medium ${
+            className={`px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium touch-manipulation ${
               selectedModel === "solar"
                 ? "bg-[#C7911B] text-white"
                 : "bg-white text-gray-600 hover:bg-gray-50"
             }`}
           >
-            Solar Model
+            <span className="hidden sm:inline">Solar Model</span>
+            <span className="sm:hidden">Solar</span>
           </button>
           <button
             type="button"
             onClick={() => setSelectedModel("voltage")}
-            className={`px-4 py-2 text-sm font-medium ${
+            className={`px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium touch-manipulation ${
               selectedModel === "voltage"
                 ? "bg-[#74045F] text-white"
                 : "bg-white text-gray-600 hover:bg-gray-50"
             }`}
           >
-            Voltage Model
+            <span className="hidden sm:inline">Voltage Model</span>
+            <span className="sm:hidden">Voltage</span>
           </button>
         </div>
 
         {/* Quick Health Badge */}
         {selectedHealth && (
           <div
-            className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${
+            className={`flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-sm font-medium ${
               selectedHealth.accuracy_status === "good"
                 ? "bg-green-100 text-green-700"
                 : selectedHealth.accuracy_status === "warning"
@@ -231,60 +234,60 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                   : "bg-red-100 text-red-700"
             }`}
           >
-            {getHealthIcon(selectedHealth.accuracy_status)}
-            <span className="ml-1 capitalize">{selectedHealth.accuracy_status}</span>
+            {getHealthIcon(selectedHealth.accuracy_status, true)}
+            <span className="ml-0.5 sm:ml-1 capitalize">{selectedHealth.accuracy_status}</span>
           </div>
         )}
       </div>
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-amber-50 text-amber-700 px-3 py-2 rounded mb-4 text-sm flex items-center">
-          <AlertTriangle className="w-4 h-4 mr-2" />
+        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm flex items-center">
+          <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 flex-shrink-0" />
           {error}
         </div>
       )}
 
       {/* Loading State */}
       {isLoading && (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-pulse text-gray-400">Loading monitoring data...</div>
+        <div className="flex items-center justify-center h-48 sm:h-64">
+          <div className="animate-pulse text-gray-400 text-sm">Loading monitoring data...</div>
         </div>
       )}
 
       {/* Health Overview */}
       {!isLoading && selectedHealth && (
-        <div className="grid grid-cols-4 gap-3 mb-4">
-          <div className="bg-gray-50 rounded-lg p-3 text-center">
-            <p className="text-xs text-gray-500 font-medium">Version</p>
-            <p className="text-lg font-bold text-gray-800">{selectedHealth.model_version}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
+          <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center">
+            <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Version</p>
+            <p className="text-sm sm:text-lg font-bold text-gray-800">{selectedHealth.model_version}</p>
           </div>
-          <div className="bg-blue-50 rounded-lg p-3 text-center">
-            <p className="text-xs text-blue-600 font-medium">Predictions (24h)</p>
-            <p className="text-lg font-bold text-blue-700">
+          <div className="bg-blue-50 rounded-lg p-2 sm:p-3 text-center">
+            <p className="text-[10px] sm:text-xs text-blue-600 font-medium truncate">Predictions (24h)</p>
+            <p className="text-sm sm:text-lg font-bold text-blue-700">
               {selectedHealth.predictions_24h.toLocaleString()}
             </p>
           </div>
-          <div className="bg-purple-50 rounded-lg p-3 text-center">
-            <p className="text-xs text-purple-600 font-medium">Avg Latency</p>
-            <p className="text-lg font-bold text-purple-700">
+          <div className="bg-purple-50 rounded-lg p-2 sm:p-3 text-center">
+            <p className="text-[10px] sm:text-xs text-purple-600 font-medium">Avg Latency</p>
+            <p className="text-sm sm:text-lg font-bold text-purple-700">
               {selectedHealth.avg_latency_ms.toFixed(0)}ms
             </p>
           </div>
           <div
-            className={`rounded-lg p-3 text-center ${
+            className={`rounded-lg p-2 sm:p-3 text-center ${
               drift?.overall_drift_detected ? "bg-amber-50" : "bg-green-50"
             }`}
           >
             <p
-              className={`text-xs font-medium ${
+              className={`text-[10px] sm:text-xs font-medium ${
                 drift?.overall_drift_detected ? "text-amber-600" : "text-green-600"
               }`}
             >
               Data Drift
             </p>
             <p
-              className={`text-lg font-bold ${
+              className={`text-sm sm:text-lg font-bold ${
                 drift?.overall_drift_detected ? "text-amber-700" : "text-green-700"
               }`}
             >
@@ -296,18 +299,19 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
 
       {/* Charts Row */}
       {!isLoading && performance && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
           {/* Metrics Timeline */}
           <div>
-            <h4 className="text-sm font-medium text-gray-600 mb-2">
-              Accuracy Metrics (7 Days)
+            <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">
+              <span className="hidden sm:inline">Accuracy Metrics (7 Days)</span>
+              <span className="sm:hidden">Accuracy (7d)</span>
             </h4>
             {performance.metrics_timeline.length > 0 ? (
               <ResponsiveContainer width="100%" height={height}>
                 <LineChart data={performance.metrics_timeline}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="period" tick={{ fontSize: 10 }} tickFormatter={formatDate} />
-                  <YAxis tick={{ fontSize: 10 }} />
+                  <XAxis dataKey="period" tick={{ fontSize: 9 }} tickFormatter={formatDate} />
+                  <YAxis tick={{ fontSize: 9 }} />
                   <Tooltip
                     formatter={(value: number, name: string) => [
                       value?.toFixed(2),
@@ -320,14 +324,14 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                       boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                     }}
                   />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: "10px" }} />
                   {selectedModel === "solar" ? (
                     <Line
                       type="monotone"
                       dataKey="mape"
                       stroke="#C7911B"
                       strokeWidth={2}
-                      dot={{ r: 4 }}
+                      dot={{ r: 3 }}
                       name="MAPE (%)"
                     />
                   ) : (
@@ -336,7 +340,7 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                       dataKey="mae"
                       stroke="#74045F"
                       strokeWidth={2}
-                      dot={{ r: 4 }}
+                      dot={{ r: 3 }}
                       name="MAE (V)"
                     />
                   )}
@@ -345,13 +349,13 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                     dataKey="rmse"
                     stroke="#6B7280"
                     strokeWidth={2}
-                    dot={{ r: 4 }}
+                    dot={{ r: 3 }}
                     name="RMSE"
                   />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-64 text-gray-400">
+              <div className="flex items-center justify-center h-48 sm:h-64 text-gray-400 text-sm">
                 No metrics data available
               </div>
             )}
@@ -359,15 +363,16 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
 
           {/* Drift Indicators */}
           <div>
-            <h4 className="text-sm font-medium text-gray-600 mb-2">
-              Feature Drift Analysis
+            <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">
+              <span className="hidden sm:inline">Feature Drift Analysis</span>
+              <span className="sm:hidden">Drift Analysis</span>
             </h4>
             {drift && drift.drift_indicators.length > 0 ? (
               <ResponsiveContainer width="100%" height={height}>
                 <BarChart data={drift.drift_indicators} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis type="number" domain={[0, 4]} tick={{ fontSize: 10 }} />
-                  <YAxis type="category" dataKey="feature" tick={{ fontSize: 10 }} width={80} />
+                  <XAxis type="number" domain={[0, 4]} tick={{ fontSize: 9 }} />
+                  <YAxis type="category" dataKey="feature" tick={{ fontSize: 8 }} width={60} />
                   <Tooltip
                     formatter={(value: number) => [`${value.toFixed(2)}`, "Drift Score"]}
                     contentStyle={{
@@ -395,7 +400,7 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-64 text-gray-400">
+              <div className="flex items-center justify-center h-48 sm:h-64 text-gray-400 text-sm">
                 No drift data available
               </div>
             )}
@@ -405,17 +410,17 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
 
       {/* Target Comparison */}
       {!isLoading && performance && (
-        <div className="bg-gray-50 rounded-lg p-4 mb-4">
-          <h4 className="text-sm font-medium text-gray-600 mb-3">
+        <div className="bg-gray-50 rounded-lg p-2 sm:p-4 mb-3 sm:mb-4">
+          <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-2 sm:mb-3">
             TOR Target Compliance
           </h4>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
             {selectedModel === "solar" ? (
               <>
                 <div className="text-center">
-                  <p className="text-xs text-gray-500">MAPE</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500">MAPE</p>
                   <div className="flex items-center justify-center">
-                    <p className="text-xl font-bold text-[#C7911B]">
+                    <p className="text-sm sm:text-xl font-bold text-[#C7911B]">
                       {performance.metrics_timeline.length > 0
                         ? (
                             performance.metrics_timeline.reduce((sum, m) => sum + (m.mape || 0), 0) /
@@ -426,7 +431,7 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                     </p>
                     {performance.targets.mape && (
                       <span
-                        className={`ml-2 ${
+                        className={`ml-1 sm:ml-2 ${
                           (performance.metrics_timeline.reduce((sum, m) => sum + (m.mape || 0), 0) /
                             (performance.metrics_timeline.length || 1)) <
                           performance.targets.mape
@@ -437,75 +442,75 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                         {(performance.metrics_timeline.reduce((sum, m) => sum + (m.mape || 0), 0) /
                           (performance.metrics_timeline.length || 1)) <
                         performance.targets.mape ? (
-                          <TrendingDown className="w-4 h-4" />
+                          <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
                         ) : (
-                          <TrendingUp className="w-4 h-4" />
+                          <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                         )}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400">Target: &lt;{performance.targets.mape}%</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">Target: &lt;{performance.targets.mape}%</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-gray-500">RMSE</p>
-                  <p className="text-xl font-bold text-[#C7911B]">
-                    {performance.overall_metrics.rmse?.toFixed(1) || "--"} kW
+                  <p className="text-[10px] sm:text-xs text-gray-500">RMSE</p>
+                  <p className="text-sm sm:text-xl font-bold text-[#C7911B]">
+                    {performance.overall_metrics.rmse?.toFixed(1) || "--"} <span className="text-[10px] sm:text-sm">kW</span>
                   </p>
-                  <p className="text-xs text-gray-400">Target: &lt;{performance.targets.rmse} kW</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">Target: &lt;{performance.targets.rmse} kW</p>
                 </div>
               </>
             ) : (
               <>
                 <div className="text-center">
-                  <p className="text-xs text-gray-500">MAE</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500">MAE</p>
                   <div className="flex items-center justify-center">
-                    <p className="text-xl font-bold text-[#74045F]">
+                    <p className="text-sm sm:text-xl font-bold text-[#74045F]">
                       {performance.overall_metrics.mae?.toFixed(2) || "--"}V
                     </p>
                     {performance.targets.mae && performance.overall_metrics.mae && (
                       <span
-                        className={`ml-2 ${
+                        className={`ml-1 sm:ml-2 ${
                           performance.overall_metrics.mae < performance.targets.mae
                             ? "text-green-500"
                             : "text-red-500"
                         }`}
                       >
                         {performance.overall_metrics.mae < performance.targets.mae ? (
-                          <TrendingDown className="w-4 h-4" />
+                          <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
                         ) : (
-                          <TrendingUp className="w-4 h-4" />
+                          <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                         )}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400">Target: &lt;{performance.targets.mae}V</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">Target: &lt;{performance.targets.mae}V</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-gray-500">RMSE</p>
-                  <p className="text-xl font-bold text-[#74045F]">
+                  <p className="text-[10px] sm:text-xs text-gray-500">RMSE</p>
+                  <p className="text-sm sm:text-xl font-bold text-[#74045F]">
                     {performance.overall_metrics.rmse?.toFixed(2) || "--"}V
                   </p>
-                  <p className="text-xs text-gray-400">Target: &lt;{performance.targets.rmse}V</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">Target: &lt;{performance.targets.rmse}V</p>
                 </div>
               </>
             )}
             <div className="text-center">
-              <p className="text-xs text-gray-500">Total Predictions</p>
-              <p className="text-xl font-bold text-gray-800">
+              <p className="text-[10px] sm:text-xs text-gray-500 truncate">Total Predictions</p>
+              <p className="text-sm sm:text-xl font-bold text-gray-800">
                 {performance.overall_metrics.total_predictions.toLocaleString()}
               </p>
-              <p className="text-xs text-gray-400">Last 7 days</p>
+              <p className="text-[10px] sm:text-xs text-gray-400">Last 7 days</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-500">Latency Target</p>
-              <p className="text-xl font-bold text-gray-800">
+              <p className="text-[10px] sm:text-xs text-gray-500 truncate">Latency Target</p>
+              <p className="text-sm sm:text-xl font-bold text-gray-800">
                 {selectedHealth?.avg_latency_ms
                   ? selectedHealth.avg_latency_ms < 500
                     ? "Pass"
                     : "Fail"
                   : "--"}
               </p>
-              <p className="text-xs text-gray-400">Target: &lt;500ms</p>
+              <p className="text-[10px] sm:text-xs text-gray-400">Target: &lt;500ms</p>
             </div>
           </div>
         </div>
@@ -513,16 +518,16 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
 
       {/* Issues & Recommendations */}
       {!isLoading && (selectedHealth?.issues.length || 0) > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-          <h4 className="text-sm font-medium text-amber-800 mb-2 flex items-center">
-            <AlertTriangle className="w-4 h-4 mr-2" />
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4">
+          <h4 className="text-xs sm:text-sm font-medium text-amber-800 mb-1.5 sm:mb-2 flex items-center">
+            <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 flex-shrink-0" />
             Issues Detected
           </h4>
-          <ul className="text-sm text-amber-700 space-y-1">
+          <ul className="text-xs sm:text-sm text-amber-700 space-y-0.5 sm:space-y-1">
             {selectedHealth?.issues.map((issue, i) => (
               <li key={i} className="flex items-start">
-                <span className="mr-2">•</span>
-                {issue}
+                <span className="mr-1.5 sm:mr-2">•</span>
+                <span className="flex-1">{issue}</span>
               </li>
             ))}
           </ul>
@@ -530,16 +535,16 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
       )}
 
       {!isLoading && drift?.recommendations && drift.recommendations.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
-            <Zap className="w-4 h-4 mr-2" />
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3">
+          <h4 className="text-xs sm:text-sm font-medium text-blue-800 mb-1.5 sm:mb-2 flex items-center">
+            <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 flex-shrink-0" />
             Recommendations
           </h4>
-          <ul className="text-sm text-blue-700 space-y-1">
+          <ul className="text-xs sm:text-sm text-blue-700 space-y-0.5 sm:space-y-1">
             {drift.recommendations.map((rec, i) => (
               <li key={i} className="flex items-start">
-                <span className="mr-2">•</span>
-                {rec}
+                <span className="mr-1.5 sm:mr-2">•</span>
+                <span className="flex-1">{rec}</span>
               </li>
             ))}
           </ul>
@@ -547,10 +552,11 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
       )}
 
       {/* Footer */}
-      <div className="mt-4 pt-3 border-t border-gray-100">
-        <p className="text-xs text-gray-500 flex items-center">
-          <Clock className="w-3 h-3 mr-1" />
-          Last updated: {lastUpdated || "Loading..."} | Auto-refresh: 60s
+      <div className="mt-2 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100">
+        <p className="text-[10px] sm:text-xs text-gray-500 flex items-center flex-wrap">
+          <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 flex-shrink-0" />
+          <span className="hidden sm:inline">Last updated: {lastUpdated || "Loading..."} | Auto-refresh: 60s</span>
+          <span className="sm:hidden">{lastUpdated ? new Date(lastUpdated).toLocaleTimeString() : "..."} | 60s</span>
         </p>
       </div>
     </div>

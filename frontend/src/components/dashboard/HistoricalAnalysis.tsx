@@ -190,17 +190,17 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-[#74045F]">
+    <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 border-[#74045F]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
         <div className="flex items-center">
-          <Calendar className="w-5 h-5 text-[#74045F] mr-2" />
-          <h3 className="text-lg font-semibold text-gray-800">Historical Analysis</h3>
+          <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-[#74045F] mr-1 sm:mr-2" />
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Historical Analysis</h3>
         </div>
         <button
           type="button"
           onClick={loadData}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
           title="Refresh"
         >
           <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`} />
@@ -208,31 +208,31 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
       </div>
 
       {/* Controls */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4">
         {/* Data Type Toggle */}
-        <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+        <div className="flex rounded-lg border border-gray-200 overflow-hidden col-span-2 sm:col-span-1">
           <button
             type="button"
             onClick={() => setDataType("solar")}
-            className={`flex-1 px-3 py-2 text-sm font-medium flex items-center justify-center ${
+            className={`flex-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium flex items-center justify-center touch-manipulation ${
               dataType === "solar"
                 ? "bg-[#C7911B] text-white"
                 : "bg-white text-gray-600 hover:bg-gray-50"
             }`}
           >
-            <Sun className="w-4 h-4 mr-1" />
+            <Sun className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
             Solar
           </button>
           <button
             type="button"
             onClick={() => setDataType("voltage")}
-            className={`flex-1 px-3 py-2 text-sm font-medium flex items-center justify-center ${
+            className={`flex-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium flex items-center justify-center touch-manipulation ${
               dataType === "voltage"
                 ? "bg-[#74045F] text-white"
                 : "bg-white text-gray-600 hover:bg-gray-50"
             }`}
           >
-            <Zap className="w-4 h-4 mr-1" />
+            <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
             Voltage
           </button>
         </div>
@@ -243,7 +243,7 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg text-xs sm:text-sm"
           />
         </div>
         <div>
@@ -251,26 +251,26 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg text-xs sm:text-sm"
           />
         </div>
 
         {/* Export Buttons */}
-        <div className="flex space-x-2">
+        <div className="flex space-x-1 sm:space-x-2 col-span-2 sm:col-span-1">
           <button
             type="button"
             onClick={() => handleExport("csv")}
-            className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 flex items-center justify-center"
+            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-green-600 text-white text-xs sm:text-sm rounded-lg hover:bg-green-700 flex items-center justify-center touch-manipulation"
           >
-            <FileSpreadsheet className="w-4 h-4 mr-1" />
+            <FileSpreadsheet className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
             CSV
           </button>
           <button
             type="button"
             onClick={() => handleExport("json")}
-            className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center justify-center"
+            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm rounded-lg hover:bg-blue-700 flex items-center justify-center touch-manipulation"
           >
-            <Download className="w-4 h-4 mr-1" />
+            <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
             JSON
           </button>
         </div>
@@ -278,16 +278,16 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-amber-50 text-amber-700 px-3 py-2 rounded mb-4 text-sm flex items-center">
-          <AlertTriangle className="w-4 h-4 mr-2" />
+        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm flex items-center">
+          <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 flex-shrink-0" />
           {error}
         </div>
       )}
 
       {/* Loading State */}
       {isLoading && (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-pulse text-gray-400">Loading historical data...</div>
+        <div className="flex items-center justify-center h-48 sm:h-64">
+          <div className="animate-pulse text-gray-400 text-sm">Loading historical data...</div>
         </div>
       )}
 
@@ -295,29 +295,29 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
       {!isLoading && dataType === "solar" && solarSummary && (
         <>
           {/* Summary Stats */}
-          <div className="grid grid-cols-4 gap-3 mb-4">
-            <div className="bg-amber-50 rounded-lg p-3 text-center">
-              <p className="text-xs text-amber-600 font-medium">Total Energy</p>
-              <p className="text-xl font-bold text-amber-700">
-                {solarSummary.total_energy_kwh.toLocaleString()} kWh
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
+            <div className="bg-amber-50 rounded-lg p-2 sm:p-3 text-center">
+              <p className="text-[10px] sm:text-xs text-amber-600 font-medium">Total Energy</p>
+              <p className="text-sm sm:text-xl font-bold text-amber-700">
+                {solarSummary.total_energy_kwh.toLocaleString()} <span className="text-[10px] sm:text-sm">kWh</span>
               </p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <p className="text-xs text-gray-500 font-medium">Avg Power</p>
-              <p className="text-xl font-bold text-gray-800">
-                {solarSummary.avg_power_kw.toFixed(1)} kW
+            <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center">
+              <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Avg Power</p>
+              <p className="text-sm sm:text-xl font-bold text-gray-800">
+                {solarSummary.avg_power_kw.toFixed(1)} <span className="text-[10px] sm:text-sm">kW</span>
               </p>
             </div>
-            <div className="bg-green-50 rounded-lg p-3 text-center">
-              <p className="text-xs text-green-600 font-medium">Peak Power</p>
-              <p className="text-xl font-bold text-green-700">
-                {solarSummary.max_power_kw.toFixed(1)} kW
+            <div className="bg-green-50 rounded-lg p-2 sm:p-3 text-center">
+              <p className="text-[10px] sm:text-xs text-green-600 font-medium">Peak Power</p>
+              <p className="text-sm sm:text-xl font-bold text-green-700">
+                {solarSummary.max_power_kw.toFixed(1)} <span className="text-[10px] sm:text-sm">kW</span>
               </p>
             </div>
-            <div className="bg-blue-50 rounded-lg p-3 text-center">
-              <p className="text-xs text-blue-600 font-medium">Avg Irradiance</p>
-              <p className="text-xl font-bold text-blue-700">
-                {solarSummary.avg_irradiance.toFixed(0)} W/m²
+            <div className="bg-blue-50 rounded-lg p-2 sm:p-3 text-center">
+              <p className="text-[10px] sm:text-xs text-blue-600 font-medium">Irradiance</p>
+              <p className="text-sm sm:text-xl font-bold text-blue-700">
+                {solarSummary.avg_irradiance.toFixed(0)} <span className="text-[10px] sm:text-sm">W/m²</span>
               </p>
             </div>
           </div>
@@ -402,28 +402,28 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
       {!isLoading && dataType === "voltage" && voltageSummary && (
         <>
           {/* Summary Stats */}
-          <div className="grid grid-cols-4 gap-3 mb-4">
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <p className="text-xs text-gray-500 font-medium">Measurements</p>
-              <p className="text-xl font-bold text-gray-800">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
+            <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center">
+              <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Measurements</p>
+              <p className="text-sm sm:text-xl font-bold text-gray-800">
                 {voltageSummary.total_measurements.toLocaleString()}
               </p>
             </div>
-            <div className="bg-purple-50 rounded-lg p-3 text-center">
-              <p className="text-xs text-purple-600 font-medium">Avg Voltage</p>
-              <p className="text-xl font-bold text-purple-700">
+            <div className="bg-purple-50 rounded-lg p-2 sm:p-3 text-center">
+              <p className="text-[10px] sm:text-xs text-purple-600 font-medium">Avg Voltage</p>
+              <p className="text-sm sm:text-xl font-bold text-purple-700">
                 {voltageSummary.avg_voltage?.toFixed(1) || "--"}V
               </p>
             </div>
-            <div className="bg-blue-50 rounded-lg p-3 text-center">
-              <p className="text-xs text-blue-600 font-medium">Range</p>
-              <p className="text-xl font-bold text-blue-700">
+            <div className="bg-blue-50 rounded-lg p-2 sm:p-3 text-center">
+              <p className="text-[10px] sm:text-xs text-blue-600 font-medium">Range</p>
+              <p className="text-sm sm:text-xl font-bold text-blue-700">
                 {voltageSummary.min_voltage?.toFixed(0)}-{voltageSummary.max_voltage?.toFixed(0)}V
               </p>
             </div>
-            <div className="bg-red-50 rounded-lg p-3 text-center">
-              <p className="text-xs text-red-600 font-medium">Violations</p>
-              <p className="text-xl font-bold text-red-700">
+            <div className="bg-red-50 rounded-lg p-2 sm:p-3 text-center">
+              <p className="text-[10px] sm:text-xs text-red-600 font-medium">Violations</p>
+              <p className="text-sm sm:text-xl font-bold text-red-700">
                 {voltageSummary.total_violations}
               </p>
             </div>
@@ -514,12 +514,14 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
       )}
 
       {/* Footer */}
-      <div className="mt-4 pt-3 border-t border-gray-100">
-        <p className="text-xs text-gray-500">
-          Date Range: {startDate} to {endDate} |{" "}
+      <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100">
+        <p className="text-[10px] sm:text-xs text-gray-500">
+          <span className="hidden sm:inline">Date Range: </span>{startDate} - {endDate} |{" "}
           {dataType === "solar"
-            ? `${solarSummary?.total_measurements.toLocaleString() || 0} measurements`
-            : `${voltageSummary?.total_measurements.toLocaleString() || 0} measurements`}
+            ? `${solarSummary?.total_measurements.toLocaleString() || 0}`
+            : `${voltageSummary?.total_measurements.toLocaleString() || 0}`}
+          <span className="hidden sm:inline"> measurements</span>
+          <span className="sm:hidden"> pts</span>
         </p>
       </div>
     </div>

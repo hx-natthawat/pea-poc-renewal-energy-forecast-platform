@@ -149,37 +149,37 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-[#74045F]">
+    <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 border-[#74045F]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <Zap className="w-5 h-5 text-[#74045F] mr-2" />
-          <h3 className="text-lg font-semibold text-gray-800">Voltage Monitoring</h3>
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center flex-wrap gap-1">
+          <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-[#74045F] mr-1 sm:mr-2" />
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Voltage Monitor</h3>
           {enableRealtime && (
             <span
-              className={`ml-2 flex items-center text-xs px-2 py-0.5 rounded-full ${
+              className={`flex items-center text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
                 wsConnected
                   ? "bg-green-100 text-green-700"
                   : "bg-gray-100 text-gray-500"
               }`}
               title={wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."}
             >
-              <Radio className={`w-3 h-3 mr-1 ${wsConnected ? "animate-pulse" : ""}`} />
+              <Radio className={`w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 ${wsConnected ? "animate-pulse" : ""}`} />
               {wsConnected ? "LIVE" : "..."}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {violations > 0 && (
-            <span className="flex items-center text-amber-600 text-sm bg-amber-50 px-2 py-1 rounded">
-              <AlertTriangle className="w-4 h-4 mr-1" />
-              {violations} warning{violations > 1 ? "s" : ""}
+            <span className="flex items-center text-amber-600 text-[10px] sm:text-sm bg-amber-50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+              <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+              {violations}
             </span>
           )}
           <button
             type="button"
             onClick={loadData}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
             title="Refresh data"
           >
             <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`} />
@@ -189,54 +189,56 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-amber-50 text-amber-700 px-3 py-2 rounded mb-4 text-sm">{error}</div>
+        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm">{error}</div>
       )}
 
-      {/* Prosumer Status Grid */}
-      <div className="grid grid-cols-7 gap-2 mb-4">
-        {prosumerStatus.map((ps) => (
-          <button
-            type="button"
-            key={ps.id}
-            onClick={() => toggleProsumer(ps.id)}
-            className={`p-2 rounded text-xs text-center transition-all ${
-              selectedProsumers.includes(ps.id) ? "ring-2 ring-offset-1" : "opacity-50"
-            } ${
-              ps.status === "critical"
-                ? "bg-red-50 ring-red-400"
-                : ps.status === "warning"
-                  ? "bg-amber-50 ring-amber-400"
-                  : "bg-green-50 ring-green-400"
-            }`}
-            style={{ borderLeft: `3px solid ${PROSUMER_COLORS[ps.id]}` }}
-          >
-            <div className="font-semibold">P{ps.id.slice(-1)}</div>
-            <div className="text-gray-600">{ps.voltage}V</div>
-            <div className="text-[10px] text-gray-400">Phase {ps.phase}</div>
-          </button>
-        ))}
+      {/* Prosumer Status Grid - Scrollable on mobile */}
+      <div className="mb-3 sm:mb-4 -mx-3 sm:mx-0 px-3 sm:px-0">
+        <div className="flex sm:grid sm:grid-cols-7 gap-1.5 sm:gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+          {prosumerStatus.map((ps) => (
+            <button
+              type="button"
+              key={ps.id}
+              onClick={() => toggleProsumer(ps.id)}
+              className={`flex-shrink-0 w-14 sm:w-auto p-1.5 sm:p-2 rounded text-[10px] sm:text-xs text-center transition-all touch-manipulation ${
+                selectedProsumers.includes(ps.id) ? "ring-2 ring-offset-1" : "opacity-50"
+              } ${
+                ps.status === "critical"
+                  ? "bg-red-50 ring-red-400"
+                  : ps.status === "warning"
+                    ? "bg-amber-50 ring-amber-400"
+                    : "bg-green-50 ring-green-400"
+              }`}
+              style={{ borderLeft: `3px solid ${PROSUMER_COLORS[ps.id]}` }}
+            >
+              <div className="font-semibold">P{ps.id.slice(-1)}</div>
+              <div className="text-gray-600 text-[10px] sm:text-xs">{ps.voltage}V</div>
+              <div className="text-[8px] sm:text-[10px] text-gray-400 hidden sm:block">Phase {ps.phase}</div>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Chart */}
       {isLoading && data.length === 0 ? (
-        <div className="h-[300px] flex items-center justify-center">
-          <div className="animate-pulse text-gray-400">Loading voltage data...</div>
+        <div className="h-[200px] sm:h-[300px] flex items-center justify-center">
+          <div className="animate-pulse text-gray-400 text-sm">Loading voltage data...</div>
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={height}>
-          <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <LineChart data={data} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="time"
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 9 }}
               tickLine={false}
               interval="preserveStartEnd"
             />
             <YAxis
               domain={[215, 245]}
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 9 }}
               tickLine={false}
-              label={{ value: "Voltage (V)", angle: -90, position: "insideLeft", fontSize: 11 }}
+              width={35}
             />
             <Tooltip
               contentStyle={{
@@ -244,10 +246,11 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
                 borderRadius: "8px",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                 borderLeft: "4px solid #74045F",
+                fontSize: "12px",
               }}
               formatter={(value: number, name: string) => [
                 `${value.toFixed(1)} V`,
-                `Prosumer ${name.slice(-1)} (Phase ${PROSUMER_CONFIG[name]?.phase})`,
+                `P${name.slice(-1)} (${PROSUMER_CONFIG[name]?.phase})`,
               ]}
             />
 
@@ -256,19 +259,19 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
               y={242}
               stroke="#EF4444"
               strokeDasharray="5 5"
-              label={{ value: "+5%", position: "right", fontSize: 10, fill: "#EF4444" }}
+              label={{ value: "+5%", position: "right", fontSize: 8, fill: "#EF4444" }}
             />
             <ReferenceLine
               y={230}
               stroke="#74045F"
               strokeDasharray="3 3"
-              label={{ value: "230V", position: "right", fontSize: 10, fill: "#74045F" }}
+              label={{ value: "230V", position: "right", fontSize: 8, fill: "#74045F" }}
             />
             <ReferenceLine
               y={218}
               stroke="#EF4444"
               strokeDasharray="5 5"
-              label={{ value: "-5%", position: "right", fontSize: 10, fill: "#EF4444" }}
+              label={{ value: "-5%", position: "right", fontSize: 8, fill: "#EF4444" }}
             />
 
             {/* Prosumer lines */}
@@ -279,9 +282,9 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
                 dataKey={prosumerId}
                 name={prosumerId}
                 stroke={PROSUMER_COLORS[prosumerId]}
-                strokeWidth={2}
+                strokeWidth={1.5}
                 dot={false}
-                activeDot={{ r: 4 }}
+                activeDot={{ r: 3 }}
               />
             ))}
           </LineChart>
@@ -289,17 +292,17 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
       )}
 
       {/* Footer */}
-      <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
-        <p className="text-xs text-gray-500">
-          Target: MAE &lt; 2V | Limits: 218V - 242V (±5%) | {data.length} data points
+      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+        <p className="text-[10px] sm:text-xs text-gray-500">
+          <span className="hidden sm:inline">Target: MAE &lt; 2V | </span>218V - 242V | {data.length} pts
           {enableRealtime && liveUpdateCount > 0 && (
-            <span className="ml-2 text-green-600">| {liveUpdateCount} live updates</span>
+            <span className="ml-1 sm:ml-2 text-green-600">| {liveUpdateCount} live</span>
           )}
         </p>
         <div className="flex gap-2">
           {["A", "B", "C"].map((phase) => (
-            <span key={phase} className="text-xs text-gray-400">
-              Phase {phase}
+            <span key={phase} className="text-[10px] sm:text-xs text-gray-400">
+              Ph {phase}
             </span>
           ))}
         </div>

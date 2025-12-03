@@ -96,22 +96,22 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
   }, [loadData]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-[#C7911B]">
+    <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 border-[#C7911B]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <Sun className="w-5 h-5 text-[#C7911B] mr-2" />
-          <h3 className="text-lg font-semibold text-gray-800">Solar Power Forecast</h3>
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center flex-wrap gap-1">
+          <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-[#C7911B] mr-1 sm:mr-2" />
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Solar Forecast</h3>
           {enableRealtime && (
             <span
-              className={`ml-2 flex items-center text-xs px-2 py-0.5 rounded-full ${
+              className={`flex items-center text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
                 wsConnected
                   ? "bg-green-100 text-green-700"
                   : "bg-gray-100 text-gray-500"
               }`}
               title={wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."}
             >
-              <Radio className={`w-3 h-3 mr-1 ${wsConnected ? "animate-pulse" : ""}`} />
+              <Radio className={`w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 ${wsConnected ? "animate-pulse" : ""}`} />
               {wsConnected ? "LIVE" : "..."}
             </span>
           )}
@@ -119,45 +119,45 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
         <button
           type="button"
           onClick={loadData}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
           title="Refresh data"
         >
           <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`} />
         </button>
       </div>
 
-      {/* Stats Row - PEA Brand Colors */}
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="bg-[#FEF3C7] rounded-lg p-3">
-          <p className="text-xs text-[#A67814] font-medium">Current Output</p>
-          <p className="text-xl font-bold text-[#C7911B]">{currentPower.toLocaleString()} kW</p>
+      {/* Stats Row - PEA Brand Colors - Responsive */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
+        <div className="bg-[#FEF3C7] rounded-lg p-2 sm:p-3">
+          <p className="text-[10px] sm:text-xs text-[#A67814] font-medium truncate">Current</p>
+          <p className="text-sm sm:text-xl font-bold text-[#C7911B]">{currentPower.toLocaleString()}<span className="text-xs sm:text-sm"> kW</span></p>
         </div>
-        <div className="bg-[#F3E8FF] rounded-lg p-3">
-          <p className="text-xs text-[#74045F] font-medium">Peak Today</p>
-          <p className="text-xl font-bold text-[#74045F]">{peakPower.toLocaleString()} kW</p>
+        <div className="bg-[#F3E8FF] rounded-lg p-2 sm:p-3">
+          <p className="text-[10px] sm:text-xs text-[#74045F] font-medium truncate">Peak</p>
+          <p className="text-sm sm:text-xl font-bold text-[#74045F]">{peakPower.toLocaleString()}<span className="text-xs sm:text-sm"> kW</span></p>
         </div>
-        <div className="bg-green-50 rounded-lg p-3">
-          <p className="text-xs text-green-600 font-medium">Accuracy</p>
+        <div className="bg-green-50 rounded-lg p-2 sm:p-3">
+          <p className="text-[10px] sm:text-xs text-green-600 font-medium truncate">Accuracy</p>
           <div className="flex items-center">
-            <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
-            <p className="text-xl font-bold text-green-700">94.2%</p>
+            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 mr-0.5 sm:mr-1" />
+            <p className="text-sm sm:text-xl font-bold text-green-700">94.2%</p>
           </div>
         </div>
       </div>
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-amber-50 text-amber-700 px-3 py-2 rounded mb-4 text-sm">{error}</div>
+        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm">{error}</div>
       )}
 
       {/* Chart */}
       {isLoading && data.length === 0 ? (
-        <div className="h-[300px] flex items-center justify-center">
-          <div className="animate-pulse text-gray-400">Loading chart data...</div>
+        <div className="h-[200px] sm:h-[300px] flex items-center justify-center">
+          <div className="animate-pulse text-gray-400 text-sm">Loading chart data...</div>
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={height}>
-          <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
             <defs>
               {/* PEA Gold gradient for actual power */}
               <linearGradient id="colorPower" x1="0" y1="0" x2="0" y2="1">
@@ -173,15 +173,15 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="time"
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 9 }}
               tickLine={false}
               interval="preserveStartEnd"
             />
             <YAxis
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 9 }}
               tickLine={false}
               tickFormatter={(value) => `${(value / 1000).toFixed(1)}k`}
-              label={{ value: "Power (kW)", angle: -90, position: "insideLeft", fontSize: 11 }}
+              width={35}
             />
             <Tooltip
               contentStyle={{
@@ -189,19 +189,20 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
                 borderRadius: "8px",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                 borderLeft: "4px solid #C7911B",
+                fontSize: "12px",
               }}
               formatter={(value: number, name: string) => [
                 `${value.toLocaleString()} kW`,
                 name,
               ]}
             />
-            <Legend />
+            <Legend wrapperStyle={{ fontSize: "10px" }} />
             <Area
               type="monotone"
               dataKey="predicted_kw"
               name="Predicted"
               stroke="#74045F"
-              strokeWidth={2}
+              strokeWidth={1.5}
               strokeDasharray="5 5"
               fillOpacity={1}
               fill="url(#colorPredicted)"
@@ -211,7 +212,7 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
               dataKey="power_kw"
               name="Actual"
               stroke="#C7911B"
-              strokeWidth={2}
+              strokeWidth={1.5}
               fillOpacity={1}
               fill="url(#colorPower)"
             />
@@ -220,11 +221,12 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
       )}
 
       {/* Footer */}
-      <div className="mt-3 pt-3 border-t border-gray-100">
-        <p className="text-xs text-gray-500">
-          Target: MAPE &lt; 10% | Data from TimescaleDB | {data.length} data points
+      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100">
+        <p className="text-[10px] sm:text-xs text-gray-500">
+          <span className="hidden sm:inline">Target: MAPE &lt; 10% | </span>
+          {data.length} points
           {enableRealtime && liveUpdateCount > 0 && (
-            <span className="ml-2 text-green-600">| {liveUpdateCount} live updates</span>
+            <span className="ml-1 sm:ml-2 text-green-600">| {liveUpdateCount} live</span>
           )}
         </p>
       </div>

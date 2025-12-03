@@ -230,17 +230,17 @@ export default function AlertDashboard({
   }));
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-red-500">
+    <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 border-red-500">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <Bell className="w-5 h-5 text-red-500 mr-2" />
-          <h3 className="text-lg font-semibold text-gray-800">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center flex-wrap gap-1">
+          <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mr-1 sm:mr-2" />
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800">
             Alert Dashboard
           </h3>
           {enableRealtime && (
             <span
-              className={`ml-2 flex items-center text-xs px-2 py-0.5 rounded-full ${
+              className={`flex items-center text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
                 wsConnected
                   ? "bg-green-100 text-green-700"
                   : "bg-gray-100 text-gray-500"
@@ -252,7 +252,7 @@ export default function AlertDashboard({
               }
             >
               <Radio
-                className={`w-3 h-3 mr-1 ${wsConnected ? "animate-pulse" : ""}`}
+                className={`w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 ${wsConnected ? "animate-pulse" : ""}`}
               />
               {wsConnected ? "LIVE" : "..."}
             </span>
@@ -261,7 +261,7 @@ export default function AlertDashboard({
         <button
           type="button"
           onClick={loadData}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
           title="Refresh data"
         >
           <RefreshCw
@@ -271,28 +271,28 @@ export default function AlertDashboard({
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-4 gap-3 mb-4">
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-gray-500 font-medium">Total (24h)</p>
-          <p className="text-2xl font-bold text-gray-800">
+      <div className="grid grid-cols-4 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
+        <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center">
+          <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Total</p>
+          <p className="text-lg sm:text-2xl font-bold text-gray-800">
             {stats?.total || 0}
           </p>
         </div>
-        <div className="bg-red-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-red-600 font-medium">Critical</p>
-          <p className="text-2xl font-bold text-red-600">
+        <div className="bg-red-50 rounded-lg p-2 sm:p-3 text-center">
+          <p className="text-[10px] sm:text-xs text-red-600 font-medium">Critical</p>
+          <p className="text-lg sm:text-2xl font-bold text-red-600">
             {stats?.critical || 0}
           </p>
         </div>
-        <div className="bg-amber-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-amber-600 font-medium">Warning</p>
-          <p className="text-2xl font-bold text-amber-600">
+        <div className="bg-amber-50 rounded-lg p-2 sm:p-3 text-center">
+          <p className="text-[10px] sm:text-xs text-amber-600 font-medium">Warning</p>
+          <p className="text-lg sm:text-2xl font-bold text-amber-600">
             {stats?.warning || 0}
           </p>
         </div>
-        <div className="bg-blue-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-blue-600 font-medium">Unacknowledged</p>
-          <p className="text-2xl font-bold text-blue-600">
+        <div className="bg-blue-50 rounded-lg p-2 sm:p-3 text-center">
+          <p className="text-[10px] sm:text-xs text-blue-600 font-medium truncate">Unack</p>
+          <p className="text-lg sm:text-2xl font-bold text-blue-600">
             {stats?.unacknowledged || 0}
           </p>
         </div>
@@ -300,14 +300,14 @@ export default function AlertDashboard({
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-amber-50 text-amber-700 px-3 py-2 rounded mb-4 text-sm">
+        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm">
           {error}
         </div>
       )}
 
       {/* Timeline Chart */}
-      <div className="mb-4">
-        <h4 className="text-sm font-medium text-gray-600 mb-2">
+      <div className="mb-3 sm:mb-4">
+        <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-2">
           Alert Timeline (24h)
         </h4>
         {isLoading && timeline.length === 0 ? (
@@ -357,68 +357,68 @@ export default function AlertDashboard({
 
       {/* Recent Alerts List */}
       <div>
-        <h4 className="text-sm font-medium text-gray-600 mb-2">
+        <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-2">
           Recent Alerts
         </h4>
-        <div className="space-y-2 max-h-64 overflow-y-auto">
+        <div className="space-y-1.5 sm:space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
           {alerts.length === 0 ? (
-            <div className="text-center py-4 text-gray-400">
-              <CheckCircle className="w-8 h-8 mx-auto mb-2" />
-              <p>All systems normal - no active alerts</p>
+            <div className="text-center py-3 sm:py-4 text-gray-400">
+              <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1.5 sm:mb-2" />
+              <p className="text-xs sm:text-sm">All systems normal - no active alerts</p>
             </div>
           ) : (
             alerts.slice(0, 10).map((alert) => (
               <div
                 key={alert.id}
-                className={`p-3 rounded-lg border ${SEVERITY_BG[alert.severity]} ${
+                className={`p-2 sm:p-3 rounded-lg border ${SEVERITY_BG[alert.severity]} ${
                   alert.acknowledged ? "opacity-60" : ""
                 }`}
               >
                 <div className="flex items-start justify-between">
-                  <div className="flex items-start">
+                  <div className="flex items-start min-w-0 flex-1">
                     {alert.severity === "critical" ? (
                       <XCircle
-                        className={`w-5 h-5 mr-2 mt-0.5 ${SEVERITY_TEXT[alert.severity]}`}
+                        className={`w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2 mt-0.5 flex-shrink-0 ${SEVERITY_TEXT[alert.severity]}`}
                       />
                     ) : (
                       <AlertTriangle
-                        className={`w-5 h-5 mr-2 mt-0.5 ${SEVERITY_TEXT[alert.severity]}`}
+                        className={`w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2 mt-0.5 flex-shrink-0 ${SEVERITY_TEXT[alert.severity]}`}
                       />
                     )}
-                    <div>
-                      <p className={`font-medium ${SEVERITY_TEXT[alert.severity]}`}>
+                    <div className="min-w-0 flex-1">
+                      <p className={`font-medium text-xs sm:text-sm ${SEVERITY_TEXT[alert.severity]}`}>
                         {alert.target_id}
                       </p>
-                      <p className="text-sm text-gray-600">{alert.message}</p>
-                      <div className="flex items-center mt-1 text-xs text-gray-500">
-                        <Clock className="w-3 h-3 mr-1" />
-                        {new Date(alert.time).toLocaleString()}
+                      <p className="text-[10px] sm:text-sm text-gray-600 truncate">{alert.message}</p>
+                      <div className="flex items-center mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 flex-wrap">
+                        <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
+                        <span className="truncate">{new Date(alert.time).toLocaleString()}</span>
                         {alert.current_value && (
-                          <span className="ml-2">
-                            Value: {alert.current_value.toFixed(1)}V
+                          <span className="ml-1 sm:ml-2">
+                            {alert.current_value.toFixed(1)}V
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex space-x-1">
+                  <div className="flex space-x-0.5 sm:space-x-1 flex-shrink-0 ml-1">
                     {!alert.acknowledged && (
                       <button
                         type="button"
                         onClick={() => acknowledgeAlert(alert.id)}
-                        className="p-1 hover:bg-gray-200 rounded"
+                        className="p-1 hover:bg-gray-200 rounded touch-manipulation"
                         title="Acknowledge"
                       >
-                        <Check className="w-4 h-4 text-gray-500" />
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" />
                       </button>
                     )}
                     <button
                       type="button"
                       onClick={() => resolveAlert(alert.id)}
-                      className="p-1 hover:bg-gray-200 rounded"
+                      className="p-1 hover:bg-gray-200 rounded touch-manipulation"
                       title="Resolve"
                     >
-                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                     </button>
                   </div>
                 </div>
@@ -429,13 +429,12 @@ export default function AlertDashboard({
       </div>
 
       {/* Footer */}
-      <div className="mt-3 pt-3 border-t border-gray-100">
-        <p className="text-xs text-gray-500">
-          Voltage limits: 218V - 242V (±5% of 230V) | {alerts.length} alerts
-          displayed
+      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100">
+        <p className="text-[10px] sm:text-xs text-gray-500">
+          <span className="hidden sm:inline">Voltage limits: </span>218V - 242V (±5%) | {alerts.length} alerts
           {enableRealtime && liveUpdateCount > 0 && (
-            <span className="ml-2 text-green-600">
-              | {liveUpdateCount} live updates
+            <span className="ml-1 sm:ml-2 text-green-600">
+              | {liveUpdateCount} live
             </span>
           )}
         </p>

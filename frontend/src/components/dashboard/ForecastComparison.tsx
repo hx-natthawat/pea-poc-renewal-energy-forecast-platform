@@ -131,33 +131,33 @@ export default function ForecastComparison({
     met: boolean
   ) => (
     <div
-      className={`p-3 rounded-lg ${met ? "bg-green-50" : "bg-red-50"} border ${
+      className={`p-2 sm:p-3 rounded-lg ${met ? "bg-green-50" : "bg-red-50"} border ${
         met ? "border-green-200" : "border-red-200"
       }`}
     >
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-xs text-gray-500">{label}</span>
+      <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+        <span className="text-[10px] sm:text-xs text-gray-500">{label}</span>
         {met ? (
-          <CheckCircle className="w-4 h-4 text-green-500" />
+          <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
         ) : (
-          <XCircle className="w-4 h-4 text-red-500" />
+          <XCircle className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
         )}
       </div>
-      <p className={`text-xl font-bold ${met ? "text-green-700" : "text-red-700"}`}>
+      <p className={`text-sm sm:text-xl font-bold ${met ? "text-green-700" : "text-red-700"}`}>
         {value !== null ? `${value.toFixed(2)}${unit}` : "N/A"}
       </p>
-      <p className="text-xs text-gray-500">Target: {target}</p>
+      <p className="text-[10px] sm:text-xs text-gray-500 truncate">Target: {target}</p>
     </div>
   );
 
   if (isLoading && data.length === 0) {
     return (
       <div
-        className="bg-white rounded-lg shadow-md p-6 border-l-4"
+        className="bg-white rounded-lg shadow-md p-3 sm:p-6 border-l-4"
         style={{ borderColor: config.color }}
       >
-        <div className="animate-pulse flex items-center justify-center h-64">
-          <p className="text-gray-400">Loading comparison data...</p>
+        <div className="animate-pulse flex items-center justify-center h-48 sm:h-64">
+          <p className="text-gray-400 text-sm">Loading comparison data...</p>
         </div>
       </div>
     );
@@ -165,33 +165,34 @@ export default function ForecastComparison({
 
   return (
     <div
-      className="bg-white rounded-lg shadow-md p-4 border-l-4"
+      className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4"
       style={{ borderColor: config.color }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <Target className="w-5 h-5 mr-2" style={{ color: config.color }} />
-          <h3 className="text-lg font-semibold text-gray-800">{config.title}</h3>
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center min-w-0">
+          <Target className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" style={{ color: config.color }} />
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800 truncate">{config.title}</h3>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
           {/* View Mode Toggle */}
           <div className="flex bg-gray-100 rounded-lg p-0.5">
             <button
               type="button"
               onClick={() => setViewMode("comparison")}
-              className={`px-3 py-1 text-xs rounded-md transition-colors ${
+              className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs rounded-md transition-colors touch-manipulation ${
                 viewMode === "comparison"
                   ? "bg-white shadow text-gray-800"
                   : "text-gray-500"
               }`}
             >
-              Comparison
+              <span className="hidden sm:inline">Comparison</span>
+              <span className="sm:hidden">Comp</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode("error")}
-              className={`px-3 py-1 text-xs rounded-md transition-colors ${
+              className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs rounded-md transition-colors touch-manipulation ${
                 viewMode === "error"
                   ? "bg-white shadow text-gray-800"
                   : "text-gray-500"
@@ -203,7 +204,7 @@ export default function ForecastComparison({
           <button
             type="button"
             onClick={loadData}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
             title="Refresh"
           >
             <RefreshCw
@@ -215,7 +216,7 @@ export default function ForecastComparison({
 
       {/* Metrics Row */}
       {metrics && (
-        <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
           {Object.entries(config.targets).map(([key, targetConfig]) => {
             const targetStatus = targets[key];
             const metricValue = metrics[targetConfig.key as keyof AccuracyMetrics] as number | null;
@@ -236,8 +237,8 @@ export default function ForecastComparison({
 
       {/* Additional Stats */}
       {metrics && (
-        <div className="flex items-center justify-between mb-4 text-sm">
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between mb-3 sm:mb-4 text-xs sm:text-sm">
+          <div className="flex items-center space-x-2 sm:space-x-4 flex-wrap gap-y-1">
             <span className="text-gray-500">
               Bias:{" "}
               <span
@@ -248,14 +249,14 @@ export default function ForecastComparison({
                 {metrics.bias > 0 ? "+" : ""}
                 {metrics.bias.toFixed(2)} {config.unit}
                 {metrics.bias > 0 ? (
-                  <TrendingUp className="w-3 h-3 inline ml-1" />
+                  <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 inline ml-0.5" />
                 ) : (
-                  <TrendingDown className="w-3 h-3 inline ml-1" />
+                  <TrendingDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 inline ml-0.5" />
                 )}
               </span>
             </span>
             <span className="text-gray-500">
-              Data points: <span className="font-semibold">{metrics.count}</span>
+              <span className="hidden sm:inline">Data points: </span><span className="font-semibold">{metrics.count}</span><span className="sm:hidden"> pts</span>
             </span>
           </div>
         </div>
@@ -263,7 +264,7 @@ export default function ForecastComparison({
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-amber-50 text-amber-700 px-3 py-2 rounded mb-4 text-sm">
+        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm">
           {error}
         </div>
       )}
@@ -383,12 +384,15 @@ export default function ForecastComparison({
       )}
 
       {/* Footer */}
-      <div className="mt-3 pt-3 border-t border-gray-100">
-        <p className="text-xs text-gray-500">
-          {modelType === "solar"
-            ? "Target: MAPE < 10%, RMSE < 100 kW, R² > 0.95 (per TOR)"
-            : "Target: MAE < 2V, RMSE < 3V, R² > 0.90 (per TOR)"}{" "}
-          | Last 24 hours
+      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100">
+        <p className="text-[10px] sm:text-xs text-gray-500">
+          <span className="hidden sm:inline">
+            {modelType === "solar"
+              ? "Target: MAPE < 10%, RMSE < 100 kW, R² > 0.95 (per TOR)"
+              : "Target: MAE < 2V, RMSE < 3V, R² > 0.90 (per TOR)"}{" "}
+            |{" "}
+          </span>
+          Last 24h
         </p>
       </div>
     </div>

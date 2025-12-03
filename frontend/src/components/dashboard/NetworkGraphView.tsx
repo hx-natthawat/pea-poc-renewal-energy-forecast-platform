@@ -601,49 +601,49 @@ function FlowContent({
   // Legend component
   const Legend = useMemo(
     () => (
-      <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-3 z-10">
-        <h4 className="text-xs font-bold text-gray-700 mb-2">Legend</h4>
-        <div className="space-y-1.5">
-          <div className="flex items-center text-xs">
-            <Zap className="w-4 h-4 text-[#74045F] mr-2" />
+      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2 sm:p-3 z-10 max-w-[140px] sm:max-w-none">
+        <h4 className="text-[10px] sm:text-xs font-bold text-gray-700 mb-1.5 sm:mb-2">Legend</h4>
+        <div className="space-y-1 sm:space-y-1.5">
+          <div className="flex items-center text-[10px] sm:text-xs">
+            <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-[#74045F] mr-1.5 sm:mr-2" />
             <span className="text-gray-600">Transformer</span>
           </div>
-          <div className="flex items-center text-xs">
-            <div className="w-4 h-4 rounded bg-red-100 border border-red-400 mr-2" />
+          <div className="flex items-center text-[10px] sm:text-xs">
+            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-red-100 border border-red-400 mr-1.5 sm:mr-2" />
             <span className="text-gray-600">Phase A</span>
           </div>
-          <div className="flex items-center text-xs">
-            <div className="w-4 h-4 rounded bg-yellow-100 border border-yellow-400 mr-2" />
+          <div className="flex items-center text-[10px] sm:text-xs">
+            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-yellow-100 border border-yellow-400 mr-1.5 sm:mr-2" />
             <span className="text-gray-600">Phase B</span>
           </div>
-          <div className="flex items-center text-xs">
-            <div className="w-4 h-4 rounded bg-blue-100 border border-blue-400 mr-2" />
+          <div className="flex items-center text-[10px] sm:text-xs">
+            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-blue-100 border border-blue-400 mr-1.5 sm:mr-2" />
             <span className="text-gray-600">Phase C</span>
           </div>
-          <div className="border-t border-gray-200 my-2" />
-          <div className="flex items-center text-xs">
-            <Home className="w-4 h-4 text-gray-600 mr-2" />
+          <div className="border-t border-gray-200 my-1.5 sm:my-2" />
+          <div className="flex items-center text-[10px] sm:text-xs">
+            <Home className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600 mr-1.5 sm:mr-2" />
             <span className="text-gray-600">Prosumer</span>
           </div>
-          <div className="flex items-center text-xs">
-            <Sun className="w-3 h-3 text-amber-500 mr-1" />
-            <span className="text-gray-500 mr-2">PV</span>
-            <Car className="w-3 h-3 text-blue-500 mr-1" />
-            <span className="text-gray-500 mr-2">EV</span>
-            <Battery className="w-3 h-3 text-green-500 mr-1" />
-            <span className="text-gray-500">Battery</span>
+          <div className="flex items-center text-[10px] sm:text-xs flex-wrap gap-1">
+            <Sun className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500" />
+            <span className="text-gray-500">PV</span>
+            <Car className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-500" />
+            <span className="text-gray-500">EV</span>
+            <Battery className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-500" />
+            <span className="text-gray-500">Batt</span>
           </div>
-          <div className="border-t border-gray-200 my-2" />
-          <div className="flex items-center text-xs">
-            <div className="w-3 h-3 rounded-full bg-green-500 mr-2" />
+          <div className="border-t border-gray-200 my-1.5 sm:my-2" />
+          <div className="flex items-center text-[10px] sm:text-xs">
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 mr-1.5 sm:mr-2" />
             <span className="text-gray-600">Normal</span>
           </div>
-          <div className="flex items-center text-xs">
-            <div className="w-3 h-3 rounded-full bg-amber-500 mr-2" />
+          <div className="flex items-center text-[10px] sm:text-xs">
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-500 mr-1.5 sm:mr-2" />
             <span className="text-gray-600">Warning</span>
           </div>
-          <div className="flex items-center text-xs">
-            <div className="w-3 h-3 rounded-full bg-red-500 mr-2" />
+          <div className="flex items-center text-[10px] sm:text-xs">
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 mr-1.5 sm:mr-2" />
             <span className="text-gray-600">Critical</span>
           </div>
         </div>
@@ -771,25 +771,25 @@ function FlowContent({
 
       {/* Stats overlay - toggleable */}
       {viewOptions.showStats && (
-        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 z-10">
-          <h4 className="text-xs font-bold text-gray-700 mb-2">Network Status</h4>
-          <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="absolute top-12 sm:top-4 right-2 sm:right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2 sm:p-3 z-10 max-w-[130px] sm:max-w-none">
+          <h4 className="text-[10px] sm:text-xs font-bold text-gray-700 mb-1.5 sm:mb-2">Status</h4>
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
             <div>
               <span className="text-gray-500">Prosumers:</span>{" "}
               <span className="font-semibold">{topology.summary.total_prosumers}</span>
             </div>
             <div>
-              <span className="text-gray-500">With PV:</span>{" "}
+              <span className="text-gray-500">PV:</span>{" "}
               <span className="font-semibold text-amber-600">{topology.summary.prosumers_with_pv}</span>
             </div>
             <div>
-              <span className="text-gray-500">Avg V:</span>{" "}
+              <span className="text-gray-500">Avg:</span>{" "}
               <span className="font-semibold">
                 {topology.summary.voltage_stats.avg_voltage?.toFixed(1) || "--"}V
               </span>
             </div>
             <div>
-              <span className="text-gray-500">Critical:</span>{" "}
+              <span className="text-gray-500">Crit:</span>{" "}
               <span className="font-semibold text-red-600">
                 {topology.summary.voltage_stats.critical_count}
               </span>
@@ -816,9 +816,9 @@ export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGrap
   // Show loading state if no topology
   if (!topology) {
     return (
-      <div className="relative w-full h-[600px] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-400 flex items-center">
-          <AlertTriangle className="w-5 h-5 mr-2" />
+      <div className="relative w-full h-[400px] sm:h-[600px] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-400 flex items-center text-sm">
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
           No topology data available
         </div>
       </div>
@@ -826,7 +826,7 @@ export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGrap
   }
 
   return (
-    <div className="relative w-full h-[600px] rounded-lg overflow-hidden border border-gray-200">
+    <div className="relative w-full h-[400px] sm:h-[600px] rounded-lg overflow-hidden border border-gray-200">
       <ReactFlowProvider>
         <FlowContent
           topology={topology}

@@ -21,8 +21,8 @@ import { getApiBaseUrl } from "@/lib/api";
 const NetworkGraphView = dynamic(() => import("./NetworkGraphView"), {
   ssr: false,
   loading: () => (
-    <div className="h-[600px] flex items-center justify-center bg-gray-50 rounded-lg">
-      <div className="animate-pulse text-gray-400">Loading graph view...</div>
+    <div className="h-[400px] sm:h-[600px] flex items-center justify-center bg-gray-50 rounded-lg">
+      <div className="animate-pulse text-gray-400 text-sm">Loading graph view...</div>
     </div>
   ),
 });
@@ -185,43 +185,43 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
         key={prosumer.id}
         onClick={() => setSelectedProsumer(isSelected ? null : prosumer.id)}
         className={`
-          relative p-3 rounded-lg border-2 cursor-pointer transition-all
+          relative p-2 sm:p-3 rounded-lg border-2 cursor-pointer transition-all touch-manipulation
           ${STATUS_COLORS[prosumer.voltage_status]}
-          ${isSelected ? "ring-2 ring-[#74045F] ring-offset-2" : "hover:shadow-md"}
+          ${isSelected ? "ring-2 ring-[#74045F] ring-offset-1 sm:ring-offset-2" : "hover:shadow-md"}
         `}
       >
         {/* Status indicator */}
         <div
-          className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${STATUS_DOT[prosumer.voltage_status]}`}
+          className={`absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${STATUS_DOT[prosumer.voltage_status]}`}
         />
 
         {/* Prosumer name and icons */}
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-semibold text-sm">{prosumer.name}</span>
-          <div className="flex space-x-1">
-            {prosumer.has_pv && <span title="Solar PV"><Sun className="w-4 h-4 text-amber-500" /></span>}
-            {prosumer.has_ev && <span title="EV Charger"><Car className="w-4 h-4 text-blue-500" /></span>}
-            {prosumer.has_battery && <span title="Battery"><Battery className="w-4 h-4 text-green-500" /></span>}
+        <div className="flex items-center justify-between mb-1 sm:mb-2">
+          <span className="font-semibold text-xs sm:text-sm">{prosumer.name}</span>
+          <div className="flex space-x-0.5 sm:space-x-1">
+            {prosumer.has_pv && <span title="Solar PV"><Sun className="w-3 h-3 sm:w-4 sm:h-4 text-amber-500" /></span>}
+            {prosumer.has_ev && <span title="EV Charger"><Car className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" /></span>}
+            {prosumer.has_battery && <span title="Battery"><Battery className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" /></span>}
           </div>
         </div>
 
         {/* Voltage display */}
         <div className="text-center">
-          <p className="text-2xl font-bold">
+          <p className="text-lg sm:text-2xl font-bold">
             {prosumer.current_voltage !== null
               ? `${prosumer.current_voltage.toFixed(1)}V`
               : "--"}
           </p>
           {prosumer.active_power !== null && (
-            <p className="text-xs opacity-75">
+            <p className="text-[10px] sm:text-xs opacity-75">
               {prosumer.active_power.toFixed(2)} kW
             </p>
           )}
         </div>
 
         {/* Position indicator */}
-        <div className="mt-2 text-xs opacity-60 text-center">
-          Position: {prosumer.position === 1 ? "Near" : prosumer.position === 2 ? "Mid" : "Far"}
+        <div className="mt-1 sm:mt-2 text-[10px] sm:text-xs opacity-60 text-center">
+          {prosumer.position === 1 ? "Near" : prosumer.position === 2 ? "Mid" : "Far"}
         </div>
       </div>
     );
@@ -229,9 +229,9 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
 
   if (isLoading && !topology) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#74045F]">
-        <div className="animate-pulse flex items-center justify-center h-64">
-          <p className="text-gray-400">Loading network topology...</p>
+      <div className="bg-white rounded-lg shadow-md p-3 sm:p-6 border-l-4 border-[#74045F]">
+        <div className="animate-pulse flex items-center justify-center h-48 sm:h-64">
+          <p className="text-gray-400 text-sm">Loading network topology...</p>
         </div>
       </div>
     );
@@ -239,69 +239,69 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
 
   if (error && !topology) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
-        <div className="flex items-center justify-center h-64 text-red-500">
-          <AlertTriangle className="w-6 h-6 mr-2" />
-          <p>{error}</p>
+      <div className="bg-white rounded-lg shadow-md p-3 sm:p-6 border-l-4 border-red-500">
+        <div className="flex items-center justify-center h-48 sm:h-64 text-red-500">
+          <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+          <p className="text-sm sm:text-base">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-[#74045F]">
+    <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 border-[#74045F]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <Zap className="w-5 h-5 text-[#74045F] mr-2" />
-          <h3 className="text-lg font-semibold text-gray-800">Network Topology</h3>
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center flex-wrap gap-1">
+          <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-[#74045F] mr-1 sm:mr-2" />
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Network Topology</h3>
           {enableRealtime && (
             <span
-              className={`ml-2 flex items-center text-xs px-2 py-0.5 rounded-full ${
+              className={`flex items-center text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
                 wsConnected
                   ? "bg-green-100 text-green-700"
                   : "bg-gray-100 text-gray-500"
               }`}
             >
-              <Radio className={`w-3 h-3 mr-1 ${wsConnected ? "animate-pulse" : ""}`} />
+              <Radio className={`w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 ${wsConnected ? "animate-pulse" : ""}`} />
               {wsConnected ? "LIVE" : "..."}
             </span>
           )}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 sm:space-x-2">
           {/* View Toggle */}
           <div className="flex rounded-lg border border-gray-200 overflow-hidden">
             <button
               type="button"
               onClick={() => setViewMode("grid")}
-              className={`px-3 py-1.5 text-xs font-medium flex items-center transition-colors ${
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium flex items-center transition-colors touch-manipulation ${
                 viewMode === "grid"
                   ? "bg-[#74045F] text-white"
                   : "bg-white text-gray-600 hover:bg-gray-50"
               }`}
               title="Grid View"
             >
-              <Grid3X3 className="w-4 h-4 mr-1" />
-              Grid
+              <Grid3X3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+              <span className="hidden sm:inline">Grid</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode("graph")}
-              className={`px-3 py-1.5 text-xs font-medium flex items-center transition-colors ${
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium flex items-center transition-colors touch-manipulation ${
                 viewMode === "graph"
                   ? "bg-[#74045F] text-white"
                   : "bg-white text-gray-600 hover:bg-gray-50"
               }`}
               title="Graph View"
             >
-              <Network className="w-4 h-4 mr-1" />
-              Graph
+              <Network className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+              <span className="hidden sm:inline">Graph</span>
             </button>
           </div>
           <button
             type="button"
             onClick={loadTopology}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
             title="Refresh"
           >
             <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`} />
@@ -311,30 +311,30 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
 
       {/* Summary Stats */}
       {topology && (
-        <div className="grid grid-cols-4 gap-3 mb-4">
-          <div className="bg-gray-50 rounded-lg p-2 text-center">
-            <p className="text-xs text-gray-500">Avg Voltage</p>
-            <p className="text-lg font-bold text-gray-800">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
+          <div className="bg-gray-50 rounded-lg p-1.5 sm:p-2 text-center">
+            <p className="text-[10px] sm:text-xs text-gray-500">Avg V</p>
+            <p className="text-sm sm:text-lg font-bold text-gray-800">
               {topology.summary.voltage_stats.avg_voltage?.toFixed(1) || "--"}V
             </p>
           </div>
-          <div className="bg-green-50 rounded-lg p-2 text-center">
-            <p className="text-xs text-green-600">Normal</p>
-            <p className="text-lg font-bold text-green-700">
+          <div className="bg-green-50 rounded-lg p-1.5 sm:p-2 text-center">
+            <p className="text-[10px] sm:text-xs text-green-600">Normal</p>
+            <p className="text-sm sm:text-lg font-bold text-green-700">
               {topology.summary.total_prosumers -
                 (topology.summary.voltage_stats.critical_count +
                   topology.summary.voltage_stats.warning_count)}
             </p>
           </div>
-          <div className="bg-amber-50 rounded-lg p-2 text-center">
-            <p className="text-xs text-amber-600">Warning</p>
-            <p className="text-lg font-bold text-amber-700">
+          <div className="bg-amber-50 rounded-lg p-1.5 sm:p-2 text-center">
+            <p className="text-[10px] sm:text-xs text-amber-600">Warning</p>
+            <p className="text-sm sm:text-lg font-bold text-amber-700">
               {topology.summary.voltage_stats.warning_count}
             </p>
           </div>
-          <div className="bg-red-50 rounded-lg p-2 text-center">
-            <p className="text-xs text-red-600">Critical</p>
-            <p className="text-lg font-bold text-red-700">
+          <div className="bg-red-50 rounded-lg p-1.5 sm:p-2 text-center">
+            <p className="text-[10px] sm:text-xs text-red-600">Critical</p>
+            <p className="text-sm sm:text-lg font-bold text-red-700">
               {topology.summary.voltage_stats.critical_count}
             </p>
           </div>
@@ -350,10 +350,10 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
       {viewMode === "grid" && topology && (
         <div className="relative">
           {/* Transformer */}
-          <div className="flex justify-center mb-4">
-            <div className="bg-[#74045F] text-white px-6 py-3 rounded-lg text-center">
-              <p className="font-semibold">{topology.transformer.name}</p>
-              <p className="text-xs text-[#D4A43D]">
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <div className="bg-[#74045F] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-center">
+              <p className="font-semibold text-sm sm:text-base">{topology.transformer.name}</p>
+              <p className="text-[10px] sm:text-xs text-[#D4A43D]">
                 {topology.transformer.capacity_kva} kVA |{" "}
                 {topology.transformer.voltage_primary / 1000}kV /{" "}
                 {topology.transformer.voltage_secondary}V
@@ -362,35 +362,35 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
           </div>
 
           {/* Main Bus */}
-          <div className="flex justify-center mb-4">
-            <div className="w-3/4 h-1 bg-gray-800 rounded" />
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <div className="w-3/4 h-0.5 sm:h-1 bg-gray-800 rounded" />
           </div>
 
           {/* Phase Groups */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {topology.phases.map((phase) => (
               <div key={phase.phase} className="relative">
                 {/* Phase Label */}
                 <div className="flex items-center mb-2">
                   <div
                     className={`
-                    px-3 py-1 rounded-full text-sm font-semibold
+                    px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold
                     ${phase.phase === "A" ? "bg-red-100 text-red-700" : ""}
                     ${phase.phase === "B" ? "bg-yellow-100 text-yellow-700" : ""}
                     ${phase.phase === "C" ? "bg-blue-100 text-blue-700" : ""}
                   `}
                   >
-                    Phase {phase.phase}
+                    Ph {phase.phase}
                   </div>
-                  <div className="flex-1 h-0.5 bg-gray-300 mx-2" />
-                  <div className="text-xs text-gray-500">
-                    Avg: {phase.avg_voltage?.toFixed(1) || "--"}V |{" "}
-                    {phase.total_power?.toFixed(2) || "--"} kW
+                  <div className="flex-1 h-0.5 bg-gray-300 mx-1 sm:mx-2" />
+                  <div className="text-[10px] sm:text-xs text-gray-500">
+                    <span className="hidden sm:inline">Avg: </span>{phase.avg_voltage?.toFixed(1) || "--"}V
+                    <span className="hidden sm:inline"> | {phase.total_power?.toFixed(2) || "--"} kW</span>
                   </div>
                 </div>
 
                 {/* Prosumer Nodes */}
-                <div className="grid grid-cols-3 gap-3 pl-8">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-3 pl-2 sm:pl-8">
                   {phase.prosumers
                     .sort((a, b) => a.position - b.position)
                     .map((prosumer) => renderProsumerNode(prosumer))}
@@ -399,7 +399,7 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
                     Array.from({ length: 3 - phase.prosumers.length }).map((_, i) => (
                       <div
                         key={`empty-${phase.phase}-${i}`}
-                        className="p-3 rounded-lg border-2 border-dashed border-gray-200 opacity-30"
+                        className="p-2 sm:p-3 rounded-lg border-2 border-dashed border-gray-200 opacity-30"
                       />
                     ))}
                 </div>
@@ -411,43 +411,43 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
 
       {/* Selected Prosumer Details */}
       {selectedProsumer && topology && viewMode === "grid" && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-semibold text-gray-800 mb-2">Prosumer Details</h4>
+        <div className="mt-3 sm:mt-4 p-2 sm:p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">Prosumer Details</h4>
           {topology.phases.flatMap((p) => p.prosumers).map((prosumer) => {
             if (prosumer.id !== selectedProsumer) return null;
             return (
-              <div key={prosumer.id} className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div key={prosumer.id} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm">
                 <div>
-                  <p className="text-gray-500">ID</p>
+                  <p className="text-gray-500 text-[10px] sm:text-xs">ID</p>
                   <p className="font-semibold">{prosumer.id}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Phase</p>
+                  <p className="text-gray-500 text-[10px] sm:text-xs">Phase</p>
                   <p className="font-semibold">Phase {prosumer.phase}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Current Voltage</p>
+                  <p className="text-gray-500 text-[10px] sm:text-xs">Voltage</p>
                   <p className="font-semibold">
                     {prosumer.current_voltage?.toFixed(1) || "--"}V
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Active Power</p>
+                  <p className="text-gray-500 text-[10px] sm:text-xs">Power</p>
                   <p className="font-semibold">
                     {prosumer.active_power?.toFixed(2) || "--"} kW
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Equipment</p>
-                  <div className="flex items-center space-x-2">
+                  <p className="text-gray-500 text-[10px] sm:text-xs">Equipment</p>
+                  <div className="flex items-center space-x-1 sm:space-x-2">
                     {prosumer.has_pv && (
-                      <span className="flex items-center text-amber-600">
-                        <Sun className="w-4 h-4 mr-1" /> PV
+                      <span className="flex items-center text-amber-600 text-[10px] sm:text-xs">
+                        <Sun className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5" /> PV
                       </span>
                     )}
                     {prosumer.has_ev && (
-                      <span className="flex items-center text-blue-600">
-                        <Car className="w-4 h-4 mr-1" /> EV
+                      <span className="flex items-center text-blue-600 text-[10px] sm:text-xs">
+                        <Car className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5" /> EV
                       </span>
                     )}
                     {!prosumer.has_pv && !prosumer.has_ev && (
@@ -456,13 +456,13 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
                   </div>
                 </div>
                 <div>
-                  <p className="text-gray-500">Status</p>
+                  <p className="text-gray-500 text-[10px] sm:text-xs">Status</p>
                   <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[prosumer.voltage_status]}`}
+                    className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-medium ${STATUS_COLORS[prosumer.voltage_status]}`}
                   >
-                    {prosumer.voltage_status === "normal" && <CheckCircle className="w-3 h-3 mr-1" />}
-                    {prosumer.voltage_status === "warning" && <AlertTriangle className="w-3 h-3 mr-1" />}
-                    {prosumer.voltage_status === "critical" && <AlertTriangle className="w-3 h-3 mr-1" />}
+                    {prosumer.voltage_status === "normal" && <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5" />}
+                    {prosumer.voltage_status === "warning" && <AlertTriangle className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5" />}
+                    {prosumer.voltage_status === "critical" && <AlertTriangle className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5" />}
                     {prosumer.voltage_status.charAt(0).toUpperCase() + prosumer.voltage_status.slice(1)}
                   </span>
                 </div>
@@ -473,12 +473,12 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
       )}
 
       {/* Footer */}
-      <div className="mt-4 pt-3 border-t border-gray-100">
-        <p className="text-xs text-gray-500">
-          Limits: {topology?.limits.lower_limit}V - {topology?.limits.upper_limit}V (±5%) |{" "}
+      <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100">
+        <p className="text-[10px] sm:text-xs text-gray-500">
+          <span className="hidden sm:inline">Limits: </span>{topology?.limits.lower_limit}V - {topology?.limits.upper_limit}V (±5%) |{" "}
           {topology?.summary.total_prosumers} prosumers
           {enableRealtime && liveUpdateCount > 0 && (
-            <span className="ml-2 text-green-600">| {liveUpdateCount} live updates</span>
+            <span className="ml-1 sm:ml-2 text-green-600">| {liveUpdateCount} live</span>
           )}
         </p>
       </div>
