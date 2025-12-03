@@ -35,6 +35,59 @@ import {
 import "@xyflow/react/dist/style.css";
 
 // ============================================================================
+// Custom CSS for electrical flow animation
+// ============================================================================
+
+const electricalFlowStyles = `
+  @keyframes electricalFlow {
+    0% {
+      stroke-dashoffset: 24;
+    }
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes electricalPulse {
+    0%, 100% {
+      opacity: 0.6;
+      filter: drop-shadow(0 0 2px currentColor);
+    }
+    50% {
+      opacity: 1;
+      filter: drop-shadow(0 0 6px currentColor);
+    }
+  }
+
+  .react-flow__edge.animated path {
+    stroke-dasharray: 8 4;
+    animation: electricalFlow 0.8s linear infinite, electricalPulse 2s ease-in-out infinite;
+  }
+
+  .react-flow__edge-path {
+    transition: stroke 0.3s ease;
+  }
+
+  /* Main feeder lines from transformer */
+  .electrical-main path {
+    stroke-dasharray: 12 6;
+    animation: electricalFlow 0.6s linear infinite, electricalPulse 1.5s ease-in-out infinite !important;
+  }
+
+  /* Phase distribution lines */
+  .electrical-phase path {
+    stroke-dasharray: 8 4;
+    animation: electricalFlow 0.7s linear infinite, electricalPulse 2s ease-in-out infinite !important;
+  }
+
+  /* Prosumer connection lines */
+  .electrical-prosumer path {
+    stroke-dasharray: 6 3;
+    animation: electricalFlow 0.9s linear infinite, electricalPulse 2.5s ease-in-out infinite !important;
+  }
+`;
+
+// ============================================================================
 // Types matching NetworkTopology.tsx
 // ============================================================================
 
@@ -442,13 +495,14 @@ function createNodesAndEdges(
       },
     });
 
-    // Edge from transformer to phase
+    // Edge from transformer to phase (main feeder)
     edges.push({
       id: `transformer-${phaseId}`,
       source: "transformer",
       target: phaseId,
-      style: { stroke: "#6B7280", strokeWidth: 2 },
-      animated: false,
+      style: { stroke: "#74045F", strokeWidth: 3 },
+      animated: true,
+      className: "electrical-main",
     });
 
     // Add prosumer nodes for this phase
@@ -489,16 +543,21 @@ function createNodesAndEdges(
       });
 
       // Edge from phase to prosumer (or prosumer to prosumer for chain)
+      const edgeColor = prosumer.voltage_status === "critical" ? "#EF4444" :
+                       prosumer.voltage_status === "warning" ? "#F59E0B" : "#22C55E";
+
       if (prosumerIndex === 0) {
+        // First prosumer connects to phase
         edges.push({
           id: `${phaseId}-${prosumer.id}`,
           source: phaseId,
           target: prosumer.id,
           style: {
-            stroke: prosumer.voltage_status === "critical" ? "#EF4444" :
-                   prosumer.voltage_status === "warning" ? "#F59E0B" : "#94A3B8",
-            strokeWidth: 1.5,
+            stroke: edgeColor,
+            strokeWidth: 2,
           },
+          animated: true,
+          className: "electrical-phase",
         });
       } else {
         // Chain prosumers together
@@ -508,10 +567,11 @@ function createNodesAndEdges(
           source: prevProsumer.id,
           target: prosumer.id,
           style: {
-            stroke: prosumer.voltage_status === "critical" ? "#EF4444" :
-                   prosumer.voltage_status === "warning" ? "#F59E0B" : "#94A3B8",
+            stroke: edgeColor,
             strokeWidth: 1.5,
           },
+          animated: true,
+          className: "electrical-prosumer",
         });
       }
     });
@@ -667,6 +727,9 @@ function FlowContent({
 
   return (
     <>
+      {/* Inject electrical flow animation styles */}
+      <style>{electricalFlowStyles}</style>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -679,6 +742,7 @@ function FlowContent({
         defaultEdgeOptions={{
           type: "smoothstep",
           style: { strokeWidth: 1.5 },
+          animated: true,
         }}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#E5E7EB" />
