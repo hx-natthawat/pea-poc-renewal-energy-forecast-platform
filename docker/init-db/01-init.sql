@@ -237,6 +237,45 @@ CREATE INDEX IF NOT EXISTS idx_ingestion_log_hash ON data_ingestion_log (file_ha
 CREATE INDEX IF NOT EXISTS idx_ingestion_log_created ON data_ingestion_log (created_at DESC);
 
 -- =============================================================================
+-- WEATHER EVENTS TABLE (Extreme Weather Logging)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS weather_events (
+    id BIGSERIAL,
+    time TIMESTAMPTZ NOT NULL,
+    event_type VARCHAR(50) NOT NULL,
+    severity VARCHAR(20) NOT NULL CHECK (severity IN ('info', 'warning', 'critical')),
+    station_id VARCHAR(50),
+
+    -- Weather metrics during event
+    min_irradiance DOUBLE PRECISION,
+    max_irradiance DOUBLE PRECISION,
+    min_clearness_index DOUBLE PRECISION,
+    precipitation_mm DOUBLE PRECISION,
+    max_wind_speed DOUBLE PRECISION,
+
+    -- Duration
+    duration_minutes INTEGER,
+
+    -- Forecast performance during event
+    forecast_error_mape DOUBLE PRECISION,
+    forecast_error_rmse DOUBLE PRECISION,
+
+    -- Metadata
+    tmd_alert_id VARCHAR(100),
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    PRIMARY KEY (id, time)
+);
+
+SELECT create_hypertable('weather_events', 'time',
+    chunk_time_interval => INTERVAL '30 days',
+    if_not_exists => TRUE);
+
+CREATE INDEX IF NOT EXISTS idx_weather_events_type ON weather_events (event_type, time DESC);
+CREATE INDEX IF NOT EXISTS idx_weather_events_station ON weather_events (station_id, time DESC);
+
+-- =============================================================================
 -- Grant permissions
 -- =============================================================================
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
