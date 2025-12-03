@@ -59,6 +59,7 @@ out/
 dist/
 .cache/
 .parcel-cache/
+frontend/.pnpm-store/
 
 # =========================
 # IDE / Editors

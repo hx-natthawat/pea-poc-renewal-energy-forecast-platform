@@ -5,14 +5,29 @@ import {
   Battery,
   Car,
   CheckCircle,
+  Grid3X3,
+  Network,
   Radio,
   RefreshCw,
   Sun,
   Zap,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 import { useVoltageWebSocket } from "@/hooks";
 import { getApiBaseUrl } from "@/lib/api";
+
+// Dynamically import ReactFlow component to avoid SSR issues
+const NetworkGraphView = dynamic(() => import("./NetworkGraphView"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[600px] flex items-center justify-center bg-gray-50 rounded-lg">
+      <div className="animate-pulse text-gray-400">Loading graph view...</div>
+    </div>
+  ),
+});
+
+type ViewMode = "grid" | "graph";
 
 interface ProsumerNode {
   id: string;
@@ -90,6 +105,7 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
   const [error, setError] = useState<string | null>(null);
   const [selectedProsumer, setSelectedProsumer] = useState<string | null>(null);
   const [liveUpdateCount, setLiveUpdateCount] = useState(0);
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   // WebSocket for real-time voltage updates
   const { isConnected: wsConnected } = useVoltageWebSocket(
@@ -252,14 +268,45 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
             </span>
           )}
         </div>
-        <button
-          type="button"
-          onClick={loadTopology}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          title="Refresh"
-        >
-          <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`} />
-        </button>
+        <div className="flex items-center space-x-2">
+          {/* View Toggle */}
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setViewMode("grid")}
+              className={`px-3 py-1.5 text-xs font-medium flex items-center transition-colors ${
+                viewMode === "grid"
+                  ? "bg-[#74045F] text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50"
+              }`}
+              title="Grid View"
+            >
+              <Grid3X3 className="w-4 h-4 mr-1" />
+              Grid
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("graph")}
+              className={`px-3 py-1.5 text-xs font-medium flex items-center transition-colors ${
+                viewMode === "graph"
+                  ? "bg-[#74045F] text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50"
+              }`}
+              title="Graph View"
+            >
+              <Network className="w-4 h-4 mr-1" />
+              Graph
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={loadTopology}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            title="Refresh"
+          >
+            <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
       </div>
 
       {/* Summary Stats */}
@@ -294,8 +341,13 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
         </div>
       )}
 
-      {/* Network Diagram */}
-      {topology && (
+      {/* Graph View */}
+      {viewMode === "graph" && (
+        <NetworkGraphView onNodeSelect={setSelectedProsumer} />
+      )}
+
+      {/* Grid View - Network Diagram */}
+      {viewMode === "grid" && topology && (
         <div className="relative">
           {/* Transformer */}
           <div className="flex justify-center mb-4">
@@ -358,7 +410,7 @@ export default function NetworkTopology({ enableRealtime = true }: NetworkTopolo
       )}
 
       {/* Selected Prosumer Details */}
-      {selectedProsumer && topology && (
+      {selectedProsumer && topology && viewMode === "grid" && (
         <div className="mt-4 p-4 bg-gray-50 rounded-lg">
           <h4 className="font-semibold text-gray-800 mb-2">Prosumer Details</h4>
           {topology.phases.flatMap((p) => p.prosumers).map((prosumer) => {

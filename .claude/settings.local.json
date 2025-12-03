@@ -74,7 +74,8 @@
       "Bash(helm install:*)",
       "Bash(docker-compose:*)",
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform log --oneline -20)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []
