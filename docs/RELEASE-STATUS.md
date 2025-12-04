@@ -101,18 +101,19 @@
 
 ## Known Issues
 
-1. **Failing Tests**: 104 tests fail in `test_topology.py` and `test_weather.py` - these test endpoints that require additional implementation
-2. **Weather API**: Weather-related endpoints need external API integration
+None - all critical issues resolved.
 
 ---
 
-## Next Steps
+## Next Steps (v1.1.0)
 
-1. Fix remaining test failures
-2. Integrate external weather API
-3. Deploy to staging environment
-4. Conduct UAT with stakeholders
-5. Production deployment
+1. ~~Fix remaining test failures~~ ✅ Complete
+2. ~~Integrate external weather API (TMD)~~ ✅ Complete
+3. Implement Model Retraining Pipeline (drift detection)
+4. Add multi-channel alerting (Email, LINE Notify)
+5. Deploy to staging environment
+6. Conduct UAT with stakeholders
+7. Production deployment
 
 ---
 
