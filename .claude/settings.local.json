@@ -84,7 +84,15 @@
       "Bash(PYTHONPATH=/Users/fero/Desktop/PEA/pea-re-forecast-platform/backend ./venv/bin/pytest:*)",
       "Bash(trivy:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\ndocs: Add deployment guide and fix test configuration\n\n- Add comprehensive DEPLOYMENT.md with Helm, ArgoCD, and K8s options\n- Add pytest.ini with --forked flag for test isolation (fixes 104 test failures)\n- Update RELEASE-STATUS.md with 100% test pass rate (214/214 tests)\n- Update local Claude settings for allowed commands\n\nAll 214 unit tests now pass with proper fixture isolation.\nPlatform is production-ready with all TOR requirements met.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\ndocs: Add deployment guide and fix test configuration\n\n- Add comprehensive DEPLOYMENT.md with Helm, ArgoCD, and K8s options\n- Add pytest.ini with --forked flag for test isolation (fixes 104 test failures)\n- Update RELEASE-STATUS.md with 100% test pass rate (214/214 tests)\n- Update local Claude settings for allowed commands\n\nAll 214 unit tests now pass with proper fixture isolation.\nPlatform is production-ready with all TOR requirements met.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git remote add:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git push:*)",
+      "Bash(git tag:*)",
+      "Bash(git commit:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform log --oneline -10)",
+      "Bash(./venv/bin/pytest tests/ -v --tb=short)",
+      "Bash(PYTHONPATH=. ./venv/bin/pytest:*)"
     ],
     "deny": [],
     "ask": []

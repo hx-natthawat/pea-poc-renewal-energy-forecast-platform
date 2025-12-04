@@ -1,0 +1,39 @@
+# Dockerfile for ML Testing with XGBoost support
+# Solves OpenMP dependency issues on macOS
+
+FROM python:3.11-slim
+
+LABEL maintainer="PEA RE Forecast Platform"
+LABEL description="ML testing environment with XGBoost and all dependencies"
+
+# Install system dependencies including OpenMP
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY ml/requirements.txt /app/ml/requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+    pandas \
+    numpy \
+    scikit-learn \
+    xgboost \
+    matplotlib \
+    seaborn
+
+# Copy ML code and data
+COPY ml/ /app/ml/
+
+# Set Python path
+ENV PYTHONPATH=/app/ml/src:$PYTHONPATH
+ENV PYTHONUNBUFFERED=1
+
+# Default command runs the test script
+CMD ["python", "ml/scripts/test_extracted_data.py"]

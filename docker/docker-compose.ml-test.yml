@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  ml-test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ml-test
+    container_name: pea-ml-test
+    volumes:
+      # Mount data directory for persistence
+      - ../ml/data:/app/ml/data
+      # Mount scripts for development
+      - ../ml/scripts:/app/ml/scripts:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python ml/scripts/test_extracted_data.py
+
+  # Interactive shell for debugging
+  ml-shell:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ml-test
+    container_name: pea-ml-shell
+    volumes:
+      - ../ml/data:/app/ml/data
+      - ../ml/scripts:/app/ml/scripts
+      - ../ml/src:/app/ml/src
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true
+    command: /bin/bash
