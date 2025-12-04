@@ -1,0 +1,87 @@
+# Docker Compose for Distributed Load Testing
+# PEA RE Forecast Platform - TOR Requirement: 300K users
+
+services:
+  # Locust Master Node
+  locust-master:
+    image: locustio/locust:2.20.1
+    container_name: pea-locust-master
+    ports:
+      - "8089:8089"  # Web UI
+      - "5557:5557"  # Worker communication
+    volumes:
+      - ../tests/load:/mnt/locust
+    command: >
+      -f /mnt/locust/locustfile.py
+      --master
+      --expect-workers=4
+      -H http://host.docker.internal:8000
+    environment:
+      - LOCUST_LOGLEVEL=INFO
+    networks:
+      - loadtest-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Locust Worker Nodes (scale as needed)
+  locust-worker:
+    image: locustio/locust:2.20.1
+    volumes:
+      - ../tests/load:/mnt/locust
+    command: >
+      -f /mnt/locust/locustfile.py
+      --worker
+      --master-host=locust-master
+    depends_on:
+      - locust-master
+    networks:
+      - loadtest-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      replicas: 4
+
+  # InfluxDB for storing metrics (optional)
+  influxdb:
+    image: influxdb:2.7-alpine
+    container_name: pea-loadtest-influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminpassword
+      - DOCKER_INFLUXDB_INIT_ORG=pea
+      - DOCKER_INFLUXDB_INIT_BUCKET=loadtest
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+      - loadtest-network
+    profiles:
+      - metrics
+
+  # Grafana for visualizing load test results (optional)
+  grafana-loadtest:
+    image: grafana/grafana:10.2.2
+    container_name: pea-loadtest-grafana
+    ports:
+      - "3100:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_loadtest_data:/var/lib/grafana
+    depends_on:
+      - influxdb
+    networks:
+      - loadtest-network
+    profiles:
+      - metrics
+
+volumes:
+  influxdb_data:
+  grafana_loadtest_data:
+
+networks:
+  loadtest-network:
+    driver: bridge

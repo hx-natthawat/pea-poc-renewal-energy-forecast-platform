@@ -1,0 +1,8 @@
+# Trivy Ignore File for PEA RE Forecast Platform
+# Add CVE IDs to ignore specific vulnerabilities
+
+# Example: CVE-2021-12345
+# Add ignored CVEs with justification comments
+
+# Accepted risks (with justification):
+# None currently - all vulnerabilities should be addressed

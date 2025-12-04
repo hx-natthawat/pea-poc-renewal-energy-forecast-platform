@@ -1,0 +1,97 @@
+# Docker Compose for Security Scanning
+# PEA RE Forecast Platform - Phase D.2
+
+services:
+  # SonarQube for code quality and security analysis
+  sonarqube:
+    image: sonarqube:10.3-community
+    container_name: pea-sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    depends_on:
+      sonarqube-db:
+        condition: service_healthy
+    networks:
+      - security-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/api/system/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 300s
+
+  # PostgreSQL for SonarQube
+  sonarqube-db:
+    image: postgres:16-alpine
+    container_name: pea-sonarqube-db
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    volumes:
+      - sonarqube_db:/var/lib/postgresql/data
+    networks:
+      - security-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Trivy for container vulnerability scanning
+  trivy:
+    image: aquasec/trivy:0.48.3
+    container_name: pea-trivy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - trivy_cache:/root/.cache/trivy
+      - ../:/project:ro
+      - ../infrastructure/security/trivy:/config:ro
+    networks:
+      - security-network
+    entrypoint: ["sh", "-c", "tail -f /dev/null"]
+
+  # OWASP Dependency Check for dependency vulnerabilities
+  dependency-check:
+    image: owasp/dependency-check:9.0.7
+    container_name: pea-dependency-check
+    volumes:
+      - ../:/src:ro
+      - dependency_check_data:/usr/share/dependency-check/data
+      - ../reports/dependency-check:/report
+    networks:
+      - security-network
+    entrypoint: ["sh", "-c", "tail -f /dev/null"]
+
+  # Bandit for Python security scanning
+  bandit-scanner:
+    image: python:3.11-slim
+    container_name: pea-bandit
+    volumes:
+      - ../backend:/app:ro
+      - ../reports/bandit:/reports
+    working_dir: /app
+    networks:
+      - security-network
+    entrypoint: ["sh", "-c", "pip install bandit && tail -f /dev/null"]
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  sonarqube_db:
+  trivy_cache:
+  dependency_check_data:
+
+networks:
+  security-network:
+    driver: bridge

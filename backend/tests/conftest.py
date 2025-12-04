@@ -45,7 +45,7 @@ def event_loop():
 # =============================================================================
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def mock_admin_user() -> CurrentUser:
     """Mock admin user for testing."""
     return CurrentUser(
@@ -110,28 +110,31 @@ def mock_api_user() -> CurrentUser:
 # =============================================================================
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def test_client(mock_admin_user: CurrentUser) -> Generator[TestClient, None, None]:
-    """Create a synchronous test client with mock authentication."""
+    """Create a synchronous test client with mock authentication.
+
+    Uses session scope to avoid lifespan issues when running multiple tests.
+    """
 
     def override_get_current_user():
         return mock_admin_user
 
     app.dependency_overrides[get_current_user] = override_get_current_user
 
-    with TestClient(app) as client:
+    with TestClient(app, raise_server_exceptions=False) as client:
         yield client
 
     app.dependency_overrides.clear()
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def unauthenticated_client() -> Generator[TestClient, None, None]:
-    """Create a test client without authentication."""
-    # Clear any overrides
-    app.dependency_overrides.clear()
+    """Create a test client without authentication.
 
-    with TestClient(app) as client:
+    Uses session scope to avoid lifespan issues when running multiple tests.
+    """
+    with TestClient(app, raise_server_exceptions=False) as client:
         yield client
 
 

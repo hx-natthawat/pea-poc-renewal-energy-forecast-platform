@@ -1,0 +1,91 @@
+# Trivy Configuration for PEA RE Forecast Platform
+# Container and Filesystem Vulnerability Scanning
+
+# Scan configuration
+scan:
+  # Severity levels to report
+  severity:
+    - CRITICAL
+    - HIGH
+    - MEDIUM
+
+  # Vulnerability types to scan
+  vuln-type:
+    - os
+    - library
+
+  # Security checks
+  security-checks:
+    - vuln
+    - config
+    - secret
+
+# Image scanning configuration
+image:
+  # Ignore unfixed vulnerabilities
+  ignore-unfixed: false
+
+  # Removed packages
+  removed-pkgs: true
+
+  # Timeout for scanning
+  timeout: 10m
+
+# Filesystem scanning configuration
+filesystem:
+  # Skip directories
+  skip-dirs:
+    - node_modules
+    - .git
+    - .venv
+    - venv
+    - __pycache__
+    - .pytest_cache
+    - dist
+    - build
+
+# Secret scanning configuration
+secret:
+  # Configuration file
+  config: trivy-secret.yaml
+
+# Misconfiguration scanning
+misconfiguration:
+  # Check Dockerfile, Kubernetes, Terraform
+  include-non-failures: false
+
+  # Policy paths
+  policy:
+    - /policies
+
+# Output configuration
+output:
+  # Format: table, json, sarif, template
+  format: json
+
+  # Output file
+  output: trivy-results.json
+
+# Cache configuration
+cache:
+  # Cache directory
+  dir: /tmp/trivy-cache
+
+  # Backend: fs, redis
+  backend: fs
+
+# Database configuration
+db:
+  # Repository for vulnerability database
+  repository: ghcr.io/aquasecurity/trivy-db
+
+  # Skip database update
+  skip-update: false
+
+# Ignore policy
+ignore:
+  # Ignore file path
+  file: .trivyignore
+
+  # Ignore specific vulnerabilities
+  vulnerabilities: []

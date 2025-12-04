@@ -1,0 +1,390 @@
+# GitLab CI/CD Pipeline for PEA RE Forecast Platform
+# TOR Compliant: GitLab CI + ArgoCD for deployment
+
+stages:
+  - validate
+  - test
+  - security
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "20"
+  TRIVY_VERSION: "0.48.3"
+
+  # Container registry
+  CONTAINER_REGISTRY: ${CI_REGISTRY}
+  BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend
+  FRONTEND_IMAGE: ${CI_REGISTRY_IMAGE}/frontend
+  ML_IMAGE: ${CI_REGISTRY_IMAGE}/ml
+
+# Cache configuration
+.python_cache: &python_cache
+  cache:
+    key: python-${CI_COMMIT_REF_SLUG}
+    paths:
+      - backend/.venv
+      - backend/.cache/pip
+
+.node_cache: &node_cache
+  cache:
+    key: node-${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+      - frontend/.pnpm-store
+
+# =============================================================================
+# VALIDATE STAGE
+# =============================================================================
+
+lint:python:
+  stage: validate
+  image: python:${PYTHON_VERSION}-slim
+  <<: *python_cache
+  script:
+    - cd backend
+    - pip install ruff black mypy
+    - ruff check app/
+    - black --check app/
+    - mypy app/ --ignore-missing-imports
+  rules:
+    - changes:
+        - backend/**/*
+
+lint:typescript:
+  stage: validate
+  image: node:${NODE_VERSION}-alpine
+  <<: *node_cache
+  script:
+    - cd frontend
+    - npm install -g pnpm
+    - pnpm install --frozen-lockfile
+    - pnpm run type-check
+    - pnpm run check
+  rules:
+    - changes:
+        - frontend/**/*
+
+# =============================================================================
+# TEST STAGE
+# =============================================================================
+
+test:backend:
+  stage: test
+  image: python:${PYTHON_VERSION}-slim
+  <<: *python_cache
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+    - name: redis:7-alpine
+      alias: redis
+  variables:
+    POSTGRES_DB: pea_forecast_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/pea_forecast_test
+    REDIS_URL: redis://redis:6379/0
+  script:
+    - cd backend
+    - pip install -r requirements.txt
+    - pip install pytest pytest-cov pytest-asyncio
+    - pytest tests/ -v --cov=app --cov-report=xml --cov-report=html
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: backend/coverage.xml
+    paths:
+      - backend/htmlcov/
+    expire_in: 1 week
+  coverage: '/TOTAL.*\s+(\d+%)/'
+  rules:
+    - changes:
+        - backend/**/*
+
+test:frontend:
+  stage: test
+  image: node:${NODE_VERSION}-alpine
+  <<: *node_cache
+  script:
+    - cd frontend
+    - npm install -g pnpm
+    - pnpm install --frozen-lockfile
+    - pnpm run test:coverage
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: frontend/coverage/cobertura-coverage.xml
+    paths:
+      - frontend/coverage/
+    expire_in: 1 week
+  rules:
+    - changes:
+        - frontend/**/*
+
+# =============================================================================
+# SECURITY STAGE (TOR: Trivy, SonarQube, Black Duck)
+# =============================================================================
+
+sast:sonarqube:
+  stage: security
+  image:
+    name: sonarsource/sonar-scanner-cli:5
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: sonar-${CI_COMMIT_REF_SLUG}
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner
+      -Dsonar.projectKey=${CI_PROJECT_NAME}
+      -Dsonar.host.url=${SONAR_HOST_URL}
+      -Dsonar.token=${SONAR_TOKEN}
+      -Dsonar.qualitygate.wait=true
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_MERGE_REQUEST_ID
+
+sast:bandit:
+  stage: security
+  image: python:${PYTHON_VERSION}-slim
+  script:
+    - pip install bandit
+    - bandit -r backend/app -f json -o backend/bandit-report.json || true
+    - bandit -r backend/app -f txt
+  artifacts:
+    reports:
+      sast: backend/bandit-report.json
+    paths:
+      - backend/bandit-report.json
+    expire_in: 1 week
+  rules:
+    - changes:
+        - backend/**/*
+
+container_scanning:trivy:backend:
+  stage: security
+  image:
+    name: aquasec/trivy:${TRIVY_VERSION}
+    entrypoint: [""]
+  variables:
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivy-cache"
+  cache:
+    key: trivy-cache
+    paths:
+      - .trivy-cache
+  script:
+    - trivy fs --config infrastructure/security/trivy/trivy.yaml backend/ --format sarif --output backend-fs-report.sarif
+    - trivy fs --config infrastructure/security/trivy/trivy.yaml backend/ --format table
+  artifacts:
+    reports:
+      sast: backend-fs-report.sarif
+    paths:
+      - backend-fs-report.sarif
+    expire_in: 1 week
+  rules:
+    - changes:
+        - backend/**/*
+
+container_scanning:trivy:frontend:
+  stage: security
+  image:
+    name: aquasec/trivy:${TRIVY_VERSION}
+    entrypoint: [""]
+  variables:
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivy-cache"
+  cache:
+    key: trivy-cache
+    paths:
+      - .trivy-cache
+  script:
+    - trivy fs --config infrastructure/security/trivy/trivy.yaml frontend/ --format sarif --output frontend-fs-report.sarif
+    - trivy fs --config infrastructure/security/trivy/trivy.yaml frontend/ --format table
+  artifacts:
+    reports:
+      sast: frontend-fs-report.sarif
+    paths:
+      - frontend-fs-report.sarif
+    expire_in: 1 week
+  rules:
+    - changes:
+        - frontend/**/*
+
+dependency_scanning:
+  stage: security
+  image:
+    name: owasp/dependency-check:9.0.7
+    entrypoint: [""]
+  variables:
+    DC_DATA_DIR: ".dependency-check-data"
+  cache:
+    key: dependency-check
+    paths:
+      - .dependency-check-data
+  script:
+    - /usr/share/dependency-check/bin/dependency-check.sh
+      --project "PEA RE Forecast"
+      --scan backend/
+      --scan frontend/
+      --format JSON
+      --format HTML
+      --out dependency-check-report
+  artifacts:
+    paths:
+      - dependency-check-report/
+    expire_in: 1 week
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+secret_detection:trivy:
+  stage: security
+  image:
+    name: aquasec/trivy:${TRIVY_VERSION}
+    entrypoint: [""]
+  script:
+    - trivy fs --security-checks secret --config infrastructure/security/trivy/trivy-secret.yaml . --format table
+    - trivy fs --security-checks secret --config infrastructure/security/trivy/trivy-secret.yaml . --format json --output secret-scan-report.json
+  artifacts:
+    paths:
+      - secret-scan-report.json
+    expire_in: 1 week
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+
+# =============================================================================
+# BUILD STAGE
+# =============================================================================
+
+build:backend:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t ${BACKEND_IMAGE}:${CI_COMMIT_SHA} -t ${BACKEND_IMAGE}:latest backend/
+    - trivy image --exit-code 1 --severity CRITICAL,HIGH ${BACKEND_IMAGE}:${CI_COMMIT_SHA} || true
+    - docker push ${BACKEND_IMAGE}:${CI_COMMIT_SHA}
+    - docker push ${BACKEND_IMAGE}:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - backend/**/*
+
+build:frontend:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t ${FRONTEND_IMAGE}:${CI_COMMIT_SHA} -t ${FRONTEND_IMAGE}:latest frontend/
+    - trivy image --exit-code 1 --severity CRITICAL,HIGH ${FRONTEND_IMAGE}:${CI_COMMIT_SHA} || true
+    - docker push ${FRONTEND_IMAGE}:${CI_COMMIT_SHA}
+    - docker push ${FRONTEND_IMAGE}:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - frontend/**/*
+
+build:ml:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t ${ML_IMAGE}:${CI_COMMIT_SHA} -t ${ML_IMAGE}:latest ml/
+    - trivy image --exit-code 1 --severity CRITICAL,HIGH ${ML_IMAGE}:${CI_COMMIT_SHA} || true
+    - docker push ${ML_IMAGE}:${CI_COMMIT_SHA}
+    - docker push ${ML_IMAGE}:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - ml/**/*
+
+# =============================================================================
+# DEPLOY STAGE (TOR: ArgoCD)
+# =============================================================================
+
+deploy:staging:
+  stage: deploy
+  image: bitnami/kubectl:1.28
+  script:
+    - kubectl config set-context --current --namespace=pea-forecast-staging
+    - |
+      cat <<EOF | kubectl apply -f -
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: pea-forecast-staging
+        namespace: argocd
+      spec:
+        project: default
+        source:
+          repoURL: ${CI_REPOSITORY_URL}
+          targetRevision: ${CI_COMMIT_SHA}
+          path: infrastructure/helm/pea-forecast
+          helm:
+            valueFiles:
+              - values-staging.yaml
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: pea-forecast-staging
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+      EOF
+  environment:
+    name: staging
+    url: https://staging.pea-forecast.go.th
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy:production:
+  stage: deploy
+  image: bitnami/kubectl:1.28
+  script:
+    - kubectl config set-context --current --namespace=pea-forecast-prod
+    - |
+      cat <<EOF | kubectl apply -f -
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: pea-forecast-production
+        namespace: argocd
+      spec:
+        project: default
+        source:
+          repoURL: ${CI_REPOSITORY_URL}
+          targetRevision: ${CI_COMMIT_TAG}
+          path: infrastructure/helm/pea-forecast
+          helm:
+            valueFiles:
+              - values-prod.yaml
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: pea-forecast-prod
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+      EOF
+  environment:
+    name: production
+    url: https://pea-forecast.go.th
+  rules:
+    - if: $CI_COMMIT_TAG
+  when: manual
