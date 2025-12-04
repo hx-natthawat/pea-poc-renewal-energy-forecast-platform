@@ -1,6 +1,6 @@
 export {
-  useWebSocket,
+  useAlertsWebSocket,
   useSolarWebSocket,
   useVoltageWebSocket,
-  useAlertsWebSocket,
+  useWebSocket,
 } from "./useWebSocket";

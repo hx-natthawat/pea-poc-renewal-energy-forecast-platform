@@ -105,15 +105,32 @@ None - all critical issues resolved.
 
 ---
 
-## Next Steps (v1.1.0)
+## v1.1.0 Feature Status
+
+### P0 - Critical Enhancements ✅ COMPLETED
+
+| Feature | Status | Implementation |
+|---------|--------|----------------|
+| Weather API Integration | ✅ Complete | TMD API with fallback simulation |
+| Model Retraining Pipeline | ✅ Complete | Drift detection + A/B testing |
+
+### P1 - Important Features ✅ COMPLETED
+
+| Feature | Status | Implementation |
+|---------|--------|----------------|
+| Enhanced Alerting (F002) | ✅ Complete | Email + LINE Notify |
+| Multi-Region Support (F003) | ✅ Complete | 4 PEA zones with RBAC |
+
+### Next Steps
 
 1. ~~Fix remaining test failures~~ ✅ Complete
 2. ~~Integrate external weather API (TMD)~~ ✅ Complete
-3. Implement Model Retraining Pipeline (drift detection)
-4. Add multi-channel alerting (Email, LINE Notify)
-5. Deploy to staging environment
-6. Conduct UAT with stakeholders
-7. Production deployment
+3. ~~Implement Model Retraining Pipeline~~ ✅ Complete
+4. ~~Add multi-channel alerting (Email, LINE Notify)~~ ✅ Complete
+5. ~~Add multi-region support~~ ✅ Complete
+6. Deploy to staging environment
+7. Conduct UAT with stakeholders
+8. Production deployment
 
 ---
 

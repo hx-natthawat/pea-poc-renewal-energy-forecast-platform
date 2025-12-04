@@ -1,6 +1,23 @@
 "use client";
 
 import {
+  Background,
+  BackgroundVariant,
+  Controls,
+  type Edge,
+  Handle,
+  MiniMap,
+  type Node,
+  type NodeProps,
+  Panel,
+  Position,
+  ReactFlow,
+  ReactFlowProvider,
+  useEdgesState,
+  useNodesState,
+  useReactFlow,
+} from "@xyflow/react";
+import {
   AlertTriangle,
   Battery,
   Car,
@@ -15,23 +32,6 @@ import {
   Zap,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Background,
-  BackgroundVariant,
-  Controls,
-  Handle,
-  MiniMap,
-  Panel,
-  Position,
-  ReactFlow,
-  ReactFlowProvider,
-  useEdgesState,
-  useNodesState,
-  useReactFlow,
-  type Edge,
-  type Node,
-  type NodeProps,
-} from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
 // ============================================================================
@@ -237,9 +237,7 @@ function TransformerNode({ data }: NodeProps<Node<TransformerNodeData>>) {
         </div>
 
         <span className="text-sm font-bold text-white">{data.label}</span>
-        <span className="text-xs text-[#D4A43D]">
-          {data.capacity_kva} kVA
-        </span>
+        <span className="text-xs text-[#D4A43D]">{data.capacity_kva} kVA</span>
         <span className="text-[10px] text-white/70">
           {data.voltage_primary / 1000}kV / {data.voltage_secondary}V
         </span>
@@ -286,12 +284,8 @@ function PhaseNode({ data }: NodeProps<Node<PhaseNodeData>>) {
         <span className="text-sm font-bold" style={{ color: colors.text }}>
           Phase {data.phase}
         </span>
-        <span className="text-xs text-gray-600">
-          {data.avg_voltage?.toFixed(1) || "--"}V avg
-        </span>
-        <span className="text-[10px] text-gray-500">
-          {data.prosumerCount} prosumers
-        </span>
+        <span className="text-xs text-gray-600">{data.avg_voltage?.toFixed(1) || "--"}V avg</span>
+        <span className="text-[10px] text-gray-500">{data.prosumerCount} prosumers</span>
       </div>
 
       <Handle
@@ -345,12 +339,8 @@ function ProsumerGraphNode({ data }: NodeProps<Node<ProsumerGraphNodeData>>) {
         {/* Device icon with equipment indicators */}
         <div className="relative mb-1">
           <Home className="w-10 h-10 text-gray-600" />
-          {data.has_pv && (
-            <Sun className="w-4 h-4 text-amber-500 absolute -top-1 -right-1" />
-          )}
-          {data.has_ev && (
-            <Car className="w-4 h-4 text-blue-500 absolute -bottom-1 -right-1" />
-          )}
+          {data.has_pv && <Sun className="w-4 h-4 text-amber-500 absolute -top-1 -right-1" />}
+          {data.has_ev && <Car className="w-4 h-4 text-blue-500 absolute -bottom-1 -right-1" />}
           {data.has_battery && (
             <Battery className="w-4 h-4 text-green-500 absolute -bottom-1 -left-1" />
           )}
@@ -374,15 +364,11 @@ function ProsumerGraphNode({ data }: NodeProps<Node<ProsumerGraphNodeData>>) {
 
         {/* Power display */}
         {data.power !== null && (
-          <span className="text-[10px] text-gray-500">
-            {data.power.toFixed(2)} kW
-          </span>
+          <span className="text-[10px] text-gray-500">{data.power.toFixed(2)} kW</span>
         )}
 
         {/* Position indicator */}
-        <span className="text-[9px] text-gray-400 mt-1">
-          {getPositionLabel(data.position)}
-        </span>
+        <span className="text-[9px] text-gray-400 mt-1">{getPositionLabel(data.position)}</span>
       </div>
 
       <Handle
@@ -436,12 +422,12 @@ function createNodesAndEdges(
   // Designed for 600px height container, centered vertically
   const HORIZONTAL = {
     TRANSFORMER_X: 80,
-    TRANSFORMER_Y: 220,           // Centered vertically for 600px height
-    PHASE_X: 280,                 // More space from transformer
-    PHASE_START_Y: 80,            // Start phases from top with padding
-    PROSUMER_START_X: 450,        // More space from phase nodes
-    PROSUMER_COL_WIDTH: 150,      // More space between prosumers
-    PHASE_SPACING: 200,           // More space between phases to prevent overlap
+    TRANSFORMER_Y: 220, // Centered vertically for 600px height
+    PHASE_X: 280, // More space from transformer
+    PHASE_START_Y: 80, // Start phases from top with padding
+    PROSUMER_START_X: 450, // More space from phase nodes
+    PROSUMER_COL_WIDTH: 150, // More space between prosumers
+    PHASE_SPACING: 200, // More space between phases to prevent overlap
   };
 
   // 1. Add Transformer node
@@ -473,7 +459,7 @@ function createNodesAndEdges(
     if (isHorizontal) {
       phasePosition = {
         x: HORIZONTAL.PHASE_X,
-        y: HORIZONTAL.PHASE_START_Y + phaseIndex * HORIZONTAL.PHASE_SPACING
+        y: HORIZONTAL.PHASE_START_Y + phaseIndex * HORIZONTAL.PHASE_SPACING,
       };
     } else {
       const phaseX = VERTICAL.TRANSFORMER_X + (phaseIndex - 1) * VERTICAL.PHASE_SPACING;
@@ -513,13 +499,13 @@ function createNodesAndEdges(
       if (isHorizontal) {
         prosumerPosition = {
           x: HORIZONTAL.PROSUMER_START_X + prosumerIndex * HORIZONTAL.PROSUMER_COL_WIDTH,
-          y: phasePosition.y - 5  // Center align with phase node
+          y: phasePosition.y - 5, // Center align with phase node
         };
       } else {
         const phaseX = VERTICAL.TRANSFORMER_X + (phaseIndex - 1) * VERTICAL.PHASE_SPACING;
         prosumerPosition = {
           x: phaseX - 45,
-          y: VERTICAL.PROSUMER_START_Y + prosumerIndex * VERTICAL.PROSUMER_ROW_HEIGHT
+          y: VERTICAL.PROSUMER_START_Y + prosumerIndex * VERTICAL.PROSUMER_ROW_HEIGHT,
         };
       }
 
@@ -543,8 +529,12 @@ function createNodesAndEdges(
       });
 
       // Edge from phase to prosumer (or prosumer to prosumer for chain)
-      const edgeColor = prosumer.voltage_status === "critical" ? "#EF4444" :
-                       prosumer.voltage_status === "warning" ? "#F59E0B" : "#22C55E";
+      const edgeColor =
+        prosumer.voltage_status === "critical"
+          ? "#EF4444"
+          : prosumer.voltage_status === "warning"
+            ? "#F59E0B"
+            : "#22C55E";
 
       if (prosumerIndex === 0) {
         // First prosumer connects to phase
@@ -844,7 +834,9 @@ function FlowContent({
             </div>
             <div>
               <span className="text-gray-500">PV:</span>{" "}
-              <span className="font-semibold text-amber-600">{topology.summary.prosumers_with_pv}</span>
+              <span className="font-semibold text-amber-600">
+                {topology.summary.prosumers_with_pv}
+              </span>
             </div>
             <div>
               <span className="text-gray-500">Avg:</span>{" "}

@@ -60,7 +60,10 @@ interface VoltageMonitorChartProps {
   enableRealtime?: boolean;
 }
 
-export default function VoltageMonitorChart({ height = 300, enableRealtime = true }: VoltageMonitorChartProps) {
+export default function VoltageMonitorChart({
+  height = 300,
+  enableRealtime = true,
+}: VoltageMonitorChartProps) {
   const [data, setData] = useState<VoltageDataPoint[]>([]);
   const [prosumerStatus, setProsumerStatus] = useState<ProsumerStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,7 +85,11 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
           setProsumerStatus((prev) =>
             prev.map((ps) =>
               ps.id === update.prosumer_id
-                ? { ...ps, voltage: update.voltage, status: update.status as ProsumerStatus["status"] }
+                ? {
+                    ...ps,
+                    voltage: update.voltage,
+                    status: update.status as ProsumerStatus["status"],
+                  }
                 : ps
             )
           );
@@ -95,7 +102,10 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
           setLiveUpdateCount((prev) => prev + 1);
 
           // Add new data point
-          const time = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+          const time = new Date().toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
           setData((prevData) => {
             const lastPoint = prevData[prevData.length - 1];
             const newPoint: VoltageDataPoint = {
@@ -158,13 +168,15 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
           {enableRealtime && (
             <span
               className={`flex items-center text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
-                wsConnected
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-500"
+                wsConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
               }`}
-              title={wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."}
+              title={
+                wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."
+              }
             >
-              <Radio className={`w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 ${wsConnected ? "animate-pulse" : ""}`} />
+              <Radio
+                className={`w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 ${wsConnected ? "animate-pulse" : ""}`}
+              />
               {wsConnected ? "LIVE" : "..."}
             </span>
           )}
@@ -189,7 +201,9 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm">{error}</div>
+        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm">
+          {error}
+        </div>
       )}
 
       {/* Prosumer Status Grid - Scrollable on mobile */}
@@ -213,7 +227,9 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
             >
               <div className="font-semibold">P{ps.id.slice(-1)}</div>
               <div className="text-gray-600 text-[10px] sm:text-xs">{ps.voltage}V</div>
-              <div className="text-[8px] sm:text-[10px] text-gray-400 hidden sm:block">Phase {ps.phase}</div>
+              <div className="text-[8px] sm:text-[10px] text-gray-400 hidden sm:block">
+                Phase {ps.phase}
+              </div>
             </button>
           ))}
         </div>
@@ -234,12 +250,7 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
               tickLine={false}
               interval="preserveStartEnd"
             />
-            <YAxis
-              domain={[215, 245]}
-              tick={{ fontSize: 9 }}
-              tickLine={false}
-              width={35}
-            />
+            <YAxis domain={[215, 245]} tick={{ fontSize: 9 }} tickLine={false} width={35} />
             <Tooltip
               contentStyle={{
                 backgroundColor: "white",
@@ -294,7 +305,8 @@ export default function VoltageMonitorChart({ height = 300, enableRealtime = tru
       {/* Footer */}
       <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
         <p className="text-[10px] sm:text-xs text-gray-500">
-          <span className="hidden sm:inline">Target: MAE &lt; 2V | </span>218V - 242V | {data.length} pts
+          <span className="hidden sm:inline">Target: MAE &lt; 2V | </span>218V - 242V |{" "}
+          {data.length} pts
           {enableRealtime && liveUpdateCount > 0 && (
             <span className="ml-1 sm:ml-2 text-green-600">| {liveUpdateCount} live</span>
           )}

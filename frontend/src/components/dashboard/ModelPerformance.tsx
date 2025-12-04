@@ -14,8 +14,6 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -87,7 +85,7 @@ interface ModelPerformanceProps {
   height?: number;
 }
 
-const HEALTH_COLORS = {
+const _HEALTH_COLORS = {
   good: "#22C55E",
   warning: "#F59E0B",
   degraded: "#EF4444",
@@ -182,7 +180,9 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
       <div className="flex items-center justify-between mb-3 sm:mb-4">
         <div className="flex items-center min-w-0">
           <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#74045F] mr-1 sm:mr-2 flex-shrink-0" />
-          <h3 className="text-sm sm:text-lg font-semibold text-gray-800 truncate">Model Performance</h3>
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800 truncate">
+            Model Performance
+          </h3>
         </div>
         <button
           type="button"
@@ -260,10 +260,14 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
           <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center">
             <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Version</p>
-            <p className="text-sm sm:text-lg font-bold text-gray-800">{selectedHealth.model_version}</p>
+            <p className="text-sm sm:text-lg font-bold text-gray-800">
+              {selectedHealth.model_version}
+            </p>
           </div>
           <div className="bg-blue-50 rounded-lg p-2 sm:p-3 text-center">
-            <p className="text-[10px] sm:text-xs text-blue-600 font-medium truncate">Predictions (24h)</p>
+            <p className="text-[10px] sm:text-xs text-blue-600 font-medium truncate">
+              Predictions (24h)
+            </p>
             <p className="text-sm sm:text-lg font-bold text-blue-700">
               {selectedHealth.predictions_24h.toLocaleString()}
             </p>
@@ -382,9 +386,9 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                     }}
                   />
                   <Bar dataKey="drift_score" name="Drift Score">
-                    {drift.drift_indicators.map((entry, index) => (
+                    {drift.drift_indicators.map((entry) => (
                       <Cell
-                        key={`cell-${index}`}
+                        key={`cell-${entry.feature}`}
                         fill={entry.drift_detected ? "#F59E0B" : "#22C55E"}
                       />
                     ))}
@@ -423,8 +427,10 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                     <p className="text-sm sm:text-xl font-bold text-[#C7911B]">
                       {performance.metrics_timeline.length > 0
                         ? (
-                            performance.metrics_timeline.reduce((sum, m) => sum + (m.mape || 0), 0) /
-                            performance.metrics_timeline.length
+                            performance.metrics_timeline.reduce(
+                              (sum, m) => sum + (m.mape || 0),
+                              0
+                            ) / performance.metrics_timeline.length
                           ).toFixed(1)
                         : "--"}
                       %
@@ -432,15 +438,18 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                     {performance.targets.mape && (
                       <span
                         className={`ml-1 sm:ml-2 ${
-                          (performance.metrics_timeline.reduce((sum, m) => sum + (m.mape || 0), 0) /
-                            (performance.metrics_timeline.length || 1)) <
-                          performance.targets.mape
+                          (
+                            performance.metrics_timeline.reduce(
+                              (sum, m) => sum + (m.mape || 0),
+                              0
+                            ) / (performance.metrics_timeline.length || 1)
+                          ) < performance.targets.mape
                             ? "text-green-500"
                             : "text-red-500"
                         }`}
                       >
-                        {(performance.metrics_timeline.reduce((sum, m) => sum + (m.mape || 0), 0) /
-                          (performance.metrics_timeline.length || 1)) <
+                        {performance.metrics_timeline.reduce((sum, m) => sum + (m.mape || 0), 0) /
+                          (performance.metrics_timeline.length || 1) <
                         performance.targets.mape ? (
                           <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
                         ) : (
@@ -449,14 +458,19 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                       </span>
                     )}
                   </div>
-                  <p className="text-[10px] sm:text-xs text-gray-400">Target: &lt;{performance.targets.mape}%</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">
+                    Target: &lt;{performance.targets.mape}%
+                  </p>
                 </div>
                 <div className="text-center">
                   <p className="text-[10px] sm:text-xs text-gray-500">RMSE</p>
                   <p className="text-sm sm:text-xl font-bold text-[#C7911B]">
-                    {performance.overall_metrics.rmse?.toFixed(1) || "--"} <span className="text-[10px] sm:text-sm">kW</span>
+                    {performance.overall_metrics.rmse?.toFixed(1) || "--"}{" "}
+                    <span className="text-[10px] sm:text-sm">kW</span>
                   </p>
-                  <p className="text-[10px] sm:text-xs text-gray-400">Target: &lt;{performance.targets.rmse} kW</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">
+                    Target: &lt;{performance.targets.rmse} kW
+                  </p>
                 </div>
               </>
             ) : (
@@ -483,14 +497,18 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
                       </span>
                     )}
                   </div>
-                  <p className="text-[10px] sm:text-xs text-gray-400">Target: &lt;{performance.targets.mae}V</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">
+                    Target: &lt;{performance.targets.mae}V
+                  </p>
                 </div>
                 <div className="text-center">
                   <p className="text-[10px] sm:text-xs text-gray-500">RMSE</p>
                   <p className="text-sm sm:text-xl font-bold text-[#74045F]">
                     {performance.overall_metrics.rmse?.toFixed(2) || "--"}V
                   </p>
-                  <p className="text-[10px] sm:text-xs text-gray-400">Target: &lt;{performance.targets.rmse}V</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">
+                    Target: &lt;{performance.targets.rmse}V
+                  </p>
                 </div>
               </>
             )}
@@ -524,8 +542,8 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
             Issues Detected
           </h4>
           <ul className="text-xs sm:text-sm text-amber-700 space-y-0.5 sm:space-y-1">
-            {selectedHealth?.issues.map((issue, i) => (
-              <li key={i} className="flex items-start">
+            {selectedHealth?.issues.map((issue) => (
+              <li key={issue} className="flex items-start">
                 <span className="mr-1.5 sm:mr-2">•</span>
                 <span className="flex-1">{issue}</span>
               </li>
@@ -541,8 +559,8 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
             Recommendations
           </h4>
           <ul className="text-xs sm:text-sm text-blue-700 space-y-0.5 sm:space-y-1">
-            {drift.recommendations.map((rec, i) => (
-              <li key={i} className="flex items-start">
+            {drift.recommendations.map((rec) => (
+              <li key={rec} className="flex items-start">
                 <span className="mr-1.5 sm:mr-2">•</span>
                 <span className="flex-1">{rec}</span>
               </li>
@@ -555,8 +573,12 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
       <div className="mt-2 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100">
         <p className="text-[10px] sm:text-xs text-gray-500 flex items-center flex-wrap">
           <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 flex-shrink-0" />
-          <span className="hidden sm:inline">Last updated: {lastUpdated || "Loading..."} | Auto-refresh: 60s</span>
-          <span className="sm:hidden">{lastUpdated ? new Date(lastUpdated).toLocaleTimeString() : "..."} | 60s</span>
+          <span className="hidden sm:inline">
+            Last updated: {lastUpdated || "Loading..."} | Auto-refresh: 60s
+          </span>
+          <span className="sm:hidden">
+            {lastUpdated ? new Date(lastUpdated).toLocaleTimeString() : "..."} | 60s
+          </span>
         </p>
       </div>
     </div>

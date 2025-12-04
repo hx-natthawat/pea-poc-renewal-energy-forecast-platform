@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, CloudRain, Wind, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface WeatherAlert {
@@ -49,7 +49,7 @@ export default function WeatherAlertBanner({
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/v1/weather/alerts`);
       if (response.ok) {
@@ -63,7 +63,7 @@ export default function WeatherAlertBanner({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchAlerts();
@@ -72,7 +72,7 @@ export default function WeatherAlertBanner({
       const interval = setInterval(fetchAlerts, refreshInterval);
       return () => clearInterval(interval);
     }
-  }, [autoRefresh, refreshInterval]);
+  }, [autoRefresh, refreshInterval, fetchAlerts]);
 
   const handleDismiss = (alertId: string) => {
     setDismissedIds((prev) => new Set([...prev, alertId]));
@@ -102,9 +102,7 @@ export default function WeatherAlertBanner({
                 <span className={`font-semibold ${config.text} text-xs sm:text-sm`}>
                   {alert.condition.replace("_", " ").toUpperCase()}
                 </span>
-                <span className="text-[10px] sm:text-xs text-gray-500">
-                  {alert.region}
-                </span>
+                <span className="text-[10px] sm:text-xs text-gray-500">{alert.region}</span>
               </div>
 
               <p className={`${config.text} text-xs sm:text-sm mt-0.5 sm:mt-1`}>
@@ -116,9 +114,7 @@ export default function WeatherAlertBanner({
                 <span className="hidden sm:inline">{alert.recommended_action}</span>
                 <span className="sm:hidden">{alert.recommended_action.slice(0, 40)}...</span>
                 {alert.expected_duration_minutes > 0 && (
-                  <span className="ml-1 sm:ml-2">
-                    ({alert.expected_duration_minutes} min)
-                  </span>
+                  <span className="ml-1 sm:ml-2">({alert.expected_duration_minutes} min)</span>
                 )}
               </p>
             </div>

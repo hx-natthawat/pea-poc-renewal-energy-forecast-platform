@@ -110,7 +110,7 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
 
     try {
       const start = new Date(startDate).toISOString();
-      const end = new Date(endDate + "T23:59:59").toISOString();
+      const end = new Date(`${endDate}T23:59:59`).toISOString();
 
       if (dataType === "solar") {
         const response = await fetch(
@@ -158,7 +158,7 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
   const handleExport = async (format: "csv" | "json") => {
     try {
       const start = new Date(startDate).toISOString();
-      const end = new Date(endDate + "T23:59:59").toISOString();
+      const end = new Date(`${endDate}T23:59:59`).toISOString();
 
       const url = `${getApiBaseUrl()}/api/v1/history/export?data_type=${dataType}&start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&format=${format}`;
 
@@ -299,25 +299,29 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
             <div className="bg-amber-50 rounded-lg p-2 sm:p-3 text-center">
               <p className="text-[10px] sm:text-xs text-amber-600 font-medium">Total Energy</p>
               <p className="text-sm sm:text-xl font-bold text-amber-700">
-                {solarSummary.total_energy_kwh.toLocaleString()} <span className="text-[10px] sm:text-sm">kWh</span>
+                {solarSummary.total_energy_kwh.toLocaleString()}{" "}
+                <span className="text-[10px] sm:text-sm">kWh</span>
               </p>
             </div>
             <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center">
               <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Avg Power</p>
               <p className="text-sm sm:text-xl font-bold text-gray-800">
-                {solarSummary.avg_power_kw.toFixed(1)} <span className="text-[10px] sm:text-sm">kW</span>
+                {solarSummary.avg_power_kw.toFixed(1)}{" "}
+                <span className="text-[10px] sm:text-sm">kW</span>
               </p>
             </div>
             <div className="bg-green-50 rounded-lg p-2 sm:p-3 text-center">
               <p className="text-[10px] sm:text-xs text-green-600 font-medium">Peak Power</p>
               <p className="text-sm sm:text-xl font-bold text-green-700">
-                {solarSummary.max_power_kw.toFixed(1)} <span className="text-[10px] sm:text-sm">kW</span>
+                {solarSummary.max_power_kw.toFixed(1)}{" "}
+                <span className="text-[10px] sm:text-sm">kW</span>
               </p>
             </div>
             <div className="bg-blue-50 rounded-lg p-2 sm:p-3 text-center">
               <p className="text-[10px] sm:text-xs text-blue-600 font-medium">Irradiance</p>
               <p className="text-sm sm:text-xl font-bold text-blue-700">
-                {solarSummary.avg_irradiance.toFixed(0)} <span className="text-[10px] sm:text-sm">W/m²</span>
+                {solarSummary.avg_irradiance.toFixed(0)}{" "}
+                <span className="text-[10px] sm:text-sm">W/m²</span>
               </p>
             </div>
           </div>
@@ -326,17 +330,11 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Hourly Distribution */}
             <div>
-              <h4 className="text-sm font-medium text-gray-600 mb-2">
-                Hourly Power Distribution
-              </h4>
+              <h4 className="text-sm font-medium text-gray-600 mb-2">Hourly Power Distribution</h4>
               <ResponsiveContainer width="100%" height={height}>
                 <BarChart data={hourlyDistribution}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis
-                    dataKey="hour"
-                    tick={{ fontSize: 10 }}
-                    tickFormatter={(h) => `${h}:00`}
-                  />
+                  <XAxis dataKey="hour" tick={{ fontSize: 10 }} tickFormatter={(h) => `${h}:00`} />
                   <YAxis tick={{ fontSize: 10 }} />
                   <Tooltip
                     formatter={(value: number) => [`${value.toFixed(1)} kW`, "Avg Power"]}
@@ -347,16 +345,19 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
                       boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                     }}
                   />
-                  <Bar dataKey="avg_power" fill="#C7911B" name="Avg Power (kW)" radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="avg_power"
+                    fill="#C7911B"
+                    name="Avg Power (kW)"
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
             {/* Daily Trend */}
             <div>
-              <h4 className="text-sm font-medium text-gray-600 mb-2">
-                Daily Energy Production
-              </h4>
+              <h4 className="text-sm font-medium text-gray-600 mb-2">Daily Energy Production</h4>
               <ResponsiveContainer width="100%" height={height}>
                 <AreaChart data={dailyAggregates}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -433,9 +434,7 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Phase Comparison */}
             <div>
-              <h4 className="text-sm font-medium text-gray-600 mb-2">
-                Voltage by Phase
-              </h4>
+              <h4 className="text-sm font-medium text-gray-600 mb-2">Voltage by Phase</h4>
               <ResponsiveContainer width="100%" height={height}>
                 <BarChart data={phaseStats} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -461,9 +460,7 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
 
             {/* Prosumer Table */}
             <div>
-              <h4 className="text-sm font-medium text-gray-600 mb-2">
-                Prosumer Statistics
-              </h4>
+              <h4 className="text-sm font-medium text-gray-600 mb-2">Prosumer Statistics</h4>
               <div className="overflow-auto max-h-64 border border-gray-200 rounded-lg">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 sticky top-0">
@@ -492,7 +489,9 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
                             {p.phase}
                           </span>
                         </td>
-                        <td className="px-3 py-2 text-right">{p.avg_voltage?.toFixed(1) || "--"}</td>
+                        <td className="px-3 py-2 text-right">
+                          {p.avg_voltage?.toFixed(1) || "--"}
+                        </td>
                         <td className="px-3 py-2 text-right text-gray-500">
                           {p.min_voltage?.toFixed(0)}-{p.max_voltage?.toFixed(0)}
                         </td>
@@ -516,7 +515,8 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
       {/* Footer */}
       <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100">
         <p className="text-[10px] sm:text-xs text-gray-500">
-          <span className="hidden sm:inline">Date Range: </span>{startDate} - {endDate} |{" "}
+          <span className="hidden sm:inline">Date Range: </span>
+          {startDate} - {endDate} |{" "}
           {dataType === "solar"
             ? `${solarSummary?.total_measurements.toLocaleString() || 0}`
             : `${voltageSummary?.total_measurements.toLocaleString() || 0}`}

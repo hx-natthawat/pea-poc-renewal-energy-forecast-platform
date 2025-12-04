@@ -92,7 +92,8 @@
       "Bash(git commit:*)",
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform log --oneline -10)",
       "Bash(./venv/bin/pytest tests/ -v --tb=short)",
-      "Bash(PYTHONPATH=. ./venv/bin/pytest:*)"
+      "Bash(PYTHONPATH=. ./venv/bin/pytest:*)",
+      "Bash(pnpm exec biome:*)"
     ],
     "deny": [],
     "ask": []

@@ -17,10 +17,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
-  Cell,
   Legend,
   Line,
   LineChart,
@@ -194,7 +191,9 @@ export default function DayAheadReport({ height = 280 }: DayAheadReportProps) {
       <div className="flex items-center justify-between mb-3 sm:mb-4">
         <div className="flex items-center min-w-0">
           <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-[#C7911B] mr-1 sm:mr-2 flex-shrink-0" />
-          <h3 className="text-sm sm:text-lg font-semibold text-gray-800 truncate">Day-Ahead Forecast</h3>
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800 truncate">
+            Day-Ahead Forecast
+          </h3>
         </div>
         <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
           <button
@@ -298,13 +297,15 @@ export default function DayAheadReport({ height = 280 }: DayAheadReportProps) {
             <div className="bg-amber-50 rounded-lg p-2 sm:p-3 text-center">
               <p className="text-[10px] sm:text-xs text-amber-600 font-medium">Total Energy</p>
               <p className="text-sm sm:text-xl font-bold text-amber-700">
-                {solarForecast.summary.total_energy_kwh.toLocaleString()} <span className="text-[10px] sm:text-sm">kWh</span>
+                {solarForecast.summary.total_energy_kwh.toLocaleString()}{" "}
+                <span className="text-[10px] sm:text-sm">kWh</span>
               </p>
             </div>
             <div className="bg-green-50 rounded-lg p-2 sm:p-3 text-center">
               <p className="text-[10px] sm:text-xs text-green-600 font-medium">Peak Power</p>
               <p className="text-sm sm:text-xl font-bold text-green-700">
-                {solarForecast.summary.peak_power_kw.toFixed(1)} <span className="text-[10px] sm:text-sm">kW</span>
+                {solarForecast.summary.peak_power_kw.toFixed(1)}{" "}
+                <span className="text-[10px] sm:text-sm">kW</span>
               </p>
             </div>
             <div className="bg-blue-50 rounded-lg p-2 sm:p-3 text-center">
@@ -314,7 +315,9 @@ export default function DayAheadReport({ height = 280 }: DayAheadReportProps) {
               </p>
             </div>
             <div className="bg-purple-50 rounded-lg p-2 sm:p-3 text-center">
-              <p className="text-[10px] sm:text-xs text-purple-600 font-medium truncate">Gen Hours</p>
+              <p className="text-[10px] sm:text-xs text-purple-600 font-medium truncate">
+                Gen Hours
+              </p>
               <p className="text-sm sm:text-xl font-bold text-purple-700">
                 {solarForecast.summary.generation_hours}h
               </p>
@@ -373,8 +376,14 @@ export default function DayAheadReport({ height = 280 }: DayAheadReportProps) {
           {/* Model Info */}
           <div className="text-[10px] sm:text-xs text-gray-500 flex items-center flex-wrap">
             <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 flex-shrink-0" />
-            <span className="hidden sm:inline">Generated: {new Date(solarForecast.generated_at).toLocaleString()} | Model: {solarForecast.model_version}</span>
-            <span className="sm:hidden">{new Date(solarForecast.generated_at).toLocaleTimeString()} | {solarForecast.model_version}</span>
+            <span className="hidden sm:inline">
+              Generated: {new Date(solarForecast.generated_at).toLocaleString()} | Model:{" "}
+              {solarForecast.model_version}
+            </span>
+            <span className="sm:hidden">
+              {new Date(solarForecast.generated_at).toLocaleTimeString()} |{" "}
+              {solarForecast.model_version}
+            </span>
           </div>
         </>
       )}
@@ -431,7 +440,7 @@ export default function DayAheadReport({ height = 280 }: DayAheadReportProps) {
                   }`}
                 >
                   <span className="hidden sm:inline">{p.name}</span>
-                  <span className="sm:hidden">P{p.prosumer_id.replace('prosumer', '')}</span>
+                  <span className="sm:hidden">P{p.prosumer_id.replace("prosumer", "")}</span>
                   {p.summary.violation_hours > 0 && (
                     <span className="ml-0.5 sm:ml-1 px-1 sm:px-1.5 py-0.5 bg-red-500 text-white text-[10px] sm:text-xs rounded">
                       {p.summary.violation_hours}
@@ -446,8 +455,13 @@ export default function DayAheadReport({ height = 280 }: DayAheadReportProps) {
           {selectedProsumer && getSelectedProsumerData() && (
             <div className="mb-3 sm:mb-4">
               <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">
-                <span className="hidden sm:inline">24-Hour Voltage Forecast - {getSelectedProsumerData()?.name} (Phase {getSelectedProsumerData()?.phase})</span>
-                <span className="sm:hidden">Voltage - {getSelectedProsumerData()?.name} ({getSelectedProsumerData()?.phase})</span>
+                <span className="hidden sm:inline">
+                  24-Hour Voltage Forecast - {getSelectedProsumerData()?.name} (Phase{" "}
+                  {getSelectedProsumerData()?.phase})
+                </span>
+                <span className="sm:hidden">
+                  Voltage - {getSelectedProsumerData()?.name} ({getSelectedProsumerData()?.phase})
+                </span>
               </h4>
               <ResponsiveContainer width="100%" height={height}>
                 <LineChart data={getSelectedProsumerData()?.hourly_forecasts}>
@@ -507,15 +521,21 @@ export default function DayAheadReport({ height = 280 }: DayAheadReportProps) {
               <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
                 <div className="text-center p-1.5 sm:p-2 bg-gray-50 rounded">
                   <p className="text-[10px] sm:text-xs text-gray-500">Avg</p>
-                  <p className="text-xs sm:text-sm font-semibold">{getSelectedProsumerData()?.summary.avg_voltage}V</p>
+                  <p className="text-xs sm:text-sm font-semibold">
+                    {getSelectedProsumerData()?.summary.avg_voltage}V
+                  </p>
                 </div>
                 <div className="text-center p-1.5 sm:p-2 bg-gray-50 rounded">
                   <p className="text-[10px] sm:text-xs text-gray-500">Min</p>
-                  <p className="text-xs sm:text-sm font-semibold">{getSelectedProsumerData()?.summary.min_voltage}V</p>
+                  <p className="text-xs sm:text-sm font-semibold">
+                    {getSelectedProsumerData()?.summary.min_voltage}V
+                  </p>
                 </div>
                 <div className="text-center p-1.5 sm:p-2 bg-gray-50 rounded">
                   <p className="text-[10px] sm:text-xs text-gray-500">Max</p>
-                  <p className="text-xs sm:text-sm font-semibold">{getSelectedProsumerData()?.summary.max_voltage}V</p>
+                  <p className="text-xs sm:text-sm font-semibold">
+                    {getSelectedProsumerData()?.summary.max_voltage}V
+                  </p>
                 </div>
                 <div className="text-center p-1.5 sm:p-2 bg-gray-50 rounded">
                   <p className="text-[10px] sm:text-xs text-gray-500 truncate">Violations</p>
@@ -536,8 +556,14 @@ export default function DayAheadReport({ height = 280 }: DayAheadReportProps) {
           {/* Model Info */}
           <div className="text-[10px] sm:text-xs text-gray-500 flex items-center flex-wrap">
             <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 flex-shrink-0" />
-            <span className="hidden sm:inline">Generated: {new Date(voltageForecast.generated_at).toLocaleString()} | Model: {voltageForecast.model_version}</span>
-            <span className="sm:hidden">{new Date(voltageForecast.generated_at).toLocaleTimeString()} | {voltageForecast.model_version}</span>
+            <span className="hidden sm:inline">
+              Generated: {new Date(voltageForecast.generated_at).toLocaleString()} | Model:{" "}
+              {voltageForecast.model_version}
+            </span>
+            <span className="sm:hidden">
+              {new Date(voltageForecast.generated_at).toLocaleTimeString()} |{" "}
+              {voltageForecast.model_version}
+            </span>
           </div>
         </>
       )}
@@ -545,7 +571,9 @@ export default function DayAheadReport({ height = 280 }: DayAheadReportProps) {
       {/* Footer */}
       <div className="mt-2 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100">
         <p className="text-[10px] sm:text-xs text-gray-500">
-          <span className="hidden sm:inline">Forecast Date: {targetDate} | Nominal: 230V | Limits: 218V - 242V (±5%)</span>
+          <span className="hidden sm:inline">
+            Forecast Date: {targetDate} | Nominal: 230V | Limits: 218V - 242V (±5%)
+          </span>
           <span className="sm:hidden">{targetDate} | 218-242V (±5%)</span>
         </p>
       </div>

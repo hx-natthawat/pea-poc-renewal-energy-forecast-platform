@@ -11,15 +11,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useAlertsWebSocket } from "@/hooks";
 import { getApiBaseUrl } from "@/lib/api";
 
@@ -92,9 +84,12 @@ export default function AlertDashboard({
     enableRealtime
       ? (update) => {
           // Add new alert to the list
-          const severity = (update.severity === "critical" || update.severity === "warning" || update.severity === "info")
-            ? update.severity
-            : "warning";
+          const severity =
+            update.severity === "critical" ||
+            update.severity === "warning" ||
+            update.severity === "info"
+              ? update.severity
+              : "warning";
 
           const newAlert: Alert = {
             id: Date.now(),
@@ -168,19 +163,14 @@ export default function AlertDashboard({
 
   const acknowledgeAlert = async (alertId: number) => {
     try {
-      const response = await fetch(
-        `${getApiBaseUrl()}/api/v1/alerts/${alertId}/acknowledge`,
-        { method: "POST" }
-      );
+      const response = await fetch(`${getApiBaseUrl()}/api/v1/alerts/${alertId}/acknowledge`, {
+        method: "POST",
+      });
 
       if (response.ok) {
-        setAlerts((prev) =>
-          prev.map((a) => (a.id === alertId ? { ...a, acknowledged: true } : a))
-        );
+        setAlerts((prev) => prev.map((a) => (a.id === alertId ? { ...a, acknowledged: true } : a)));
         setStats((prev) =>
-          prev
-            ? { ...prev, unacknowledged: Math.max(0, prev.unacknowledged - 1) }
-            : null
+          prev ? { ...prev, unacknowledged: Math.max(0, prev.unacknowledged - 1) } : null
         );
       }
     } catch (err) {
@@ -190,10 +180,9 @@ export default function AlertDashboard({
 
   const resolveAlert = async (alertId: number) => {
     try {
-      const response = await fetch(
-        `${getApiBaseUrl()}/api/v1/alerts/${alertId}/resolve`,
-        { method: "POST" }
-      );
+      const response = await fetch(`${getApiBaseUrl()}/api/v1/alerts/${alertId}/resolve`, {
+        method: "POST",
+      });
 
       if (response.ok) {
         setAlerts((prev) => prev.filter((a) => a.id !== alertId));
@@ -235,20 +224,14 @@ export default function AlertDashboard({
       <div className="flex items-center justify-between mb-3 sm:mb-4">
         <div className="flex items-center flex-wrap gap-1">
           <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mr-1 sm:mr-2" />
-          <h3 className="text-sm sm:text-lg font-semibold text-gray-800">
-            Alert Dashboard
-          </h3>
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Alert Dashboard</h3>
           {enableRealtime && (
             <span
               className={`flex items-center text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
-                wsConnected
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-500"
+                wsConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
               }`}
               title={
-                wsConnected
-                  ? "Real-time updates active"
-                  : "Connecting to real-time updates..."
+                wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."
               }
             >
               <Radio
@@ -264,9 +247,7 @@ export default function AlertDashboard({
           className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
           title="Refresh data"
         >
-          <RefreshCw
-            className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`}
-          />
+          <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`} />
         </button>
       </div>
 
@@ -274,21 +255,15 @@ export default function AlertDashboard({
       <div className="grid grid-cols-4 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
         <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center">
           <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Total</p>
-          <p className="text-lg sm:text-2xl font-bold text-gray-800">
-            {stats?.total || 0}
-          </p>
+          <p className="text-lg sm:text-2xl font-bold text-gray-800">{stats?.total || 0}</p>
         </div>
         <div className="bg-red-50 rounded-lg p-2 sm:p-3 text-center">
           <p className="text-[10px] sm:text-xs text-red-600 font-medium">Critical</p>
-          <p className="text-lg sm:text-2xl font-bold text-red-600">
-            {stats?.critical || 0}
-          </p>
+          <p className="text-lg sm:text-2xl font-bold text-red-600">{stats?.critical || 0}</p>
         </div>
         <div className="bg-amber-50 rounded-lg p-2 sm:p-3 text-center">
           <p className="text-[10px] sm:text-xs text-amber-600 font-medium">Warning</p>
-          <p className="text-lg sm:text-2xl font-bold text-amber-600">
-            {stats?.warning || 0}
-          </p>
+          <p className="text-lg sm:text-2xl font-bold text-amber-600">{stats?.warning || 0}</p>
         </div>
         <div className="bg-blue-50 rounded-lg p-2 sm:p-3 text-center">
           <p className="text-[10px] sm:text-xs text-blue-600 font-medium truncate">Unack</p>
@@ -307,22 +282,14 @@ export default function AlertDashboard({
 
       {/* Timeline Chart */}
       <div className="mb-3 sm:mb-4">
-        <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-2">
-          Alert Timeline (24h)
-        </h4>
+        <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-2">Alert Timeline (24h)</h4>
         {isLoading && timeline.length === 0 ? (
-          <div
-            className="flex items-center justify-center"
-            style={{ height: height }}
-          >
+          <div className="flex items-center justify-center" style={{ height: height }}>
             <div className="animate-pulse text-gray-400">Loading timeline...</div>
           </div>
         ) : formatTimelineData.length > 0 ? (
           <ResponsiveContainer width="100%" height={height}>
-            <BarChart
-              data={formatTimelineData}
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-            >
+            <BarChart data={formatTimelineData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis
                 dataKey="time"
@@ -357,9 +324,7 @@ export default function AlertDashboard({
 
       {/* Recent Alerts List */}
       <div>
-        <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-2">
-          Recent Alerts
-        </h4>
+        <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-2">Recent Alerts</h4>
         <div className="space-y-1.5 sm:space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
           {alerts.length === 0 ? (
             <div className="text-center py-3 sm:py-4 text-gray-400">
@@ -386,17 +351,19 @@ export default function AlertDashboard({
                       />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className={`font-medium text-xs sm:text-sm ${SEVERITY_TEXT[alert.severity]}`}>
+                      <p
+                        className={`font-medium text-xs sm:text-sm ${SEVERITY_TEXT[alert.severity]}`}
+                      >
                         {alert.target_id}
                       </p>
-                      <p className="text-[10px] sm:text-sm text-gray-600 truncate">{alert.message}</p>
+                      <p className="text-[10px] sm:text-sm text-gray-600 truncate">
+                        {alert.message}
+                      </p>
                       <div className="flex items-center mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 flex-wrap">
                         <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
                         <span className="truncate">{new Date(alert.time).toLocaleString()}</span>
                         {alert.current_value && (
-                          <span className="ml-1 sm:ml-2">
-                            {alert.current_value.toFixed(1)}V
-                          </span>
+                          <span className="ml-1 sm:ml-2">{alert.current_value.toFixed(1)}V</span>
                         )}
                       </div>
                     </div>
@@ -431,11 +398,10 @@ export default function AlertDashboard({
       {/* Footer */}
       <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100">
         <p className="text-[10px] sm:text-xs text-gray-500">
-          <span className="hidden sm:inline">Voltage limits: </span>218V - 242V (±5%) | {alerts.length} alerts
+          <span className="hidden sm:inline">Voltage limits: </span>218V - 242V (±5%) |{" "}
+          {alerts.length} alerts
           {enableRealtime && liveUpdateCount > 0 && (
-            <span className="ml-1 sm:ml-2 text-green-600">
-              | {liveUpdateCount} live
-            </span>
+            <span className="ml-1 sm:ml-2 text-green-600">| {liveUpdateCount} live</span>
           )}
         </p>
       </div>

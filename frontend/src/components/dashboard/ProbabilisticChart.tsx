@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, RefreshCw, TrendingUp } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   Area,
@@ -12,8 +13,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { AlertTriangle, RefreshCw, TrendingUp } from "lucide-react";
-import { getApiBaseUrl } from "@/lib/api";
 
 interface ForecastDataPoint {
   time: string;
@@ -63,9 +62,7 @@ export default function ProbabilisticChart({
         // Simulate solar curve with uncertainty bands
         const hourOfDay = hour.getHours();
         const solarFactor =
-          hourOfDay >= 6 && hourOfDay <= 18
-            ? Math.sin(((hourOfDay - 6) * Math.PI) / 12)
-            : 0;
+          hourOfDay >= 6 && hourOfDay <= 18 ? Math.sin(((hourOfDay - 6) * Math.PI) / 12) : 0;
 
         const basePower = solarFactor * 4000;
         const uncertainty = solarFactor > 0.3 ? basePower * 0.15 : basePower * 0.3;
@@ -125,9 +122,7 @@ export default function ProbabilisticChart({
           className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
           title="Refresh"
         >
-          <RefreshCw
-            className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`}
-          />
+          <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`} />
         </button>
       </div>
 
@@ -139,9 +134,7 @@ export default function ProbabilisticChart({
               className="w-2 h-2 sm:w-3 sm:h-3 rounded-full"
               style={{ backgroundColor: color }}
             />
-            <span className="text-gray-600 capitalize">
-              {condition.replace("_", " ")}
-            </span>
+            <span className="text-gray-600 capitalize">{condition.replace("_", " ")}</span>
           </div>
         ))}
       </div>
@@ -255,10 +248,7 @@ export default function ProbabilisticChart({
           </AreaChart>
         </ResponsiveContainer>
       ) : (
-        <div
-          className="flex items-center justify-center text-gray-400"
-          style={{ height }}
-        >
+        <div className="flex items-center justify-center text-gray-400" style={{ height }}>
           No forecast data available
         </div>
       )}

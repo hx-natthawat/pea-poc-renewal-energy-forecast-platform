@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  CheckCircle,
-  RefreshCw,
-  Target,
-  TrendingDown,
-  TrendingUp,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle, RefreshCw, Target, TrendingDown, TrendingUp, XCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   Area,
@@ -94,9 +87,7 @@ export default function ForecastComparison({
     setError(null);
 
     try {
-      const response = await fetch(
-        `${getApiBaseUrl()}/api/v1/comparison/${modelType}?hours=24`
-      );
+      const response = await fetch(`${getApiBaseUrl()}/api/v1/comparison/${modelType}?hours=24`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch comparison data");
@@ -171,8 +162,13 @@ export default function ForecastComparison({
       {/* Header */}
       <div className="flex items-center justify-between mb-3 sm:mb-4">
         <div className="flex items-center min-w-0">
-          <Target className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" style={{ color: config.color }} />
-          <h3 className="text-sm sm:text-lg font-semibold text-gray-800 truncate">{config.title}</h3>
+          <Target
+            className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0"
+            style={{ color: config.color }}
+          />
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800 truncate">
+            {config.title}
+          </h3>
         </div>
         <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
           {/* View Mode Toggle */}
@@ -181,9 +177,7 @@ export default function ForecastComparison({
               type="button"
               onClick={() => setViewMode("comparison")}
               className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs rounded-md transition-colors touch-manipulation ${
-                viewMode === "comparison"
-                  ? "bg-white shadow text-gray-800"
-                  : "text-gray-500"
+                viewMode === "comparison" ? "bg-white shadow text-gray-800" : "text-gray-500"
               }`}
             >
               <span className="hidden sm:inline">Comparison</span>
@@ -193,9 +187,7 @@ export default function ForecastComparison({
               type="button"
               onClick={() => setViewMode("error")}
               className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs rounded-md transition-colors touch-manipulation ${
-                viewMode === "error"
-                  ? "bg-white shadow text-gray-800"
-                  : "text-gray-500"
+                viewMode === "error" ? "bg-white shadow text-gray-800" : "text-gray-500"
               }`}
             >
               Error
@@ -207,9 +199,7 @@ export default function ForecastComparison({
             className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
             title="Refresh"
           >
-            <RefreshCw
-              className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`}
-            />
+            <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? "animate-spin" : ""}`} />
           </button>
         </div>
       </div>
@@ -225,7 +215,13 @@ export default function ForecastComparison({
                 {renderMetricCard(
                   targetConfig.label,
                   metricValue,
-                  key === "r_squared" ? "" : config.unit === "kW" && key !== "mape" ? " kW" : key === "mape" ? "%" : " V",
+                  key === "r_squared"
+                    ? ""
+                    : config.unit === "kW" && key !== "mape"
+                      ? " kW"
+                      : key === "mape"
+                        ? "%"
+                        : " V",
                   targetConfig.target,
                   targetStatus?.met ?? false
                 )}
@@ -242,9 +238,7 @@ export default function ForecastComparison({
             <span className="text-gray-500">
               Bias:{" "}
               <span
-                className={`font-semibold ${
-                  metrics.bias > 0 ? "text-amber-600" : "text-blue-600"
-                }`}
+                className={`font-semibold ${metrics.bias > 0 ? "text-amber-600" : "text-blue-600"}`}
               >
                 {metrics.bias > 0 ? "+" : ""}
                 {metrics.bias.toFixed(2)} {config.unit}
@@ -256,7 +250,9 @@ export default function ForecastComparison({
               </span>
             </span>
             <span className="text-gray-500">
-              <span className="hidden sm:inline">Data points: </span><span className="font-semibold">{metrics.count}</span><span className="sm:hidden"> pts</span>
+              <span className="hidden sm:inline">Data points: </span>
+              <span className="font-semibold">{metrics.count}</span>
+              <span className="sm:hidden"> pts</span>
             </span>
           </div>
         </div>
@@ -340,11 +336,7 @@ export default function ForecastComparison({
                 tickLine={false}
                 interval="preserveStartEnd"
               />
-              <YAxis
-                tick={{ fontSize: 10 }}
-                tickLine={false}
-                domain={["auto", "auto"]}
-              />
+              <YAxis tick={{ fontSize: 10 }} tickLine={false} domain={["auto", "auto"]} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "white",
@@ -375,10 +367,7 @@ export default function ForecastComparison({
           )}
         </ResponsiveContainer>
       ) : (
-        <div
-          className="flex items-center justify-center text-gray-400"
-          style={{ height }}
-        >
+        <div className="flex items-center justify-center text-gray-400" style={{ height }}>
           No comparison data available
         </div>
       )}

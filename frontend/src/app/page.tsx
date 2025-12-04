@@ -1,9 +1,27 @@
 "use client";
 
-import { Activity, AlertTriangle, BarChart3, Bell, Calendar, Menu, Settings, Sun, X, Zap } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  BarChart3,
+  Bell,
+  Calendar,
+  Menu,
+  Settings,
+  Sun,
+  X,
+  Zap,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { SolarForecastChart, VoltageMonitorChart } from "@/components/charts";
-import { AlertDashboard, DayAheadReport, ForecastComparison, HistoricalAnalysis, ModelPerformance, NetworkTopology } from "@/components/dashboard";
+import {
+  AlertDashboard,
+  DayAheadReport,
+  ForecastComparison,
+  HistoricalAnalysis,
+  ModelPerformance,
+  NetworkTopology,
+} from "@/components/dashboard";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface HealthStatus {
@@ -15,7 +33,9 @@ interface HealthStatus {
 export default function Home() {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "solar" | "voltage" | "alerts" | "history">("overview");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "solar" | "voltage" | "alerts" | "history"
+  >("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -75,7 +95,10 @@ export default function Home() {
               ) : (
                 <span className="text-gray-300 text-xs sm:text-sm">...</span>
               )}
-              <button type="button" className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors hidden sm:block">
+              <button
+                type="button"
+                className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors hidden sm:block"
+              >
                 <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               {/* Mobile menu button */}
@@ -147,12 +170,12 @@ export default function Home() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`flex flex-col items-center py-2 px-3 flex-1 ${
-                  activeTab === tab.id
-                    ? "text-[#74045F]"
-                    : "text-gray-500"
+                  activeTab === tab.id ? "text-[#74045F]" : "text-gray-500"
                 }`}
               >
-                <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? "text-[#74045F]" : "text-gray-400"}`} />
+                <tab.icon
+                  className={`w-5 h-5 ${activeTab === tab.id ? "text-[#74045F]" : "text-gray-400"}`}
+                />
                 <span className="text-[10px] mt-0.5 font-medium">{tab.shortLabel}</span>
               </button>
             ))}
@@ -170,10 +193,7 @@ export default function Home() {
               <span className="font-medium text-sm sm:text-base">{error}</span>
             </div>
             <p className="text-xs sm:text-sm mt-1 text-amber-600 overflow-x-auto">
-              Run:{" "}
-              <code className="bg-amber-100 px-1 rounded text-xs">
-                docker compose up -d
-              </code>
+              Run: <code className="bg-amber-100 px-1 rounded text-xs">docker compose up -d</code>
             </p>
           </div>
         )}
@@ -269,7 +289,9 @@ export default function Home() {
             <AlertDashboard height={260} />
 
             <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Alert Configuration</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
+                Alert Configuration
+              </h3>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-500">Voltage Upper</p>

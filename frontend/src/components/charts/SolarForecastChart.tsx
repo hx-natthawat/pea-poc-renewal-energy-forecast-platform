@@ -27,7 +27,10 @@ interface SolarForecastChartProps {
   enableRealtime?: boolean;
 }
 
-export default function SolarForecastChart({ height = 300, enableRealtime = true }: SolarForecastChartProps) {
+export default function SolarForecastChart({
+  height = 300,
+  enableRealtime = true,
+}: SolarForecastChartProps) {
   const [data, setData] = useState<SolarDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPower, setCurrentPower] = useState(0);
@@ -105,13 +108,15 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
           {enableRealtime && (
             <span
               className={`flex items-center text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
-                wsConnected
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-500"
+                wsConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
               }`}
-              title={wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."}
+              title={
+                wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."
+              }
             >
-              <Radio className={`w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 ${wsConnected ? "animate-pulse" : ""}`} />
+              <Radio
+                className={`w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 ${wsConnected ? "animate-pulse" : ""}`}
+              />
               {wsConnected ? "LIVE" : "..."}
             </span>
           )}
@@ -130,11 +135,17 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
       <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
         <div className="bg-[#FEF3C7] rounded-lg p-2 sm:p-3">
           <p className="text-[10px] sm:text-xs text-[#A67814] font-medium truncate">Current</p>
-          <p className="text-sm sm:text-xl font-bold text-[#C7911B]">{currentPower.toLocaleString()}<span className="text-xs sm:text-sm"> kW</span></p>
+          <p className="text-sm sm:text-xl font-bold text-[#C7911B]">
+            {currentPower.toLocaleString()}
+            <span className="text-xs sm:text-sm"> kW</span>
+          </p>
         </div>
         <div className="bg-[#F3E8FF] rounded-lg p-2 sm:p-3">
           <p className="text-[10px] sm:text-xs text-[#74045F] font-medium truncate">Peak</p>
-          <p className="text-sm sm:text-xl font-bold text-[#74045F]">{peakPower.toLocaleString()}<span className="text-xs sm:text-sm"> kW</span></p>
+          <p className="text-sm sm:text-xl font-bold text-[#74045F]">
+            {peakPower.toLocaleString()}
+            <span className="text-xs sm:text-sm"> kW</span>
+          </p>
         </div>
         <div className="bg-green-50 rounded-lg p-2 sm:p-3">
           <p className="text-[10px] sm:text-xs text-green-600 font-medium truncate">Accuracy</p>
@@ -147,7 +158,9 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm">{error}</div>
+        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm">
+          {error}
+        </div>
       )}
 
       {/* Chart */}
@@ -191,10 +204,7 @@ export default function SolarForecastChart({ height = 300, enableRealtime = true
                 borderLeft: "4px solid #C7911B",
                 fontSize: "12px",
               }}
-              formatter={(value: number, name: string) => [
-                `${value.toLocaleString()} kW`,
-                name,
-              ]}
+              formatter={(value: number, name: string) => [`${value.toLocaleString()} kW`, name]}
             />
             <Legend wrapperStyle={{ fontSize: "10px" }} />
             <Area

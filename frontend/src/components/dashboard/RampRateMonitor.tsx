@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Activity, AlertTriangle, RefreshCw, TrendingDown, TrendingUp } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface RampEvent {
@@ -34,7 +34,7 @@ export default function RampRateMonitor({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const response = await fetch(
         `${getApiBaseUrl()}/api/v1/weather/ramp-rate/current?station_id=${stationId}`
@@ -52,13 +52,13 @@ export default function RampRateMonitor({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [stationId]);
 
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, refreshInterval);
     return () => clearInterval(interval);
-  }, [stationId, refreshInterval]);
+  }, [refreshInterval, fetchData]);
 
   if (isLoading && !data) {
     return (
@@ -145,9 +145,7 @@ export default function RampRateMonitor({
       <div className="grid grid-cols-2 gap-2 mb-2 sm:mb-3">
         <div className="bg-gray-50 rounded p-2 text-center">
           <p className="text-[10px] sm:text-xs text-gray-500">Rate</p>
-          <p className="text-sm sm:text-lg font-bold text-gray-800">
-            {ratePercent.toFixed(1)}%
-          </p>
+          <p className="text-sm sm:text-lg font-bold text-gray-800">{ratePercent.toFixed(1)}%</p>
         </div>
         <div className="bg-gray-50 rounded p-2 text-center">
           <p className="text-[10px] sm:text-xs text-gray-500">Direction</p>
@@ -181,8 +179,7 @@ export default function RampRateMonitor({
             <span className="font-medium text-[10px] sm:text-xs">Last Event</span>
           </div>
           <p className="text-[10px] sm:text-xs text-gray-500">
-            {data.last_event.rate_percent.toFixed(1)}%{" "}
-            {data.last_event.direction} at{" "}
+            {data.last_event.rate_percent.toFixed(1)}% {data.last_event.direction} at{" "}
             {new Date(data.last_event.timestamp).toLocaleTimeString()}
           </p>
           <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
