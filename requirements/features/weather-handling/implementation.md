@@ -1303,11 +1303,14 @@ async def test_ramp_rate_endpoint():
 
 ## Deployment Checklist
 
-- [ ] TMD API credentials configured (using mock data for POC)
+- [x] TMD API integrated (real API at `https://data.tmd.go.th/api`)
+  - WeatherToday: Daily weather from 122+ stations
+  - WeatherForecast7Days: 7-day provincial forecasts
+  - Configuration: `TMD_API_UID`, `TMD_API_KEY` in settings
 - [x] Database migration applied (`docker/init-db/01-init.sql` - weather_events table)
 - [x] Backend weather endpoints deployed
-  - `/api/v1/weather/alerts` - Weather alerts
-  - `/api/v1/weather/condition` - Current condition
+  - `/api/v1/weather/alerts` - Weather alerts from TMD
+  - `/api/v1/weather/condition` - Current condition (uses nearest TMD station)
   - `/api/v1/weather/ramp-rate/current` - Ramp rate status
   - `/api/v1/weather/ramp-rate/events` - Ramp events history
   - `/api/v1/weather/clear-sky` - Clear sky irradiance
@@ -1318,8 +1321,20 @@ async def test_ramp_rate_endpoint():
   - `WeatherAlertBanner.tsx` - Alert display with severity colors
   - `ProbabilisticChart.tsx` - P10/P50/P90 confidence bands
   - `RampRateMonitor.tsx` - Real-time ramp rate gauge
-- [ ] Monitoring dashboards updated (Grafana panels)
-- [ ] Alert notifications configured (Prometheus rules)
+- [x] Monitoring dashboards updated (`docker/observability/grafana/dashboards/weather-monitoring.json`)
+  - Weather status panels (condition, clearness index, alerts)
+  - Ramp rate monitoring (gauge, timeline, events)
+  - Irradiance tracking (actual vs clear-sky)
+  - Probabilistic forecast visualization
+- [x] Alert notifications configured (`docker/observability/prometheus/alerts.yml`)
+  - RampRateExceeded (>30% in 1min)
+  - CriticalRampRate (>50% in 30s)
+  - StormConditionActive
+  - LowClearnessIndex (<0.3)
+  - TMDAPIUnavailable
+  - HeavyRainfallWarning (>50mm/24h)
+  - HighWindWarning (>40 km/h)
+  - HighForecastUncertainty (>3x multiplier)
 - [x] Documentation updated
 
 ---

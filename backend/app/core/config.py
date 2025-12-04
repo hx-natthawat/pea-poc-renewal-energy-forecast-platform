@@ -69,6 +69,14 @@ class Settings(BaseSettings):
     # ML Models
     MODEL_REGISTRY_PATH: str = "/app/models"
 
+    # TMD (Thai Meteorological Department) API
+    # Register at: https://data.tmd.go.th/nwpapi/register
+    TMD_API_BASE_URL: str = "https://data.tmd.go.th/api"
+    TMD_API_UID: str = "api"  # Public demo credentials
+    TMD_API_KEY: str = "api12345"  # Public demo credentials
+    TMD_API_TIMEOUT: int = 10  # seconds
+    TMD_CACHE_TTL: int = 300  # 5 minutes
+
     # Logging
     LOG_LEVEL: str = "INFO"
 

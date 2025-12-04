@@ -157,3 +157,122 @@ groups:
         annotations:
           summary: "Critical alerts are active"
           description: "{{ $value | printf \"%.0f\" }} critical alerts require attention"
+
+  # ===========================================================================
+  # Weather Monitoring Alerts
+  # ===========================================================================
+  - name: weather
+    rules:
+      # Ramp rate detection - sudden irradiance changes
+      - alert: RampRateExceeded
+        expr: weather_ramp_rate_percent > 30
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Rapid irradiance change detected"
+          description: "Ramp rate is {{ $value | printf \"%.1f\" }}% (threshold: 30%)"
+
+      - alert: CriticalRampRate
+        expr: weather_ramp_rate_percent > 50
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical irradiance ramp detected"
+          description: "Ramp rate is {{ $value | printf \"%.1f\" }}% - Grid stability may be affected"
+
+      # Weather condition alerts
+      - alert: StormConditionActive
+        expr: weather_condition_storm == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Storm conditions detected"
+          description: "Storm weather condition is active - Expect significant forecast uncertainty"
+
+      - alert: LowClearnessIndex
+        expr: weather_clearness_index < 0.3
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low clearness index detected"
+          description: "Clearness index is {{ $value | printf \"%.2f\" }} - Heavy cloud cover or rain"
+
+      # TMD API health
+      - alert: TMDAPIUnavailable
+        expr: tmd_api_status == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TMD API is unavailable"
+          description: "Unable to fetch weather data from Thai Meteorological Department"
+
+      - alert: TMDAPIHighLatency
+        expr: tmd_api_response_time_seconds > 5
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "TMD API response time is high"
+          description: "TMD API latency is {{ $value | printf \"%.2f\" }}s"
+
+      # Weather event alerts
+      - alert: HeavyRainfallWarning
+        expr: weather_precipitation_mm > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Heavy rainfall detected"
+          description: "Precipitation is {{ $value | printf \"%.1f\" }}mm/24h - Solar output will be affected"
+
+      - alert: HighWindWarning
+        expr: weather_wind_speed_kmh > 40
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High wind speed detected"
+          description: "Wind speed is {{ $value | printf \"%.1f\" }}km/h - Monitor panel stability"
+
+      - alert: ExtremeTemperature
+        expr: weather_temperature_celsius > 40
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "Extreme temperature detected"
+          description: "Temperature is {{ $value | printf \"%.1f\" }}C - Panel efficiency may be reduced"
+
+      # Forecast uncertainty alerts
+      - alert: HighForecastUncertainty
+        expr: weather_uncertainty_factor > 3
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High forecast uncertainty"
+          description: "Uncertainty multiplier is {{ $value | printf \"%.1f\" }}x - Forecasts less reliable"
+
+      # Weather event frequency
+      - alert: FrequentRampEvents
+        expr: rate(weather_ramp_events_total[1h]) > 5
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Frequent ramp events detected"
+          description: "{{ $value | printf \"%.1f\" }} ramp events per hour - Unstable irradiance conditions"
+
+      - alert: WeatherAlertActive
+        expr: weather_alerts_active > 0
+        for: 1m
+        labels:
+          severity: info
+        annotations:
+          summary: "Weather alert is active"
+          description: "{{ $value | printf \"%.0f\" }} weather alert(s) from TMD"
