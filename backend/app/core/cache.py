@@ -10,7 +10,6 @@ import hashlib
 import json
 import logging
 from datetime import datetime
-from typing import Any, Optional
 
 import redis.asyncio as redis
 from pydantic import BaseModel
@@ -34,7 +33,7 @@ class RedisCache:
 
     def __init__(self, url: str = settings.REDIS_URL):
         self.url = url
-        self._client: Optional[redis.Redis] = None
+        self._client: redis.Redis | None = None
         self.config = CacheConfig()
         self._connected = False
 
@@ -84,7 +83,7 @@ class RedisCache:
         self,
         timestamp: datetime,
         features: dict,
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """Get cached solar prediction."""
         if not self.is_connected or not self.config.enabled:
             return None
@@ -103,6 +102,8 @@ class RedisCache:
             }
             key = self._generate_key("solar", cache_data)
 
+            if self._client is None:
+                return None
             cached = await self._client.get(key)
             if cached:
                 logger.debug(f"Cache hit for solar prediction: {key}")
@@ -119,7 +120,7 @@ class RedisCache:
         prediction: dict,
     ) -> bool:
         """Cache solar prediction result."""
-        if not self.is_connected or not self.config.enabled:
+        if not self.is_connected or not self.config.enabled or self._client is None:
             return False
 
         try:
@@ -150,7 +151,7 @@ class RedisCache:
         self,
         timestamp: datetime,
         prosumer_id: str,
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """Get cached voltage prediction."""
         if not self.is_connected or not self.config.enabled:
             return None
@@ -165,6 +166,8 @@ class RedisCache:
             }
             key = self._generate_key("voltage", cache_data)
 
+            if self._client is None:
+                return None
             cached = await self._client.get(key)
             if cached:
                 logger.debug(f"Cache hit for voltage prediction: {key}")
@@ -181,7 +184,7 @@ class RedisCache:
         prediction: dict,
     ) -> bool:
         """Cache voltage prediction result."""
-        if not self.is_connected or not self.config.enabled:
+        if not self.is_connected or not self.config.enabled or self._client is None:
             return False
 
         try:
@@ -206,7 +209,7 @@ class RedisCache:
 
     async def clear_all(self) -> int:
         """Clear all cache entries. Returns count of deleted keys."""
-        if not self.is_connected:
+        if not self.is_connected or self._client is None:
             return 0
 
         try:
@@ -220,7 +223,7 @@ class RedisCache:
 
     async def get_stats(self) -> dict:
         """Get cache statistics."""
-        if not self.is_connected:
+        if not self.is_connected or self._client is None:
             return {"connected": False, "enabled": self.config.enabled}
 
         try:

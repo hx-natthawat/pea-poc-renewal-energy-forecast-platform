@@ -7,12 +7,10 @@ Provides WebSocket connections for:
 - Alert notifications
 """
 
-import asyncio
 import json
 from datetime import datetime
-from typing import Any
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
 from app.api.v1.websocket.manager import manager
 from app.ml import get_solar_inference, get_voltage_inference

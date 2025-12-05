@@ -11,7 +11,6 @@ import ssl
 from dataclasses import dataclass, field
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -38,10 +37,10 @@ class EmailMessage:
     to: list[str]
     subject: str
     body_html: str
-    body_text: Optional[str] = None
+    body_text: str | None = None
     cc: list[str] = field(default_factory=list)
     bcc: list[str] = field(default_factory=list)
-    reply_to: Optional[str] = None
+    reply_to: str | None = None
     headers: dict[str, str] = field(default_factory=dict)
 
 
@@ -50,8 +49,8 @@ class EmailResult:
     """Result of email send operation."""
 
     success: bool
-    message_id: Optional[str] = None
-    error: Optional[str] = None
+    message_id: str | None = None
+    error: str | None = None
     recipients_sent: list[str] = field(default_factory=list)
     recipients_failed: list[str] = field(default_factory=list)
 
@@ -67,7 +66,7 @@ class EmailProvider:
     - Retry on failure
     """
 
-    def __init__(self, config: Optional[EmailConfig] = None):
+    def __init__(self, config: EmailConfig | None = None):
         """Initialize email provider with configuration."""
         self.config = config or EmailConfig()
         self._is_configured = bool(
@@ -176,7 +175,7 @@ class EmailProvider:
         recipients: list[str],
         subject: str,
         body_html: str,
-        body_text: Optional[str] = None,
+        body_text: str | None = None,
     ) -> EmailResult:
         """
         Convenience method to send an alert email.
@@ -200,7 +199,7 @@ class EmailProvider:
 
 
 # Singleton instance
-_email_provider: Optional[EmailProvider] = None
+_email_provider: EmailProvider | None = None
 
 
 def get_email_provider() -> EmailProvider:

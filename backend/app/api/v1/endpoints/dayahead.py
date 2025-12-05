@@ -4,14 +4,13 @@ Day-Ahead Forecast API endpoints.
 Provides 24-hour forecast generation, scheduling, and report export.
 """
 
-import io
 import logging
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -41,21 +40,21 @@ class HourlyForecast(BaseModel):
     predicted_value: float
     confidence_lower: float
     confidence_upper: float
-    conditions: Optional[Dict[str, Any]] = None
+    conditions: dict[str, Any] | None = None
 
 
 class DayAheadForecastResponse(BaseModel):
     """Response for day-ahead forecast."""
     status: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
 
 class ForecastSchedule(BaseModel):
     """Scheduled forecast job configuration."""
     forecast_type: ForecastType
     target_date: str
-    station_id: Optional[str] = "POC_STATION_1"
-    prosumer_ids: Optional[List[str]] = None
+    station_id: str | None = "POC_STATION_1"
+    prosumer_ids: list[str] | None = None
     created_at: str
     status: str
 
@@ -67,14 +66,14 @@ class ForecastSchedule(BaseModel):
 
 @router.get("/solar")
 async def get_solar_day_ahead_forecast(
-    target_date: Optional[str] = Query(
+    target_date: str | None = Query(
         default=None,
         description="Target date (YYYY-MM-DD). Defaults to tomorrow."
     ),
     station_id: str = Query(default="POC_STATION_1", description="Station ID"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Generate 24-hour day-ahead solar power forecast.
 
@@ -196,14 +195,14 @@ async def get_solar_day_ahead_forecast(
 
 @router.get("/voltage")
 async def get_voltage_day_ahead_forecast(
-    target_date: Optional[str] = Query(
+    target_date: str | None = Query(
         default=None,
         description="Target date (YYYY-MM-DD). Defaults to tomorrow."
     ),
-    prosumer_id: Optional[str] = Query(default=None, description="Filter by prosumer ID"),
+    prosumer_id: str | None = Query(default=None, description="Filter by prosumer ID"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Generate 24-hour day-ahead voltage forecast for prosumers.
 
@@ -242,7 +241,7 @@ async def get_voltage_day_ahead_forecast(
     """)
 
     result = await db.execute(hourly_query)
-    historical_data: Dict[str, Dict[int, Any]] = {}
+    historical_data: dict[str, dict[int, Any]] = {}
     for row in result.fetchall():
         pid = row[0]
         hour = int(row[1])
@@ -350,7 +349,7 @@ async def get_voltage_day_ahead_forecast(
 
 @router.get("/report")
 async def generate_day_ahead_report(
-    target_date: Optional[str] = Query(
+    target_date: str | None = Query(
         default=None,
         description="Target date (YYYY-MM-DD). Defaults to tomorrow."
     ),
@@ -396,6 +395,35 @@ async def generate_day_ahead_report(
     voltage_result = await db.execute(voltage_query)
     voltage_data = {r[0]: round(r[1] or 230, 1) for r in voltage_result.fetchall()}
 
+    # Calculate values for report
+    total_energy_kwh = sum(solar_data.values())
+    peak_power_kw = max(solar_data.values()) if solar_data else 0
+    hourly_forecast = [{"hour": h, "power_kw": solar_data.get(h, 0)} for h in range(24)]
+    prosumer_forecasts = [{"prosumer_id": pid, "avg_voltage": v} for pid, v in voltage_data.items()]
+    overall_avg_voltage = round(sum(voltage_data.values()) / len(voltage_data), 1) if voltage_data else 230.0
+    recommendations: list[dict[str, str]] = []
+
+    # Add recommendations based on forecasts
+    if peak_power_kw > 4000:
+        recommendations.append({
+            "type": "solar_high",
+            "message": "High solar generation expected. Monitor for voltage rise.",
+            "severity": "info",
+        })
+
+    if overall_avg_voltage > 235:
+        recommendations.append({
+            "type": "voltage_high",
+            "message": f"Average voltage {overall_avg_voltage}V trending high. Consider reactive power compensation.",
+            "severity": "warning",
+        })
+    elif overall_avg_voltage < 225:
+        recommendations.append({
+            "type": "voltage_low",
+            "message": f"Average voltage {overall_avg_voltage}V trending low. Monitor load conditions.",
+            "severity": "warning",
+        })
+
     report_data = {
         "report_type": "Day-Ahead Forecast Report",
         "forecast_date": str(forecast_date),
@@ -403,45 +431,21 @@ async def generate_day_ahead_report(
         "generated_by": current_user.username,
         "solar_forecast": {
             "station_id": "POC_STATION_1",
-            "total_energy_kwh": sum(solar_data.values()),
-            "peak_power_kw": max(solar_data.values()) if solar_data else 0,
-            "hourly_forecast": [
-                {"hour": h, "power_kw": solar_data.get(h, 0)} for h in range(24)
-            ],
+            "total_energy_kwh": total_energy_kwh,
+            "peak_power_kw": peak_power_kw,
+            "hourly_forecast": hourly_forecast,
         },
         "voltage_forecast": {
-            "prosumers": [
-                {"prosumer_id": pid, "avg_voltage": v} for pid, v in voltage_data.items()
-            ],
-            "overall_avg_voltage": round(sum(voltage_data.values()) / len(voltage_data), 1) if voltage_data else 230,
+            "prosumers": prosumer_forecasts,
+            "overall_avg_voltage": overall_avg_voltage,
         },
-        "recommendations": [],
+        "recommendations": recommendations,
     }
 
-    # Add recommendations based on forecasts
-    if report_data["solar_forecast"]["peak_power_kw"] > 4000:
-        report_data["recommendations"].append({
-            "type": "solar_high",
-            "message": "High solar generation expected. Monitor for voltage rise.",
-            "severity": "info",
-        })
-
-    avg_voltage = report_data["voltage_forecast"]["overall_avg_voltage"]
-    if avg_voltage > 235:
-        report_data["recommendations"].append({
-            "type": "voltage_high",
-            "message": f"Average voltage {avg_voltage}V trending high. Consider reactive power compensation.",
-            "severity": "warning",
-        })
-    elif avg_voltage < 225:
-        report_data["recommendations"].append({
-            "type": "voltage_low",
-            "message": f"Average voltage {avg_voltage}V trending low. Monitor load conditions.",
-            "severity": "warning",
-        })
-
     if format == "html":
-        # Generate HTML report
+        # Generate HTML report using local variables
+        generated_at = datetime.now().isoformat()
+        generated_by = current_user.username or "System"
         html_content = f"""
 <!DOCTYPE html>
 <html>
@@ -463,27 +467,27 @@ async def generate_day_ahead_report(
     <h1>PEA RE Forecast Platform</h1>
     <h2>Day-Ahead Forecast Report</h2>
     <p><strong>Forecast Date:</strong> {forecast_date}</p>
-    <p><strong>Generated:</strong> {report_data['generated_at']}</p>
-    <p><strong>Generated By:</strong> {report_data['generated_by']}</p>
+    <p><strong>Generated:</strong> {generated_at}</p>
+    <p><strong>Generated By:</strong> {generated_by}</p>
 
     <div class="summary">
         <h3>Solar Forecast Summary</h3>
-        <p>Total Energy: <strong>{report_data['solar_forecast']['total_energy_kwh']:.1f} kWh</strong></p>
-        <p>Peak Power: <strong>{report_data['solar_forecast']['peak_power_kw']:.1f} kW</strong></p>
+        <p>Total Energy: <strong>{total_energy_kwh:.1f} kWh</strong></p>
+        <p>Peak Power: <strong>{peak_power_kw:.1f} kW</strong></p>
     </div>
 
     <div class="summary">
         <h3>Voltage Forecast Summary</h3>
-        <p>Average Voltage: <strong>{report_data['voltage_forecast']['overall_avg_voltage']:.1f} V</strong></p>
-        <p>Prosumers Monitored: <strong>{len(report_data['voltage_forecast']['prosumers'])}</strong></p>
+        <p>Average Voltage: <strong>{overall_avg_voltage:.1f} V</strong></p>
+        <p>Prosumers Monitored: <strong>{len(prosumer_forecasts)}</strong></p>
     </div>
 
-    {"".join(f'<div class="{r["severity"]}"><strong>{r["type"]}:</strong> {r["message"]}</div>' for r in report_data['recommendations'])}
+    {"".join(f'<div class="{r["severity"]}"><strong>{r["type"]}:</strong> {r["message"]}</div>' for r in recommendations)}
 
     <h2>Hourly Solar Forecast</h2>
     <table>
         <tr><th>Hour</th><th>Power (kW)</th></tr>
-        {"".join(f'<tr><td>{h["hour"]:02d}:00</td><td>{h["power_kw"]:.1f}</td></tr>' for h in report_data['solar_forecast']['hourly_forecast'])}
+        {"".join(f'<tr><td>{h["hour"]:02d}:00</td><td>{h["power_kw"]:.1f}</td></tr>' for h in hourly_forecast)}
     </table>
 
     <footer style="margin-top: 40px; color: #666; font-size: 12px;">
@@ -509,7 +513,7 @@ async def generate_day_ahead_report(
 @router.get("/schedule")
 async def list_forecast_schedules(
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     List scheduled day-ahead forecast jobs.
 

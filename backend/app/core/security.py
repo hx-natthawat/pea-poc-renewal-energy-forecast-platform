@@ -6,9 +6,7 @@ per TOR requirements (Section 7.1.3 - Keycloak, Section 7.1.6 - Audit Trail).
 """
 
 import logging
-from datetime import datetime
-from functools import lru_cache
-from typing import List, Optional
+from datetime import UTC, datetime
 
 import httpx
 from fastapi import Depends, HTTPException, Request, status
@@ -30,33 +28,38 @@ class TokenPayload(BaseModel):
     sub: str  # Subject (user ID)
     exp: int  # Expiration timestamp
     iat: int  # Issued at timestamp
-    email: Optional[str] = None
-    name: Optional[str] = None
-    preferred_username: Optional[str] = None
-    realm_access: Optional[dict] = None
-    azp: Optional[str] = None  # Authorized party (client ID)
+    email: str | None = None
+    name: str | None = None
+    preferred_username: str | None = None
+    realm_access: dict | None = None
+    azp: str | None = None  # Authorized party (client ID)
 
 
 class CurrentUser(BaseModel):
     """Current authenticated user information."""
 
     id: str
-    email: Optional[str] = None
-    name: Optional[str] = None
-    username: Optional[str] = None
-    roles: List[str] = []
+    email: str | None = None
+    name: str | None = None
+    username: str | None = None
+    roles: list[str] = []
+
+    @property
+    def user_id(self) -> str:
+        """Alias for id for backwards compatibility."""
+        return self.id
 
 
 class JWKSClient:
     """Client for fetching and caching JWKS from Keycloak."""
 
     def __init__(self):
-        self._jwks: Optional[dict] = None
-        self._last_fetch: Optional[datetime] = None
+        self._jwks: dict | None = None
+        self._last_fetch: datetime | None = None
 
     async def get_jwks(self) -> dict:
         """Fetch JWKS from Keycloak, with caching."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
 
         # Check if cache is valid
         if self._jwks and self._last_fetch:
@@ -87,7 +90,7 @@ class JWKSClient:
                 detail="Authentication service unavailable",
             )
 
-    def get_key(self, kid: str) -> Optional[dict]:
+    def get_key(self, kid: str) -> dict | None:
         """Get a specific key from JWKS by key ID."""
         if not self._jwks:
             return None
@@ -151,14 +154,14 @@ async def decode_token(token: str) -> TokenPayload:
         logger.warning(f"JWT validation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid token: {str(e)}",
+            detail=f"Invalid token: {e!s}",
         )
 
 
 async def get_current_user_optional(
     request: Request,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
-) -> Optional[CurrentUser]:
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+) -> CurrentUser | None:
     """
     Get current user if authenticated, None otherwise.
 
@@ -187,7 +190,7 @@ async def get_current_user_optional(
 
 async def get_current_user(
     request: Request,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> CurrentUser:
     """
     Get current authenticated user.
@@ -227,7 +230,7 @@ async def get_current_user(
     )
 
 
-def require_roles(required_roles: List[str]):
+def require_roles(required_roles: list[str]):
     """
     Dependency factory for role-based access control.
 

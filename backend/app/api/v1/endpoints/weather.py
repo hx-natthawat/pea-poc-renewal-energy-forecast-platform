@@ -1,18 +1,12 @@
 """Weather API endpoints for extreme weather handling."""
 
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Query
 from loguru import logger
 
 from app.models.schemas.weather import (
-    AlertSeverity,
-    ProbabilisticForecast,
-    RampRateStatus,
-    WeatherAlert,
     WeatherCondition,
-    WeatherConditionResponse,
     WeatherEventLog,
 )
 from app.services.ramp_rate_service import ramp_rate_service
@@ -23,8 +17,8 @@ router = APIRouter(prefix="/weather", tags=["weather"])
 
 @router.get("/alerts", response_model=dict)
 async def get_weather_alerts(
-    region: Optional[str] = Query(None, description="Filter by region"),
-    severity: Optional[str] = Query(
+    region: str | None = Query(None, description="Filter by region"),
+    severity: str | None = Query(
         None, description="Filter by severity (info, warning, critical)"
     ),
 ):
@@ -46,7 +40,7 @@ async def get_weather_alerts(
             "data": {
                 "alerts": [a.model_dump() for a in alerts],
                 "count": len(alerts),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             },
         }
     except Exception as e:
@@ -56,7 +50,7 @@ async def get_weather_alerts(
             "data": {
                 "alerts": [],
                 "count": 0,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "message": "Weather alert service temporarily unavailable",
             },
         }
@@ -90,7 +84,7 @@ async def get_weather_condition(
             "status": "success",
             "data": {
                 "condition": WeatherCondition.PARTLY_CLOUDY.value,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "message": "Using default weather condition",
             },
         }
@@ -134,7 +128,7 @@ async def get_current_ramp_rate(
                 "is_alert": False,
                 "last_event": None,
                 "station_id": station_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             },
         }
 
@@ -157,7 +151,7 @@ async def get_ramp_rate_events(
             "data": {
                 "events": [e.model_dump() for e in events],
                 "count": len(events),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             },
         }
     except Exception as e:
@@ -167,16 +161,16 @@ async def get_ramp_rate_events(
             "data": {
                 "events": [],
                 "count": 0,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             },
         }
 
 
 @router.get("/events", response_model=dict)
 async def get_weather_events(
-    start_date: Optional[datetime] = Query(None, description="Start date"),
-    end_date: Optional[datetime] = Query(None, description="End date"),
-    event_type: Optional[str] = Query(
+    start_date: datetime | None = Query(None, description="Start date"),
+    end_date: datetime | None = Query(None, description="End date"),
+    event_type: str | None = Query(
         None, description="Event type (storm, heavy_rain, cloud_event)"
     ),
     limit: int = Query(default=100, ge=1, le=1000, description="Maximum events"),
@@ -190,9 +184,9 @@ async def get_weather_events(
     - Performance review
     """
     if start_date is None:
-        start_date = datetime.utcnow() - timedelta(days=30)
+        start_date = datetime.now(UTC) - timedelta(days=30)
     if end_date is None:
-        end_date = datetime.utcnow()
+        end_date = datetime.now(UTC)
 
     # In production, this would query the weather_events table
     # For now, return simulated data structure
@@ -214,7 +208,7 @@ async def get_clear_sky_irradiance(
     latitude: float = Query(default=13.7563, description="Location latitude"),
     longitude: float = Query(default=100.5018, description="Location longitude"),
     altitude: float = Query(default=0, description="Altitude in meters"),
-    timestamp: Optional[datetime] = Query(None, description="Time for calculation"),
+    timestamp: datetime | None = Query(None, description="Time for calculation"),
 ):
     """
     Calculate theoretical clear sky irradiance.
@@ -223,7 +217,7 @@ async def get_clear_sky_irradiance(
     Used as reference for calculating clearness index.
     """
     if timestamp is None:
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(UTC)
 
     try:
         clear_sky = weather_service.calculate_clear_sky_irradiance(
@@ -277,7 +271,7 @@ async def get_uncertainty_factors():
 
 @router.post("/classify", response_model=dict)
 async def classify_weather(
-    clearness_index: Optional[float] = Query(
+    clearness_index: float | None = Query(
         None, ge=0, le=1.5, description="Clearness index (measured/clear_sky)"
     ),
     precipitation_mm: float = Query(default=0, ge=0, description="Precipitation in mm"),
@@ -307,6 +301,6 @@ async def classify_weather(
                 "wind_speed_kmh": wind_speed_kmh,
                 "has_storm_alert": has_storm_alert,
             },
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         },
     }

@@ -5,8 +5,8 @@ Authentication is controlled by AUTH_ENABLED setting.
 """
 
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -32,14 +32,14 @@ VOLTAGE_WARNING_LOWER = 222.0
 
 class Alert(BaseModel):
     """Alert model."""
-    id: Optional[int] = None
+    id: int | None = None
     time: datetime
     alert_type: str
     severity: str  # info, warning, critical
     target_id: str
     message: str
-    current_value: Optional[float] = None
-    threshold_value: Optional[float] = None
+    current_value: float | None = None
+    threshold_value: float | None = None
     acknowledged: bool = False
     resolved: bool = False
 
@@ -47,13 +47,13 @@ class Alert(BaseModel):
 class AlertResponse(BaseModel):
     """Alert response model."""
     status: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
 
 class VoltageCheckRequest(BaseModel):
     """Request to check voltage for violations."""
     timestamp: datetime = Field(default_factory=datetime.now)
-    prosumer_ids: List[str] = Field(
+    prosumer_ids: list[str] = Field(
         default=["prosumer1", "prosumer2", "prosumer3", "prosumer4", "prosumer5", "prosumer6", "prosumer7"]
     )
 
@@ -69,8 +69,8 @@ class AlertStats(BaseModel):
 
 @router.get("/")
 async def get_alerts(
-    severity: Optional[str] = None,
-    acknowledged: Optional[bool] = None,
+    severity: str | None = None,
+    acknowledged: bool | None = None,
     limit: int = Query(default=50, le=200),
     offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_db),
@@ -218,7 +218,7 @@ async def check_voltage_violations(
                     "voltage": voltage,
                     "message": message,
                 })
-            except Exception as e:
+            except Exception:
                 # Log error but continue
                 pass
 

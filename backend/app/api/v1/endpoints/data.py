@@ -6,11 +6,11 @@ Authentication is controlled by AUTH_ENABLED setting.
 """
 
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import timedelta
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,13 +38,13 @@ class SolarDataPoint(BaseModel):
 class VoltageDataPoint(BaseModel):
     """Voltage measurement data point for chart."""
     time: str
-    prosumer1: Optional[float] = None
-    prosumer2: Optional[float] = None
-    prosumer3: Optional[float] = None
-    prosumer4: Optional[float] = None
-    prosumer5: Optional[float] = None
-    prosumer6: Optional[float] = None
-    prosumer7: Optional[float] = None
+    prosumer1: float | None = None
+    prosumer2: float | None = None
+    prosumer3: float | None = None
+    prosumer4: float | None = None
+    prosumer5: float | None = None
+    prosumer6: float | None = None
+    prosumer7: float | None = None
 
 
 # =============================================================================
@@ -60,7 +60,7 @@ async def get_latest_solar_data(
     offset: int = Query(default=0, ge=0, description="Records to skip for pagination"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get latest solar measurements for chart display.
 
@@ -139,7 +139,7 @@ async def get_solar_stats(
     station_id: str = Query(default="POC_STATION_1", description="Station ID"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get solar data statistics.
 
@@ -183,7 +183,7 @@ async def get_latest_voltage_data(
     limit: int = Query(default=288, ge=1, le=1000, description="Max records to return"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get latest voltage measurements for all prosumers.
 
@@ -228,7 +228,7 @@ async def get_latest_voltage_data(
     rows = result.fetchall()
 
     # Pivot data by time bucket
-    time_data: Dict[str, Dict] = {}
+    time_data: dict[str, dict] = {}
     for row in rows:
         bucket_str = row.bucket.strftime("%H:%M")
         if bucket_str not in time_data:
@@ -304,7 +304,7 @@ async def get_prosumer_voltage(
     offset: int = Query(default=0, ge=0, description="Records to skip for pagination"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get voltage history for a specific prosumer.
 
@@ -356,7 +356,7 @@ async def get_prosumer_voltage(
 async def get_data_statistics(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get statistics about all data in the database.
 

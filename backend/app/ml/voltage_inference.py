@@ -108,15 +108,15 @@ class VoltageInference:
             "energy_meter_current": current,
             "apparent_power": np.sqrt(active_power**2 + reactive_power**2),
             "power_factor": active_power / max(np.sqrt(active_power**2 + reactive_power**2), 0.01),
-            "voltage_drop_indicator": config["position"] * active_power,
-            "load_intensity": current * config["position"],
+            "voltage_drop_indicator": int(config["position"]) * active_power,
+            "load_intensity": current * int(config["position"]),
             # Rate of change (use 0 for single point)
             "voltage_change": 0.0,
             "power_change": 0.0,
         }
 
         # Lag features (use nominal voltage ~228V as approximation)
-        base_voltage = 230 - config["position"] * 1.5
+        base_voltage = 230 - int(config["position"]) * 1.5
         for lag in [1, 2, 3, 6]:
             features[f"voltage_lag_{lag}"] = base_voltage
             features[f"power_lag_{lag}"] = active_power
@@ -133,7 +133,7 @@ class VoltageInference:
             if col not in df.columns:
                 df[col] = 0.0
 
-        return df[self.feature_columns]
+        return pd.DataFrame(df[self.feature_columns])
 
     def predict(
         self,
@@ -160,7 +160,7 @@ class VoltageInference:
 
         if not self._is_loaded:
             # Fallback to simple estimation
-            base_voltage = 230.0 - config["position"] * 1.5
+            base_voltage = 230.0 - int(config["position"]) * 1.5
             return {
                 "predicted_voltage": round(base_voltage, 1),
                 "confidence_lower": round(base_voltage - 3, 1),
@@ -172,6 +172,8 @@ class VoltageInference:
             }
 
         X = self._create_features(timestamp, prosumer_id, active_power, reactive_power, current)
+        if self.model is None:
+            raise RuntimeError("Model not loaded")
         predicted_voltage = float(self.model.predict(X)[0])
 
         # Calculate confidence based on CV metrics

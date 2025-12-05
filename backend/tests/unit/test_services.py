@@ -4,7 +4,7 @@ Unit tests for service layer.
 Tests the business logic services.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import numpy as np
 import pandas as pd
@@ -295,14 +295,14 @@ class TestWeatherService:
         """Test cache validity check with expired entry."""
         service = WeatherService()
         service._cache["test_key"] = "data"
-        service._cache_times["test_key"] = datetime.utcnow() - timedelta(hours=1)
+        service._cache_times["test_key"] = datetime.now(timezone.utc) - timedelta(hours=1)
         assert service._is_cache_valid("test_key") is False
 
     def test_is_cache_valid_fresh(self):
         """Test cache validity check with fresh entry."""
         service = WeatherService()
         service._cache["test_key"] = "data"
-        service._cache_times["test_key"] = datetime.utcnow()
+        service._cache_times["test_key"] = datetime.now(timezone.utc)
         assert service._is_cache_valid("test_key") is True
 
     def test_generate_alerts_from_station_heavy_rain(self):

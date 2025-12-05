@@ -3,8 +3,8 @@
 import math
 import random
 import xml.etree.ElementTree as ET
-from datetime import datetime
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any, ClassVar
 
 import httpx
 from loguru import logger
@@ -31,7 +31,7 @@ class WeatherService:
     """
 
     # Province codes for Thailand (subset for Central region)
-    PROVINCE_CODES = {
+    PROVINCE_CODES: ClassVar[dict[str, str]] = {
         "bangkok": "กรุงเทพมหานคร",
         "nonthaburi": "นนทบุรี",
         "pathum_thani": "ปทุมธานี",
@@ -50,7 +50,7 @@ class WeatherService:
         self.cache_ttl = settings.TMD_CACHE_TTL
 
         # HTTP client
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
         # Cache storage
         self._cache: dict[str, Any] = {}
@@ -73,8 +73,8 @@ class WeatherService:
         return self._client
 
     async def _call_tmd_api(
-        self, endpoint: str, params: Optional[dict] = None
-    ) -> Optional[str]:
+        self, endpoint: str, params: dict | None = None
+    ) -> str | None:
         """
         Call TMD API endpoint.
 
@@ -135,11 +135,11 @@ class WeatherService:
                 }
                 stations.append(station_data)
 
-            return {"stations": stations, "timestamp": datetime.utcnow()}
+            return {"stations": stations, "timestamp": datetime.now(UTC)}
 
         except ET.ParseError as e:
             logger.error(f"Failed to parse WeatherToday XML: {e}")
-            return {"stations": [], "timestamp": datetime.utcnow()}
+            return {"stations": [], "timestamp": datetime.now(UTC)}
 
     def _parse_forecast_7days(self, xml_data: str) -> list[dict[str, Any]]:
         """Parse WeatherForecast7Days API response."""
@@ -183,11 +183,11 @@ class WeatherService:
         if xml_data:
             result = self._parse_weather_today(xml_data)
             self._cache[cache_key] = result
-            self._cache_times[cache_key] = datetime.utcnow()
+            self._cache_times[cache_key] = datetime.now(UTC)
             return result
 
         # Return cached or empty
-        return self._cache.get(cache_key, {"stations": [], "timestamp": datetime.utcnow()})
+        return self._cache.get(cache_key, {"stations": [], "timestamp": datetime.now(UTC)})
 
     async def get_tmd_forecast_7days(self, province: str = "กรุงเทพมหานคร") -> list[dict]:
         """
@@ -212,13 +212,13 @@ class WeatherService:
         if xml_data:
             result = self._parse_forecast_7days(xml_data)
             self._cache[cache_key] = result
-            self._cache_times[cache_key] = datetime.utcnow()
+            self._cache_times[cache_key] = datetime.now(UTC)
             return result
 
         return self._cache.get(cache_key, [])
 
     async def get_current_alerts(
-        self, region: Optional[str] = None
+        self, region: str | None = None
     ) -> list[WeatherAlert]:
         """
         Fetch current weather alerts from TMD.
@@ -260,14 +260,14 @@ class WeatherService:
 
         # Cache results
         self._cache[cache_key] = alerts
-        self._cache_times[cache_key] = datetime.utcnow()
+        self._cache_times[cache_key] = datetime.now(UTC)
 
         return alerts
 
     def _generate_alerts_from_station(self, station: dict) -> list[WeatherAlert]:
         """Generate alerts from station weather data."""
         alerts = []
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
 
         # Heavy rainfall alert (>50mm/24h)
         if station.get("rainfall_24h", 0) > 50:
@@ -313,7 +313,7 @@ class WeatherService:
     def _generate_alerts_from_forecast(self, forecast: dict) -> list[WeatherAlert]:
         """Generate alerts from forecast data."""
         alerts = []
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         desc = forecast.get("description", "").lower()
 
         # Check for storm/thunderstorm in forecast
@@ -405,7 +405,7 @@ class WeatherService:
                 cloud_cover_percent=(1 - clearness) * 100,
                 precipitation_mm=rainfall,
                 wind_speed_kmh=wind,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
             )
 
         # Fallback to simulation if no nearby station
@@ -415,7 +415,7 @@ class WeatherService:
         self, latitude: float, longitude: float
     ) -> WeatherConditionResponse:
         """Generate simulated weather condition as fallback."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         hour = now.hour
 
         # Simulate clearness index based on time
@@ -438,7 +438,7 @@ class WeatherService:
 
     def classify_weather(
         self,
-        clearness_index: Optional[float] = None,
+        clearness_index: float | None = None,
         precipitation_mm: float = 0,
         wind_speed_kmh: float = 0,
         has_storm_alert: bool = False,
@@ -528,10 +528,7 @@ class WeatherService:
             return 0.0
 
         # Air mass
-        if elevation > 0:
-            air_mass = 1 / math.sin(math.radians(elevation))
-        else:
-            air_mass = 40  # Very high for horizon
+        air_mass = 1 / math.sin(math.radians(elevation)) if elevation > 0 else 40
 
         # Clear sky irradiance (simplified Kasten model)
         solar_constant = 1361  # W/m2
@@ -552,7 +549,7 @@ class WeatherService:
         """Check if cache entry is still valid."""
         if cache_key not in self._cache_times:
             return False
-        return (datetime.utcnow() - self._cache_times[cache_key]).seconds < self.cache_ttl
+        return (datetime.now(UTC) - self._cache_times[cache_key]).seconds < self.cache_ttl
 
     async def close(self):
         """Close HTTP client."""

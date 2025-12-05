@@ -159,7 +159,7 @@ class SolarInference:
             if col not in df.columns:
                 df[col] = 0.0
 
-        return df[self.feature_columns]
+        return pd.DataFrame(df[self.feature_columns])
 
     def predict(
         self,
@@ -204,6 +204,8 @@ class SolarInference:
         )
 
         # Predict
+        if self.model is None:
+            raise RuntimeError("Model not loaded")
         power_kw = float(self.model.predict(X)[0])
 
         # Ensure non-negative

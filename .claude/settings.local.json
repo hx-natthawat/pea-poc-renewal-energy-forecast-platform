@@ -98,7 +98,9 @@
       "Bash(PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 ./venv/bin/pip install:*)",
       "Bash(npx playwright install:*)",
       "Bash(npx playwright test:*)",
-      "Bash(PYTHONPATH=. ./venv/bin/python:*)"
+      "Bash(PYTHONPATH=. ./venv/bin/python:*)",
+      "Bash(./venv/bin/pyrefly check:*)",
+      "Bash(./venv/bin/ruff check:*)"
     ],
     "deny": [],
     "ask": []

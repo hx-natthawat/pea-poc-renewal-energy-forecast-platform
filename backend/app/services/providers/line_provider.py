@@ -7,8 +7,7 @@ Part of v1.1.0 Enhanced Alerting System feature.
 """
 
 import logging
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 import httpx
 
@@ -33,10 +32,10 @@ class LineMessage:
     """LINE notification message structure."""
 
     message: str
-    image_url: Optional[str] = None
-    image_thumbnail: Optional[str] = None
-    sticker_package_id: Optional[int] = None
-    sticker_id: Optional[int] = None
+    image_url: str | None = None
+    image_thumbnail: str | None = None
+    sticker_package_id: int | None = None
+    sticker_id: int | None = None
     notification_disabled: bool = False
 
 
@@ -45,10 +44,10 @@ class LineResult:
     """Result of LINE notification send operation."""
 
     success: bool
-    status_code: Optional[int] = None
-    error: Optional[str] = None
-    rate_limit_remaining: Optional[int] = None
-    rate_limit_reset: Optional[int] = None
+    status_code: int | None = None
+    error: str | None = None
+    rate_limit_remaining: int | None = None
+    rate_limit_reset: int | None = None
 
 
 class LineProvider:
@@ -62,7 +61,7 @@ class LineProvider:
     - Rate limit tracking
     """
 
-    def __init__(self, config: Optional[LineConfig] = None):
+    def __init__(self, config: LineConfig | None = None):
         """Initialize LINE provider with configuration."""
         self.config = config or LineConfig()
         self._is_configured = bool(self.config.access_token)
@@ -162,9 +161,9 @@ class LineProvider:
 
         return self._parse_response(response)
 
-    def _build_payload(self, message: LineMessage) -> dict:
+    def _build_payload(self, message: LineMessage) -> dict[str, str | int]:
         """Build the API payload from message."""
-        data = {"message": message.message}
+        data: dict[str, str | int] = {"message": message.message}
 
         if message.image_url:
             data["imageThumbnail"] = message.image_thumbnail or message.image_url
@@ -224,7 +223,7 @@ class LineProvider:
             rate_limit_remaining=1000,
         )
 
-    def send_alert(self, message: str, image_url: Optional[str] = None) -> LineResult:
+    def send_alert(self, message: str, image_url: str | None = None) -> LineResult:
         """
         Convenience method to send a simple alert.
 
@@ -242,7 +241,7 @@ class LineProvider:
         return self.send(line_message)
 
     async def send_alert_async(
-        self, message: str, image_url: Optional[str] = None
+        self, message: str, image_url: str | None = None
     ) -> LineResult:
         """
         Convenience method to send a simple alert asynchronously.
@@ -262,7 +261,7 @@ class LineProvider:
 
 
 # Singleton instance
-_line_provider: Optional[LineProvider] = None
+_line_provider: LineProvider | None = None
 
 
 def get_line_provider() -> LineProvider:

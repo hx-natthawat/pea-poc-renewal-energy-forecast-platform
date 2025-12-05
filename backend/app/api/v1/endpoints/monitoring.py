@@ -7,10 +7,10 @@ Provides model performance tracking, drift detection, and accuracy monitoring.
 import logging
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -43,11 +43,11 @@ class MetricType(str, Enum):
 class PerformanceMetric(BaseModel):
     """Performance metric for a time period."""
     period: str
-    mape: Optional[float] = None
-    mae: Optional[float] = None
-    rmse: Optional[float] = None
-    r2: Optional[float] = None
-    bias: Optional[float] = None
+    mape: float | None = None
+    mae: float | None = None
+    rmse: float | None = None
+    r2: float | None = None
+    bias: float | None = None
     sample_count: int
 
 
@@ -66,11 +66,11 @@ class ModelHealth(BaseModel):
     model_type: str
     model_version: str
     is_healthy: bool
-    last_prediction: Optional[str] = None
+    last_prediction: str | None = None
     predictions_24h: int
     avg_latency_ms: float
     accuracy_status: str  # good, warning, degraded
-    issues: List[str]
+    issues: list[str]
 
 
 # =============================================================================
@@ -78,7 +78,7 @@ class ModelHealth(BaseModel):
 # =============================================================================
 
 
-def calculate_metrics(predictions: List[float], actuals: List[float]) -> Dict[str, float]:
+def calculate_metrics(predictions: list[float], actuals: list[float]) -> dict[str, float]:
     """Calculate accuracy metrics."""
     if not predictions or not actuals or len(predictions) != len(actuals):
         return {}
@@ -131,7 +131,7 @@ def calculate_metrics(predictions: List[float], actuals: List[float]) -> Dict[st
 async def get_model_health(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get health status for all models.
 
@@ -220,7 +220,7 @@ async def get_model_performance(
     interval: str = Query(default="1d", description="Aggregation interval: 1h, 6h, 1d"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get model performance metrics over time.
 
@@ -318,7 +318,7 @@ async def detect_drift(
     current_days: int = Query(default=7, ge=1, le=30, description="Current period (days)"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(require_roles(["admin", "analyst"])),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Detect data drift by comparing baseline and current distributions.
 
@@ -366,9 +366,9 @@ async def detect_drift(
         current_row = current_result.fetchone()
 
         if baseline_row and current_row and baseline_row[0] and current_row[0]:
-            baseline_mean = baseline_row[0]
-            baseline_std = baseline_row[1] or 1
-            current_mean = current_row[0]
+            baseline_mean = float(baseline_row[0])
+            baseline_std = float(baseline_row[1] or 1)
+            current_mean = float(current_row[0])
 
             # Calculate drift score (z-score of mean difference)
             drift_score = abs((current_mean - baseline_mean) / baseline_std)
@@ -409,7 +409,7 @@ async def get_prediction_accuracy(
     hours: int = Query(default=24, ge=1, le=168, description="Hours to analyze"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get detailed prediction accuracy breakdown.
 
@@ -485,7 +485,7 @@ async def get_prediction_accuracy(
 async def list_models(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     List all registered models.
 

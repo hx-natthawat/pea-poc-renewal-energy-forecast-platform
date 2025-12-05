@@ -9,14 +9,13 @@ Provides:
 """
 
 import time
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable
 
 from fastapi import Request, Response
 from prometheus_client import Counter, Gauge, Histogram, Info, generate_latest
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response as StarletteResponse
-
 
 # =============================================================================
 # Application Info
@@ -221,13 +220,10 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
         """Normalize path to reduce cardinality."""
         # Replace IDs and dynamic segments
         parts = path.split("/")
-        normalized = []
+        normalized: list[str] = []
         for part in parts:
             # Replace UUIDs
-            if len(part) == 36 and part.count("-") == 4:
-                normalized.append("{id}")
-            # Replace numeric IDs
-            elif part.isdigit():
+            if (len(part) == 36 and part.count("-") == 4) or part.isdigit():
                 normalized.append("{id}")
             # Replace prosumer IDs like prosumer1, prosumer2
             elif part.startswith("prosumer") and part[8:].isdigit():
@@ -297,7 +293,7 @@ def set_model_loaded(model_type: str, model_version: str, is_loaded: bool) -> No
     )
 
 
-def set_model_accuracy(model_type: str, mape: float = None, mae: float = None) -> None:
+def set_model_accuracy(model_type: str, mape: float | None = None, mae: float | None = None) -> None:
     """Set model accuracy metrics."""
     if mape is not None:
         ML_MAPE.labels(model_type=model_type).set(mape)

@@ -10,9 +10,9 @@ from typing import Any
 from fastapi import APIRouter
 
 from app.core.versioning import (
-    APIVersion,
     CURRENT_VERSION,
     LATEST_VERSION,
+    APIVersion,
     create_versioned_response,
     get_version_info,
 )

@@ -8,13 +8,12 @@ for solar and voltage measurement data.
 import csv
 import io
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Response
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -52,23 +51,23 @@ class ExportFormat(str, Enum):
 class DateRangeStats(BaseModel):
     """Statistics for a date range."""
     count: int
-    avg: Optional[float] = None
-    min: Optional[float] = None
-    max: Optional[float] = None
-    std: Optional[float] = None
+    avg: float | None = None
+    min: float | None = None
+    max: float | None = None
+    std: float | None = None
 
 
 class HistoricalDataPoint(BaseModel):
     """A single historical data point."""
     time: str
     value: float
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
 
 class HistoricalResponse(BaseModel):
     """Response for historical data queries."""
     status: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
 
 # =============================================================================
@@ -102,7 +101,7 @@ async def get_solar_history(
     offset: int = Query(default=0, ge=0, description="Records to skip"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get historical solar measurements for a date range.
 
@@ -233,7 +232,7 @@ async def get_solar_summary(
     station_id: str = Query(default="POC_STATION_1", description="Station ID"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get summary statistics for solar data in a date range.
 
@@ -355,14 +354,14 @@ async def get_solar_summary(
 async def get_voltage_history(
     start_date: datetime = Query(..., description="Start date (ISO format)"),
     end_date: datetime = Query(..., description="End date (ISO format)"),
-    prosumer_id: Optional[str] = Query(default=None, description="Filter by prosumer ID"),
-    phase: Optional[str] = Query(default=None, description="Filter by phase (A, B, C)"),
+    prosumer_id: str | None = Query(default=None, description="Filter by prosumer ID"),
+    phase: str | None = Query(default=None, description="Filter by phase (A, B, C)"),
     interval: AggregationInterval = Query(default=AggregationInterval.hour, description="Aggregation interval"),
     limit: int = Query(default=1000, ge=1, le=10000, description="Max records"),
     offset: int = Query(default=0, ge=0, description="Records to skip"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get historical voltage measurements for a date range.
 
@@ -374,7 +373,7 @@ async def get_voltage_history(
 
     # Build WHERE clause
     where_conditions = ["m.time >= :start_date", "m.time <= :end_date"]
-    params: Dict[str, Any] = {"start_date": start_date, "end_date": end_date, "limit": limit, "offset": offset}
+    params: dict[str, Any] = {"start_date": start_date, "end_date": end_date, "limit": limit, "offset": offset}
 
     if prosumer_id:
         where_conditions.append("m.prosumer_id = :prosumer_id")
@@ -491,7 +490,7 @@ async def get_voltage_summary(
     end_date: datetime = Query(..., description="End date (ISO format)"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get summary statistics for voltage data in a date range.
 
@@ -625,7 +624,7 @@ async def export_historical_data(
     end_date: datetime = Query(..., description="End date (ISO format)"),
     format: ExportFormat = Query(default=ExportFormat.csv, description="Export format"),
     station_id: str = Query(default="POC_STATION_1", description="Station ID (for solar)"),
-    prosumer_id: Optional[str] = Query(default=None, description="Prosumer ID (for voltage)"),
+    prosumer_id: str | None = Query(default=None, description="Prosumer ID (for voltage)"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(require_roles(["admin", "analyst"])),
 ) -> Response:
@@ -667,7 +666,7 @@ async def export_historical_data(
 
     else:  # voltage
         where_clause = "time >= :start_date AND time <= :end_date"
-        params: Dict[str, Any] = {"start_date": start_date, "end_date": end_date}
+        params: dict[str, Any] = {"start_date": start_date, "end_date": end_date}
         if prosumer_id:
             where_clause += " AND prosumer_id = :prosumer_id"
             params["prosumer_id"] = prosumer_id

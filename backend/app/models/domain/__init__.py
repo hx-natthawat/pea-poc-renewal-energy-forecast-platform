@@ -1,15 +1,15 @@
 """Domain models package."""
 
 from app.models.domain.region import (
+    AccessLevel,
     Region,
     RegionType,
     UserRegionAccess,
-    AccessLevel,
 )
 
 __all__ = [
+    "AccessLevel",
     "Region",
     "RegionType",
     "UserRegionAccess",
-    "AccessLevel",
 ]

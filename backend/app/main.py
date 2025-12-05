@@ -5,8 +5,8 @@ This is the FastAPI application entry point for the PEA Renewable Energy
 Forecast Platform.
 """
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,7 +25,7 @@ from app.core.rate_limit import RateLimitConfig, RateLimitMiddleware
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     """Application lifespan manager for startup/shutdown events."""
     # Startup
     print(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")

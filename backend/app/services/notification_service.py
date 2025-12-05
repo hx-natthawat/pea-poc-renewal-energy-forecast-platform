@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -111,9 +111,9 @@ class NotificationService:
 
     def __init__(
         self,
-        config: Optional[NotificationConfig] = None,
-        email_provider: Optional[EmailProvider] = None,
-        line_provider: Optional[LineProvider] = None,
+        config: NotificationConfig | None = None,
+        email_provider: EmailProvider | None = None,
+        line_provider: LineProvider | None = None,
     ):
         """Initialize notification service."""
         self.config = config or NotificationConfig()
@@ -122,13 +122,13 @@ class NotificationService:
 
         # Initialize template engine
         templates_path = Path(self.config.templates_dir)
+        self._jinja_env: Environment | None = None
         if templates_path.exists():
             self._jinja_env = Environment(
                 loader=FileSystemLoader(str(templates_path)),
                 autoescape=select_autoescape(["html", "xml"]),
             )
         else:
-            self._jinja_env = None
             logger.warning(f"Templates directory not found: {templates_path}")
 
         # In-memory notification log (for dashboard delivery)
@@ -626,7 +626,7 @@ MAPE: {current_mape}% (จำกัด: {threshold}%)
 
 
 # Singleton instance
-_notification_service: Optional[NotificationService] = None
+_notification_service: NotificationService | None = None
 
 
 def get_notification_service() -> NotificationService:
@@ -638,9 +638,9 @@ def get_notification_service() -> NotificationService:
 
 
 def configure_notification_service(
-    config: Optional[NotificationConfig] = None,
-    email_config: Optional[EmailConfig] = None,
-    line_config: Optional[LineConfig] = None,
+    config: NotificationConfig | None = None,
+    email_config: EmailConfig | None = None,
+    line_config: LineConfig | None = None,
 ) -> NotificationService:
     """Configure the notification service with specific settings."""
     global _notification_service

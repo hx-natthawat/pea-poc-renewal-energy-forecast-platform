@@ -5,7 +5,7 @@ from app.services.providers.line_provider import LineProvider, get_line_provider
 
 __all__ = [
     "EmailProvider",
-    "get_email_provider",
     "LineProvider",
+    "get_email_provider",
     "get_line_provider",
 ]

@@ -7,9 +7,8 @@ Part of v1.1.0 Model Retraining Pipeline feature.
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
 
 import numpy as np
 from scipy import stats
@@ -45,7 +44,7 @@ class DriftResult:
     severity: DriftSeverity
     baseline_stats: dict
     current_stats: dict
-    p_value: Optional[float] = None
+    p_value: float | None = None
     recommendation: str = ""
 
 
@@ -91,7 +90,7 @@ class RetrainingDecision:
     drift_results: list = field(default_factory=list)
     performance_metrics: dict = field(default_factory=dict)
     urgency: DriftSeverity = DriftSeverity.NONE
-    estimated_improvement: Optional[float] = None
+    estimated_improvement: float | None = None
 
 
 class DriftDetectionService:
@@ -104,7 +103,7 @@ class DriftDetectionService:
     - Performance degradation monitoring
     """
 
-    def __init__(self, config: Optional[RetrainingTrigger] = None):
+    def __init__(self, config: RetrainingTrigger | None = None):
         """Initialize drift detection service."""
         self.config = config or RetrainingTrigger()
         self._violation_counts: dict[str, int] = {}
@@ -188,8 +187,8 @@ class DriftDetectionService:
         model_type: str,
         baseline_mape: float,
         current_mape: float,
-        baseline_mae: Optional[float] = None,
-        current_mae: Optional[float] = None,
+        baseline_mae: float | None = None,
+        current_mae: float | None = None,
     ) -> DriftResult:
         """
         Detect performance degradation in model predictions.
@@ -256,7 +255,7 @@ class DriftDetectionService:
         model_type: str,
         drift_results: list[DriftResult],
         current_metrics: dict[str, float],
-        last_retrain_date: Optional[datetime] = None,
+        last_retrain_date: datetime | None = None,
     ) -> RetrainingDecision:
         """
         Evaluate whether model retraining is needed.
@@ -421,14 +420,14 @@ class ModelRegistryService:
     def __init__(self):
         """Initialize model registry service."""
         self._models: dict[str, list[ModelCandidate]] = {}
-        self._traffic_config: dict[str, dict[str, float]] = {}
+        self._traffic_config: dict[str, dict[str, str | float]] = {}
 
     def register_model(
         self,
         model_type: str,
         version: str,
         metrics: dict,
-        model_id: Optional[str] = None,
+        model_id: str | None = None,
     ) -> ModelCandidate:
         """
         Register a new model version.
@@ -492,7 +491,7 @@ class ModelRegistryService:
 
         return self._traffic_config[model_type]
 
-    def get_model_for_prediction(self, model_type: str) -> str:
+    def get_model_for_prediction(self, model_type: str) -> str | None:
         """
         Get model ID to use for prediction (supports A/B routing).
 
@@ -500,7 +499,7 @@ class ModelRegistryService:
             model_type: Type of model
 
         Returns:
-            Model ID to use
+            Model ID to use, or None if no model available
         """
         if model_type not in self._traffic_config:
             # No A/B test, return champion
@@ -511,11 +510,11 @@ class ModelRegistryService:
         config = self._traffic_config[model_type]
 
         # Simple random routing based on traffic percentage
-        if np.random.random() * 100 < config["challenger_traffic"]:
-            return config["challenger_id"]
-        return config["champion_id"]
+        if np.random.random() * 100 < float(config["challenger_traffic"]):
+            return str(config["challenger_id"])
+        return str(config["champion_id"])
 
-    def promote_challenger(self, model_type: str) -> Optional[ModelCandidate]:
+    def promote_challenger(self, model_type: str) -> ModelCandidate | None:
         """
         Promote challenger to champion after successful A/B test.
 
@@ -554,7 +553,7 @@ class ModelRegistryService:
 
         return None
 
-    def rollback(self, model_type: str, target_version: Optional[str] = None) -> Optional[ModelCandidate]:
+    def rollback(self, model_type: str, target_version: str | None = None) -> ModelCandidate | None:
         """
         Rollback to a previous model version.
 
@@ -615,8 +614,8 @@ class ModelRegistryService:
 
 
 # Singleton instances
-_drift_service: Optional[DriftDetectionService] = None
-_registry_service: Optional[ModelRegistryService] = None
+_drift_service: DriftDetectionService | None = None
+_registry_service: ModelRegistryService | None = None
 
 
 def get_drift_detection_service() -> DriftDetectionService:

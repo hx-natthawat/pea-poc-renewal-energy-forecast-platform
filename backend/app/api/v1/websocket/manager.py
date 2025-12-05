@@ -6,7 +6,6 @@ Supports multiple channels: solar, voltage, alerts.
 """
 
 import asyncio
-import json
 from datetime import datetime
 from typing import Any
 
@@ -71,19 +70,17 @@ class ConnectionManager:
     async def subscribe(self, websocket: WebSocket, channel: str):
         """Subscribe a connection to a specific channel."""
         async with self._lock:
-            if channel in self.channel_subscriptions:
-                if websocket not in self.channel_subscriptions[channel]:
-                    self.channel_subscriptions[channel].append(websocket)
-                    return True
+            if channel in self.channel_subscriptions and websocket not in self.channel_subscriptions[channel]:
+                self.channel_subscriptions[channel].append(websocket)
+                return True
         return False
 
     async def unsubscribe(self, websocket: WebSocket, channel: str):
         """Unsubscribe a connection from a specific channel."""
         async with self._lock:
-            if channel in self.channel_subscriptions:
-                if websocket in self.channel_subscriptions[channel]:
-                    self.channel_subscriptions[channel].remove(websocket)
-                    return True
+            if channel in self.channel_subscriptions and websocket in self.channel_subscriptions[channel]:
+                self.channel_subscriptions[channel].remove(websocket)
+                return True
         return False
 
     async def send_personal_message(self, message: dict[str, Any], websocket: WebSocket):

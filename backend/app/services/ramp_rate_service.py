@@ -1,8 +1,7 @@
 """Ramp rate detection service for cloud shadow and rapid irradiance changes."""
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
@@ -24,16 +23,16 @@ class RampRateConfig:
 class RampRateService:
     """Service for detecting rapid irradiance changes (cloud shadows, storms)."""
 
-    def __init__(self, config: Optional[RampRateConfig] = None):
+    def __init__(self, config: RampRateConfig | None = None):
         """Initialize ramp rate service."""
         self.config = config or RampRateConfig()
-        self._last_alert_time: Optional[datetime] = None
+        self._last_alert_time: datetime | None = None
         self._recent_events: list[RampEvent] = []
         self._max_recent_events = 100
 
     def detect_ramp_event(
         self, irradiance_series: pd.Series
-    ) -> Optional[RampEvent]:
+    ) -> RampEvent | None:
         """
         Detect sudden changes in irradiance indicating cloud shadow.
 
@@ -63,12 +62,12 @@ class RampRateService:
                 logger.debug("Ramp event detected but in cooldown period")
                 return None
 
-            self._last_alert_time = datetime.utcnow()
+            self._last_alert_time = datetime.now(UTC)
 
             event = RampEvent(
                 timestamp=irradiance_series.index[-1]
                 if hasattr(irradiance_series.index[-1], "isoformat")
-                else datetime.utcnow(),
+                else datetime.now(UTC),
                 rate_percent=rate_of_change,
                 direction="down" if rate_of_change < 0 else "up",
                 current_irradiance=float(current),
@@ -120,9 +119,9 @@ class RampRateService:
 
         events = []
         in_cloud = False
-        event_start_idx = None
+        event_start_idx: int | None = None
 
-        for i, (t, k) in enumerate(zip(timestamps, kt)):
+        for i, (_t, k) in enumerate(zip(timestamps, kt, strict=False)):
             # Enter cloud event when kt drops below 0.5
             if k < 0.5 and not in_cloud:
                 in_cloud = True
@@ -169,14 +168,14 @@ class RampRateService:
             Variability index series
         """
         window = f"{window_minutes}min"
-        rolling_mean = irradiance.rolling(window).mean()
-        rolling_std = irradiance.rolling(window).std()
+        rolling_mean: pd.Series = irradiance.rolling(window).mean()  # type: ignore[assignment]
+        rolling_std: pd.Series = irradiance.rolling(window).std()  # type: ignore[assignment]
 
         # Avoid division by zero
         return rolling_std / rolling_mean.replace(0, np.nan)
 
     def get_current_status(
-        self, current_irradiance: Optional[float] = None
+        self, current_irradiance: float | None = None
     ) -> RampRateStatus:
         """
         Get current ramp rate monitoring status.
@@ -192,7 +191,7 @@ class RampRateService:
         if len(self._recent_events) >= 1:
             last_event = self._recent_events[-1]
             # Check if last event is recent (within last 5 minutes)
-            if (datetime.utcnow() - last_event.timestamp).total_seconds() < 300:
+            if (datetime.now(UTC) - last_event.timestamp).total_seconds() < 300:
                 current_rate = last_event.rate_percent
 
         is_alert = abs(current_rate) >= self.config.threshold_percent
@@ -202,7 +201,7 @@ class RampRateService:
             threshold_percent=self.config.threshold_percent,
             is_alert=is_alert,
             last_event=self._recent_events[-1] if self._recent_events else None,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
         )
 
     def get_recent_events(self, limit: int = 10) -> list[RampEvent]:
@@ -214,7 +213,7 @@ class RampRateService:
         if self._last_alert_time is None:
             return False
 
-        elapsed = (datetime.utcnow() - self._last_alert_time).seconds
+        elapsed = (datetime.now(UTC) - self._last_alert_time).seconds
         return elapsed < self.config.alert_cooldown_seconds
 
 

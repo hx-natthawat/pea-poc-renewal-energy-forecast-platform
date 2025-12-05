@@ -10,7 +10,7 @@ Tests cover:
 """
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 
 from app.core.security import get_current_user, CurrentUser
@@ -45,7 +45,7 @@ class TestSolarForecast:
     ):
         """Test solar forecast with high irradiance values."""
         request = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "station_id": "POC_STATION_1",
             "horizon_minutes": 60,
             "features": {
@@ -71,7 +71,7 @@ class TestSolarForecast:
     ):
         """Test solar forecast with zero irradiance (nighttime)."""
         request = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "station_id": "POC_STATION_1",
             "horizon_minutes": 60,
             "features": {
@@ -97,7 +97,7 @@ class TestSolarForecast:
     ):
         """Test solar forecast with invalid irradiance values."""
         request = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "station_id": "POC_STATION_1",
             "horizon_minutes": 60,
             "features": {
@@ -180,7 +180,7 @@ class TestVoltageForecast:
     ):
         """Test voltage prediction for all prosumers."""
         request = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "prosumer_ids": sample_prosumer_ids,
             "horizon_minutes": 15,
         }
@@ -197,7 +197,7 @@ class TestVoltageForecast:
     ):
         """Test voltage prediction for a single prosumer."""
         request = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "prosumer_ids": ["prosumer1"],
             "horizon_minutes": 15,
         }
@@ -396,7 +396,7 @@ class TestForecastValidation:
     ):
         """Test solar forecast with missing features."""
         request = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "station_id": "POC_STATION_1",
             "horizon_minutes": 60,
             "features": {
@@ -414,7 +414,7 @@ class TestForecastValidation:
     ):
         """Test voltage forecast with empty prosumer list."""
         request = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "prosumer_ids": [],
             "horizon_minutes": 15,
         }
@@ -431,7 +431,7 @@ class TestForecastValidation:
     ):
         """Test solar forecast with invalid horizon."""
         request = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "station_id": "POC_STATION_1",
             "horizon_minutes": 10000,  # Too large
             "features": sample_solar_features,

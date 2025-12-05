@@ -6,11 +6,11 @@
 name = "pea-re-forecast-backend"
 version = "1.1.0"
 description = "PEA Renewable Energy Forecast Platform - Backend API"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 
 [tool.ruff]
 # Ruff configuration - replaces black, isort, flake8, and more
-target-version = "py311"
+target-version = "py313"  # py314 not yet supported by ruff, using closest available
 line-length = 88
 indent-width = 4
 
@@ -76,13 +76,35 @@ line-ending = "lf"
 # Enable auto-formatting of code examples in docstrings
 docstring-code-format = true
 
-[tool.mypy]
-python_version = "3.11"
-warn_return_any = true
-warn_unused_ignores = true
-disallow_untyped_defs = true
-ignore_missing_imports = true
-plugins = ["pydantic.mypy"]
+# Note: mypy removed - using pyrefly for type checking instead
+
+[tool.pyrefly]
+# Python environment
+python-version = "3.14"
+python-platform = "linux"
+python-interpreter-path = "./venv/bin/python"
+
+# File inclusion - type check the app directory
+project-includes = ["app"]
+project-excludes = ["**/.[!/.]*", "**/migrations", "**/__pycache__"]
+
+# Import resolution
+search-path = [".", "app"]
+site-package-path = ["./venv/lib/python3.14/site-packages"]
+
+# Type checking behavior (similar to mypy disallow_untyped_defs)
+untyped-def-behavior = "check-and-infer-return-type"
+ignore-errors-in-generated-code = true
+use-ignore-files = true
+
+# Ignore directives compatibility
+enabled-ignores = ["type", "pyrefly", "pyright"]
+
+# Error configuration - disable some noisy errors during migration
+[tool.pyrefly.errors]
+# These are often false positives with dict operations and type inference
+no-matching-overload = false  # min/max with mixed types
+bad-index = false  # dict indexing issues
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

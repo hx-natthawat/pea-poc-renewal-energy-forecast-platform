@@ -5,7 +5,6 @@ All configuration is loaded from environment variables with sensible defaults
 for local development.
 """
 
-from typing import List
 
 from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -41,7 +40,7 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
-    def CORS_ORIGINS(self) -> List[str]:
+    def CORS_ORIGINS(self) -> list[str]:
         """Parse CORS origins from comma-separated string."""
         return [origin.strip() for origin in self.CORS_ORIGINS_STR.split(",") if origin.strip()]
 

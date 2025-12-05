@@ -9,15 +9,13 @@ Provides:
 """
 
 import asyncio
+import contextlib
 import time
-from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Dict, Optional
 
 from fastapi import HTTPException, Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware
-
-from app.core.config import settings
 
 
 @dataclass
@@ -85,8 +83,8 @@ class InMemoryRateLimiter:
 
     def __init__(self, config: RateLimitConfig):
         self.config = config
-        self.buckets: Dict[str, TokenBucket] = {}
-        self._cleanup_task: Optional[asyncio.Task] = None
+        self.buckets: dict[str, TokenBucket] = {}
+        self._cleanup_task: asyncio.Task | None = None
         self._lock = asyncio.Lock()
 
     async def start(self):
@@ -98,10 +96,8 @@ class InMemoryRateLimiter:
         """Stop the cleanup task."""
         if self._cleanup_task:
             self._cleanup_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._cleanup_task
-            except asyncio.CancelledError:
-                pass
             self._cleanup_task = None
 
     async def _cleanup_loop(self):
@@ -199,7 +195,7 @@ class RedisRateLimiter:
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Rate limiting middleware for FastAPI."""
 
-    def __init__(self, app, config: Optional[RateLimitConfig] = None):
+    def __init__(self, app, config: RateLimitConfig | None = None):
         super().__init__(app)
         self.config = config or RateLimitConfig()
         self.limiter = InMemoryRateLimiter(self.config)
@@ -295,10 +291,7 @@ def rate_limit(requests_per_minute: int = 30, requests_per_second: int = 5):
 
     def decorator(func: Callable) -> Callable:
         # Store rate limit config on the function
-        func._rate_limit = {
-            "requests_per_minute": requests_per_minute,
-            "requests_per_second": requests_per_second,
-        }
+        setattr(func, "_rate_limit", {"requests_per_minute": requests_per_minute, "requests_per_second": requests_per_second})  # noqa: B010
         return func
 
     return decorator

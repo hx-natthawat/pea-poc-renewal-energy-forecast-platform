@@ -6,8 +6,7 @@ Authentication is controlled by AUTH_ENABLED setting.
 """
 
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 from fastapi import APIRouter, Depends, Query
@@ -35,16 +34,16 @@ class ComparisonDataPoint(BaseModel):
     predicted: float
     actual: float
     error: float
-    error_percent: Optional[float] = None
+    error_percent: float | None = None
 
 
 class AccuracyMetrics(BaseModel):
     """Model accuracy metrics."""
 
-    mape: Optional[float] = None  # Mean Absolute Percentage Error
+    mape: float | None = None  # Mean Absolute Percentage Error
     mae: float  # Mean Absolute Error
     rmse: float  # Root Mean Square Error
-    r_squared: Optional[float] = None  # R-squared
+    r_squared: float | None = None  # R-squared
     bias: float  # Mean bias (predicted - actual)
     count: int  # Number of data points
 
@@ -53,7 +52,7 @@ class ComparisonResponse(BaseModel):
     """Comparison response model."""
 
     status: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
 
 # =============================================================================
@@ -61,7 +60,7 @@ class ComparisonResponse(BaseModel):
 # =============================================================================
 
 
-def calculate_metrics(predictions: List[float], actuals: List[float]) -> AccuracyMetrics:
+def calculate_metrics(predictions: list[float], actuals: list[float]) -> AccuracyMetrics:
     """Calculate accuracy metrics from predictions and actuals."""
     if len(predictions) == 0 or len(actuals) == 0:
         return AccuracyMetrics(mae=0, rmse=0, bias=0, count=0)
@@ -223,7 +222,7 @@ async def get_solar_comparison(
 
 @router.get("/voltage")
 async def get_voltage_comparison(
-    prosumer_id: Optional[str] = Query(default=None, description="Specific prosumer ID"),
+    prosumer_id: str | None = Query(default=None, description="Specific prosumer ID"),
     hours: int = Query(default=24, ge=1, le=168, description="Hours of history"),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
@@ -274,7 +273,7 @@ async def get_voltage_comparison(
     comparison_data = []
     predictions = []
     actuals = []
-    by_prosumer: Dict[str, Dict[str, List[float]]] = {}
+    by_prosumer: dict[str, dict[str, list[float]]] = {}
 
     for row in rows:
         predicted = row.predicted_value

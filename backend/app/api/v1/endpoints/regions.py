@@ -7,7 +7,7 @@ Part of v1.1.0 Multi-Region Support feature (F003).
 
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -16,10 +16,8 @@ from app.models.domain.region import AccessLevel, Region, RegionType
 from app.models.schemas.region import (
     RegionComparisonRequest,
     RegionCreate,
-    RegionResponse,
     RegionUpdate,
     UserRegionAccessCreate,
-    UserRegionAccessResponse,
 )
 from app.services.region_service import RegionService, get_region_service
 
@@ -35,11 +33,11 @@ router = APIRouter()
 
 @router.get("")
 async def list_regions(
-    region_type: Optional[str] = Query(
+    region_type: str | None = Query(
         default=None,
         description="Filter by type: zone, region, district, station",
     ),
-    parent_id: Optional[str] = Query(
+    parent_id: str | None = Query(
         default=None,
         description="Filter by parent region ID",
     ),

@@ -6,10 +6,11 @@ Supports both URL-based (/api/v1, /api/v2) and header-based versioning.
 """
 
 import logging
+from collections.abc import Callable
 from datetime import datetime
 from enum import Enum
 from functools import wraps
-from typing import Any, Callable, Optional
+from typing import Any
 
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -28,10 +29,7 @@ class APIVersion(str, Enum):
     def from_string(cls, version: str) -> "APIVersion":
         """Parse version string to enum."""
         version = version.lower().strip()
-        if version.startswith("v"):
-            version = version
-        else:
-            version = f"v{version}"
+        version = version if version.startswith("v") else f"v{version}"
 
         try:
             return cls(version)
@@ -44,12 +42,12 @@ class APIVersion(str, Enum):
         return self in DEPRECATED_VERSIONS
 
     @property
-    def deprecation_date(self) -> Optional[datetime]:
+    def deprecation_date(self) -> datetime | None:
         """Get deprecation date if deprecated."""
         return DEPRECATION_DATES.get(self)
 
     @property
-    def sunset_date(self) -> Optional[datetime]:
+    def sunset_date(self) -> datetime | None:
         """Get sunset (removal) date if deprecated."""
         return SUNSET_DATES.get(self)
 
@@ -68,10 +66,10 @@ class DeprecationInfo(BaseModel):
     """Deprecation information model."""
 
     deprecated: bool = False
-    deprecation_date: Optional[str] = None
-    sunset_date: Optional[str] = None
-    message: Optional[str] = None
-    migration_guide_url: Optional[str] = None
+    deprecation_date: str | None = None
+    sunset_date: str | None = None
+    message: str | None = None
+    migration_guide_url: str | None = None
 
 
 class VersionInfo(BaseModel):
@@ -79,7 +77,7 @@ class VersionInfo(BaseModel):
 
     version: str
     status: str  # "current", "latest", "deprecated", "sunset"
-    deprecation: Optional[DeprecationInfo] = None
+    deprecation: DeprecationInfo | None = None
 
 
 def get_version_info(version: APIVersion) -> VersionInfo:
@@ -129,7 +127,7 @@ class VersionNegotiator:
     API_VERSION_HEADER = "X-API-Version"
 
     @classmethod
-    def get_version_from_request(cls, request: Request) -> Optional[APIVersion]:
+    def get_version_from_request(cls, request: Request) -> APIVersion | None:
         """
         Extract API version from request.
 
@@ -166,9 +164,9 @@ class VersionNegotiator:
 
 def deprecated_endpoint(
     deprecated_in: str,
-    removed_in: Optional[str] = None,
-    alternative: Optional[str] = None,
-    message: Optional[str] = None,
+    removed_in: str | None = None,
+    alternative: str | None = None,
+    message: str | None = None,
 ) -> Callable:
     """
     Decorator to mark an endpoint as deprecated.
@@ -197,16 +195,12 @@ def deprecated_endpoint(
 
             return result
 
-        # Add deprecation metadata
-        wrapper.__deprecated__ = True
-        wrapper.__deprecated_in__ = deprecated_in
-        wrapper.__removed_in__ = removed_in
-        wrapper.__alternative__ = alternative
-        wrapper.__deprecation_message__ = message or (
-            f"This endpoint is deprecated since {deprecated_in}"
-            + (f" and will be removed in {removed_in}" if removed_in else "")
-            + (f". Use {alternative} instead." if alternative else ".")
-        )
+        # Add deprecation metadata (using setattr for pyrefly compatibility)
+        setattr(wrapper, "__deprecated__", True)  # noqa: B010
+        setattr(wrapper, "__deprecated_in__", deprecated_in)  # noqa: B010
+        setattr(wrapper, "__removed_in__", removed_in)  # noqa: B010
+        setattr(wrapper, "__alternative__", alternative)  # noqa: B010
+        setattr(wrapper, "__deprecation_message__", message or f"This endpoint is deprecated since {deprecated_in}" + (f" and will be removed in {removed_in}" if removed_in else "") + (f". Use {alternative} instead." if alternative else "."))  # noqa: B010
 
         return wrapper
 
@@ -214,8 +208,8 @@ def deprecated_endpoint(
 
 
 def version_specific(
-    min_version: Optional[str] = None,
-    max_version: Optional[str] = None,
+    min_version: str | None = None,
+    max_version: str | None = None,
 ) -> Callable:
     """
     Decorator to restrict endpoint to specific API versions.
@@ -232,13 +226,15 @@ def version_specific(
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        async def wrapper(*args, request: Request = None, **kwargs):
+        async def wrapper(*args, request: Request | None = None, **kwargs):
             if request:
                 current_version = VersionNegotiator.get_version_from_request(request)
+                if current_version is None:
+                    current_version = APIVersion.V1  # Default to V1
 
                 if min_version:
                     min_ver = APIVersion.from_string(min_version)
-                    if list(APIVersion).index(current_version) < list(APIVersion).index(min_ver):
+                    if min_ver is not None and list(APIVersion).index(current_version) < list(APIVersion).index(min_ver):
                         raise HTTPException(
                             status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"This endpoint requires API version {min_version} or higher",
@@ -246,7 +242,7 @@ def version_specific(
 
                 if max_version:
                     max_ver = APIVersion.from_string(max_version)
-                    if list(APIVersion).index(current_version) > list(APIVersion).index(max_ver):
+                    if max_ver is not None and list(APIVersion).index(current_version) > list(APIVersion).index(max_ver):
                         raise HTTPException(
                             status_code=status.HTTP_410_GONE,
                             detail=f"This endpoint is not available in API version {current_version.value}",
@@ -265,14 +261,14 @@ class VersionedResponse(BaseModel):
 
     api_version: str
     data: Any
-    metadata: Optional[dict[str, Any]] = None
-    deprecation: Optional[DeprecationInfo] = None
+    metadata: dict[str, Any] | None = None
+    deprecation: DeprecationInfo | None = None
 
 
 def create_versioned_response(
     data: Any,
     version: APIVersion,
-    metadata: Optional[dict[str, Any]] = None,
+    metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create a versioned response with appropriate metadata."""
     response = {

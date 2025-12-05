@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -83,13 +82,13 @@ class WeatherEventLog(BaseModel):
     event_type: str
     severity: AlertSeverity
     station_id: str
-    min_irradiance: Optional[float] = None
-    max_irradiance: Optional[float] = None
-    min_clearness_index: Optional[float] = None
-    duration_minutes: Optional[int] = None
-    forecast_error_mape: Optional[float] = None
-    forecast_error_rmse: Optional[float] = None
-    tmd_alert_id: Optional[str] = None
+    min_irradiance: float | None = None
+    max_irradiance: float | None = None
+    min_clearness_index: float | None = None
+    duration_minutes: int | None = None
+    forecast_error_mape: float | None = None
+    forecast_error_rmse: float | None = None
+    tmd_alert_id: str | None = None
 
 
 class RampRateStatus(BaseModel):
@@ -98,7 +97,7 @@ class RampRateStatus(BaseModel):
     current_ramp_rate_percent: float
     threshold_percent: float
     is_alert: bool
-    last_event: Optional[RampEvent] = None
+    last_event: RampEvent | None = None
     timestamp: datetime
 
 
@@ -106,10 +105,10 @@ class WeatherConditionResponse(BaseModel):
     """Weather condition classification response."""
 
     condition: WeatherCondition
-    clearness_index: Optional[float] = None
-    cloud_cover_percent: Optional[float] = None
-    precipitation_mm: Optional[float] = None
-    wind_speed_kmh: Optional[float] = None
+    clearness_index: float | None = None
+    cloud_cover_percent: float | None = None
+    precipitation_mm: float | None = None
+    wind_speed_kmh: float | None = None
     timestamp: datetime
 
 

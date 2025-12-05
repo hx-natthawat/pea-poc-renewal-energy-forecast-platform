@@ -5,7 +5,7 @@ Part of v1.1.0 Multi-Region Support feature (F003).
 """
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -14,11 +14,11 @@ class RegionBase(BaseModel):
     """Base schema for region data."""
 
     name: str = Field(..., description="Region name in English")
-    name_th: Optional[str] = Field(default=None, description="Region name in Thai")
+    name_th: str | None = Field(default=None, description="Region name in Thai")
     region_type: str = Field(..., description="Type: zone, region, district, station")
-    parent_id: Optional[str] = Field(default=None, description="Parent region ID")
-    latitude: Optional[float] = Field(default=None, ge=-90, le=90)
-    longitude: Optional[float] = Field(default=None, ge=-180, le=180)
+    parent_id: str | None = Field(default=None, description="Parent region ID")
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
     timezone: str = Field(default="Asia/Bangkok")
 
 
@@ -31,11 +31,11 @@ class RegionCreate(RegionBase):
 class RegionUpdate(BaseModel):
     """Schema for updating a region."""
 
-    name: Optional[str] = None
-    name_th: Optional[str] = None
-    latitude: Optional[float] = Field(default=None, ge=-90, le=90)
-    longitude: Optional[float] = Field(default=None, ge=-180, le=180)
-    is_active: Optional[bool] = None
+    name: str | None = None
+    name_th: str | None = None
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
+    is_active: bool | None = None
 
 
 class RegionResponse(RegionBase):
@@ -45,8 +45,8 @@ class RegionResponse(RegionBase):
     is_active: bool = True
     power_plants_count: int = 0
     prosumers_count: int = 0
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
     model_config = {"from_attributes": True}
 
@@ -75,15 +75,15 @@ class UserRegionAccessBase(BaseModel):
 class UserRegionAccessCreate(UserRegionAccessBase):
     """Schema for granting region access."""
 
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
 
 
 class UserRegionAccessResponse(UserRegionAccessBase):
     """Schema for user region access response."""
 
-    granted_by: Optional[str] = None
+    granted_by: str | None = None
     granted_at: datetime
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
     is_expired: bool = False
 
     model_config = {"from_attributes": True}
@@ -98,7 +98,7 @@ class RegionStatsResponse(BaseModel):
     prosumers_count: int
     total_capacity_kw: float = 0.0
     active_alerts: int = 0
-    avg_forecast_accuracy: Optional[float] = None
+    avg_forecast_accuracy: float | None = None
 
 
 class RegionComparisonRequest(BaseModel):
@@ -109,8 +109,8 @@ class RegionComparisonRequest(BaseModel):
         default="power_output",
         description="Metric to compare: power_output, forecast_accuracy, voltage_violations",
     )
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
 
 
 class RegionComparisonResponse(BaseModel):
@@ -126,7 +126,7 @@ class RegionDashboardResponse(BaseModel):
 
     region_id: str
     region_name: str
-    region_name_th: Optional[str] = None
+    region_name_th: str | None = None
     summary: dict[str, Any]
     power_plants: list[dict[str, Any]]
     recent_alerts: list[dict[str, Any]]

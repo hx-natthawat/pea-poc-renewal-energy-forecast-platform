@@ -8,7 +8,7 @@ Part of v1.1.0 Enhanced Alerting System feature.
 
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -57,10 +57,10 @@ class NotificationPreferencesRequest(BaseModel):
     line_enabled: bool = True
     dashboard_enabled: bool = True
     preferred_language: str = "th"
-    quiet_hours_start: Optional[int] = Field(
+    quiet_hours_start: int | None = Field(
         default=None, ge=0, le=23, description="Quiet hours start (0-23)"
     )
-    quiet_hours_end: Optional[int] = Field(
+    quiet_hours_end: int | None = Field(
         default=None, ge=0, le=23, description="Quiet hours end (0-23)"
     )
     alert_types_email: list[str] = Field(
@@ -77,7 +77,7 @@ class TestNotificationRequest(BaseModel):
     """Request to send a test notification."""
 
     channel: str = Field(..., description="Channel to test: email or line")
-    recipient: Optional[str] = Field(default=None, description="Test recipient")
+    recipient: str | None = Field(default=None, description="Test recipient")
 
 
 # =============================================================================

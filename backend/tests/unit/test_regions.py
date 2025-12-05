@@ -650,7 +650,6 @@ class TestCheckRegionAccess:
     """Test check_region_access endpoint."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Code uses current_user.user_id but CurrentUser has id - bug in implementation")
     async def test_check_access(self):
         """Test checking access to a region."""
         from app.api.v1.endpoints.regions import check_region_access

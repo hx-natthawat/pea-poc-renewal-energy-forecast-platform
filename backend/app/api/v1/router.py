@@ -4,7 +4,21 @@ API v1 Router - Aggregates all API endpoints.
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import alerts, comparison, data, dayahead, forecast, health, history, monitoring, notifications, regions, retraining, topology, weather
+from app.api.v1.endpoints import (
+    alerts,
+    comparison,
+    data,
+    dayahead,
+    forecast,
+    health,
+    history,
+    monitoring,
+    notifications,
+    regions,
+    retraining,
+    topology,
+    weather,
+)
 from app.api.v1.websocket import realtime as websocket_realtime
 
 api_router = APIRouter()

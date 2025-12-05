@@ -6,20 +6,16 @@ Part of v1.1.0 Multi-Region Support feature (F003).
 """
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from app.models.domain.region import (
-    AccessLevel,
     PEA_REGIONS,
+    AccessLevel,
     Region,
     RegionType,
     UserRegionAccess,
-    get_child_regions,
-    get_region_by_id,
-    get_region_hierarchy,
-    get_regions_by_type,
 )
 
 logger = logging.getLogger(__name__)
@@ -47,7 +43,7 @@ class RegionService:
     - Region-filtered queries
     """
 
-    def __init__(self, config: Optional[RegionServiceConfig] = None):
+    def __init__(self, config: RegionServiceConfig | None = None):
         """Initialize region service."""
         self.config = config or RegionServiceConfig()
 
@@ -60,7 +56,7 @@ class RegionService:
     # Region CRUD Operations
     # =========================================================================
 
-    def get_region(self, region_id: str) -> Optional[Region]:
+    def get_region(self, region_id: str) -> Region | None:
         """Get a region by ID."""
         return self._regions.get(region_id)
 
@@ -116,7 +112,7 @@ class RegionService:
         self,
         region_id: str,
         updates: dict[str, Any],
-    ) -> Optional[Region]:
+    ) -> Region | None:
         """Update a region."""
         region = self.get_region(region_id)
         if not region:
@@ -158,8 +154,8 @@ class RegionService:
         user_id: str,
         region_id: str,
         access_level: AccessLevel,
-        granted_by: Optional[str] = None,
-        expires_at: Optional[datetime] = None,
+        granted_by: str | None = None,
+        expires_at: datetime | None = None,
     ) -> UserRegionAccess:
         """Grant user access to a region."""
         region = self.get_region(region_id)
@@ -239,11 +235,7 @@ class RegionService:
         accessible_region_ids = set()
 
         for access in accesses:
-            if required_level == AccessLevel.READ and access.can_read():
-                accessible_region_ids.add(access.region_id)
-            elif required_level == AccessLevel.WRITE and access.can_write():
-                accessible_region_ids.add(access.region_id)
-            elif required_level == AccessLevel.ADMIN and access.is_admin():
+            if (required_level == AccessLevel.READ and access.can_read()) or (required_level == AccessLevel.WRITE and access.can_write()) or (required_level == AccessLevel.ADMIN and access.is_admin()):
                 accessible_region_ids.add(access.region_id)
 
         return [
@@ -351,7 +343,7 @@ class RegionService:
 
 
 # Singleton instance
-_region_service: Optional[RegionService] = None
+_region_service: RegionService | None = None
 
 
 def get_region_service() -> RegionService:

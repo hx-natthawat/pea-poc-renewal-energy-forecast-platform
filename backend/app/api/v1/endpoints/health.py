@@ -2,8 +2,8 @@
 Health check endpoints for Kubernetes probes and monitoring.
 """
 
-from datetime import datetime
-from typing import Dict, Any
+from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import APIRouter
 
@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/health")
-async def health_check() -> Dict[str, Any]:
+async def health_check() -> dict[str, Any]:
     """
     Health check endpoint for liveness probe.
 
@@ -19,13 +19,13 @@ async def health_check() -> Dict[str, Any]:
     """
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "service": "pea-re-forecast-backend",
     }
 
 
 @router.get("/ready")
-async def readiness_check() -> Dict[str, Any]:
+async def readiness_check() -> dict[str, Any]:
     """
     Readiness check endpoint for readiness probe.
 
@@ -43,6 +43,6 @@ async def readiness_check() -> Dict[str, Any]:
 
     return {
         "status": "ready" if all_healthy else "not_ready",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "checks": checks,
     }

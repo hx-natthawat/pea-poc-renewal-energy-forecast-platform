@@ -7,10 +7,10 @@ Part of v1.1.0 Model Retraining Pipeline feature.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,10 +19,7 @@ from app.core.security import CurrentUser, get_current_user, require_roles
 from app.db import get_db
 from app.services.drift_detection_service import (
     DriftDetectionService,
-    DriftSeverity,
-    DriftType,
     ModelRegistryService,
-    RetrainingTrigger,
     get_drift_detection_service,
     get_model_registry_service,
 )
@@ -42,7 +39,7 @@ class DriftDetectionRequest(BaseModel):
     model_type: str = Field(..., description="Model type: solar or voltage")
     baseline_days: int = Field(default=30, ge=7, le=90)
     current_days: int = Field(default=7, ge=1, le=30)
-    features: Optional[List[str]] = Field(default=None, description="Features to analyze")
+    features: list[str] | None = Field(default=None, description="Features to analyze")
 
 
 class RetrainingEvaluationRequest(BaseModel):
@@ -63,7 +60,7 @@ class ModelPromotionRequest(BaseModel):
     """Request to promote or rollback a model."""
     model_type: str
     action: str = Field(..., description="promote or rollback")
-    target_version: Optional[str] = Field(default=None, description="Version to rollback to")
+    target_version: str | None = Field(default=None, description="Version to rollback to")
 
 
 class RetrainingTriggerConfig(BaseModel):
@@ -103,7 +100,7 @@ async def fetch_feature_data(
     return np.array([row[0] for row in rows if row[0] is not None])
 
 
-async def get_current_metrics(db: AsyncSession, model_type: str, hours: int = 24) -> Dict[str, float]:
+async def get_current_metrics(db: AsyncSession, model_type: str, hours: int = 24) -> dict[str, float]:
     """Get current model performance metrics."""
     query = text("""
         SELECT
@@ -129,7 +126,7 @@ async def get_current_metrics(db: AsyncSession, model_type: str, hours: int = 24
     return {"mae": 0.0, "rmse": 0.0, "mape": 0.0}
 
 
-async def get_last_retrain_date(db: AsyncSession, model_type: str) -> Optional[datetime]:
+async def get_last_retrain_date(db: AsyncSession, model_type: str) -> datetime | None:
     """Get the date of the last model training."""
     query = text("""
         SELECT trained_at
@@ -156,7 +153,7 @@ async def analyze_drift(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(require_roles(["admin", "analyst"])),
     drift_service: DriftDetectionService = Depends(get_drift_detection_service),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Analyze data drift for a model.
 
@@ -256,7 +253,7 @@ async def evaluate_retraining(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(require_roles(["admin", "analyst"])),
     drift_service: DriftDetectionService = Depends(get_drift_detection_service),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Evaluate whether model retraining is needed.
 
@@ -304,7 +301,7 @@ async def trigger_retraining(
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(require_roles(["admin"])),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Manually trigger model retraining.
 
@@ -338,7 +335,7 @@ async def trigger_retraining(
 async def get_retraining_job_status(
     job_id: str,
     current_user: CurrentUser = Depends(get_current_user),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get status of a retraining job.
 
@@ -362,7 +359,7 @@ async def setup_ab_test(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(require_roles(["admin"])),
     registry: ModelRegistryService = Depends(get_model_registry_service),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Set up A/B test between champion and challenger models.
 
@@ -394,7 +391,7 @@ async def promote_or_rollback(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(require_roles(["admin"])),
     registry: ModelRegistryService = Depends(get_model_registry_service),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Promote challenger to champion or rollback to previous version.
 
@@ -432,7 +429,7 @@ async def get_model_history(
     model_type: str,
     current_user: CurrentUser = Depends(get_current_user),
     registry: ModelRegistryService = Depends(get_model_registry_service),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get model version history.
 
@@ -454,7 +451,7 @@ async def get_model_history(
 async def get_retraining_config(
     current_user: CurrentUser = Depends(get_current_user),
     drift_service: DriftDetectionService = Depends(get_drift_detection_service),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get current retraining configuration.
 
@@ -482,7 +479,7 @@ async def update_retraining_config(
     config: RetrainingTriggerConfig,
     current_user: CurrentUser = Depends(require_roles(["admin"])),
     drift_service: DriftDetectionService = Depends(get_drift_detection_service),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Update retraining configuration.
 

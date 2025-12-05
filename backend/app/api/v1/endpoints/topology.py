@@ -6,11 +6,10 @@ Authentication is controlled by AUTH_ENABLED setting.
 """
 
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -37,20 +36,20 @@ class ProsumerNode(BaseModel):
     has_pv: bool
     has_ev: bool
     has_battery: bool = False
-    pv_capacity_kw: Optional[float] = None
-    current_voltage: Optional[float] = None
+    pv_capacity_kw: float | None = None
+    current_voltage: float | None = None
     voltage_status: str = "unknown"  # normal, warning, critical, unknown
-    active_power: Optional[float] = None
-    reactive_power: Optional[float] = None
+    active_power: float | None = None
+    reactive_power: float | None = None
 
 
 class PhaseGroup(BaseModel):
     """Group of prosumers on a single phase."""
 
     phase: str
-    prosumers: List[ProsumerNode]
-    avg_voltage: Optional[float] = None
-    total_power: Optional[float] = None
+    prosumers: list[ProsumerNode]
+    avg_voltage: float | None = None
+    total_power: float | None = None
 
 
 class TransformerNode(BaseModel):
@@ -61,14 +60,14 @@ class TransformerNode(BaseModel):
     capacity_kva: float = 50.0
     voltage_primary: float = 22000.0
     voltage_secondary: float = 400.0
-    phases: List[str] = ["A", "B", "C"]
+    phases: list[str] = ["A", "B", "C"]
 
 
 class TopologyResponse(BaseModel):
     """Network topology response."""
 
     status: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
 
 # =============================================================================
@@ -83,7 +82,7 @@ VOLTAGE_WARNING_UPPER = 238.0
 VOLTAGE_WARNING_LOWER = 222.0
 
 
-def get_voltage_status(voltage: Optional[float]) -> str:
+def get_voltage_status(voltage: float | None) -> str:
     """Determine voltage status based on limits."""
     if voltage is None:
         return "unknown"
@@ -151,7 +150,7 @@ async def get_network_topology(
             }
 
     # Build prosumer nodes
-    prosumers_by_phase: Dict[str, List[ProsumerNode]] = {"A": [], "B": [], "C": []}
+    prosumers_by_phase: dict[str, list[ProsumerNode]] = {"A": [], "B": [], "C": []}
 
     for row in prosumer_rows:
         voltage_info = voltage_data.get(row.id, {})

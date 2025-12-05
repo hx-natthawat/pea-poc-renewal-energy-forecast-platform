@@ -8,7 +8,7 @@ Authentication is controlled by AUTH_ENABLED setting.
 import logging
 import time
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -62,15 +62,15 @@ class SolarForecastResponse(BaseModel):
     """Response model for solar power forecast."""
 
     status: str
-    data: Dict[str, Any]
-    meta: Dict[str, Any]
+    data: dict[str, Any]
+    meta: dict[str, Any]
 
 
 class VoltageForecastRequest(BaseModel):
     """Request model for voltage prediction."""
 
     timestamp: datetime
-    prosumer_ids: List[str]
+    prosumer_ids: list[str]
     horizon_minutes: int = Field(default=15, ge=5, le=60)
 
 
@@ -90,8 +90,8 @@ class VoltageForecastResponse(BaseModel):
     """Response model for voltage prediction."""
 
     status: str
-    data: Dict[str, Any]
-    meta: Dict[str, Any] = Field(default_factory=dict)
+    data: dict[str, Any]
+    meta: dict[str, Any] = Field(default_factory=dict)
 
 
 # =============================================================================
@@ -282,7 +282,7 @@ async def get_solar_forecast_history(
     offset: int = Query(default=0, ge=0, description="Records to skip for pagination"),
     current_user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get historical solar power predictions for a station.
 
@@ -357,7 +357,7 @@ async def get_voltage_history(
     offset: int = Query(default=0, ge=0, description="Records to skip for pagination"),
     current_user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get historical voltage predictions for a prosumer.
 
@@ -428,7 +428,7 @@ async def get_voltage_history(
 @router.get("/cache/stats")
 async def get_cache_stats(
     current_user: CurrentUser = Depends(require_roles(["admin"])),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get cache statistics for monitoring.
 

@@ -10,7 +10,7 @@ This module provides:
 
 import asyncio
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import AsyncGenerator, Generator
 
 import pytest
@@ -160,7 +160,7 @@ def sample_solar_features() -> dict:
 def sample_solar_request(sample_solar_features: dict) -> dict:
     """Sample solar forecast request."""
     return {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "station_id": "POC_STATION_1",
         "horizon_minutes": 60,
         "features": sample_solar_features,
@@ -171,7 +171,7 @@ def sample_solar_request(sample_solar_features: dict) -> dict:
 def sample_voltage_request() -> dict:
     """Sample voltage forecast request."""
     return {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "prosumer_ids": ["prosumer1", "prosumer2", "prosumer3"],
         "horizon_minutes": 15,
     }
@@ -256,16 +256,16 @@ def mock_voltage_prediction() -> dict:
 @pytest.fixture
 def current_timestamp() -> datetime:
     """Current timestamp for tests."""
-    return datetime.utcnow()
+    return datetime.now(timezone.utc)
 
 
 @pytest.fixture
 def past_timestamp() -> datetime:
     """Timestamp from 24 hours ago."""
-    return datetime.utcnow() - timedelta(hours=24)
+    return datetime.now(timezone.utc) - timedelta(hours=24)
 
 
 @pytest.fixture
 def future_timestamp() -> datetime:
     """Timestamp 1 hour in the future."""
-    return datetime.utcnow() + timedelta(hours=1)
+    return datetime.now(timezone.utc) + timedelta(hours=1)

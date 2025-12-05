@@ -8,7 +8,6 @@ Part of v1.1.0 Multi-Region Support feature (F003).
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 
 class RegionType(str, Enum):
@@ -40,10 +39,10 @@ class Region:
     id: str
     name: str
     region_type: RegionType
-    name_th: Optional[str] = None
-    parent_id: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+    name_th: str | None = None
+    parent_id: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
     timezone: str = "Asia/Bangkok"
     is_active: bool = True
     power_plants_count: int = 0
@@ -70,9 +69,9 @@ class UserRegionAccess:
     user_id: str
     region_id: str
     access_level: AccessLevel
-    granted_by: Optional[str] = None
+    granted_by: str | None = None
     granted_at: datetime = field(default_factory=datetime.now)
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
 
     def is_expired(self) -> bool:
         """Check if access has expired."""
@@ -188,7 +187,7 @@ PEA_REGIONS = {
 }
 
 
-def get_region_by_id(region_id: str) -> Optional[Region]:
+def get_region_by_id(region_id: str) -> Region | None:
     """Get a region by its ID."""
     return PEA_REGIONS.get(region_id)
 
