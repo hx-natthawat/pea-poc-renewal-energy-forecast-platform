@@ -93,7 +93,9 @@
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform log --oneline -10)",
       "Bash(./venv/bin/pytest tests/ -v --tb=short)",
       "Bash(PYTHONPATH=. ./venv/bin/pytest:*)",
-      "Bash(pnpm exec biome:*)"
+      "Bash(pnpm exec biome:*)",
+      "Bash(pnpm run build:*)",
+      "Bash(PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 ./venv/bin/pip install:*)"
     ],
     "deny": [],
     "ask": []

@@ -91,6 +91,7 @@ class VoltageForecastResponse(BaseModel):
 
     status: str
     data: Dict[str, Any]
+    meta: Dict[str, Any] = Field(default_factory=dict)
 
 
 # =============================================================================
@@ -200,7 +201,7 @@ async def predict_voltage(
     Predict voltage levels for prosumers.
 
     Takes prosumer IDs and predicts voltage levels, identifying potential
-    violations.
+    violations. Results are cached in Redis for 1 minute per prosumer.
 
     **Requires roles:** admin, operator, analyst, or api
 
@@ -212,13 +213,25 @@ async def predict_voltage(
     logger.info(f"Voltage prediction requested by user: {current_user.username}")
     start_time = time.time()
 
-    # Get inference service
+    # Get cache and inference service
+    cache = await get_cache()
     inference = get_voltage_inference()
 
     predictions = []
     model_version = "not_loaded"
+    cache_hits = 0
 
     for prosumer_id in request.prosumer_ids:
+        # Try cache first
+        cached = await cache.get_voltage_prediction(request.timestamp, prosumer_id)
+
+        if cached:
+            predictions.append(cached)
+            model_version = cached.get("model_version", model_version)
+            cache_hits += 1
+            continue
+
+        # Make prediction using trained model
         result = inference.predict(
             timestamp=request.timestamp,
             prosumer_id=prosumer_id,
@@ -235,7 +248,16 @@ async def predict_voltage(
             status=result["status"],
             violation_probability=0.1 if result["status"] != "normal" else 0.02,
         )
-        predictions.append(prediction.model_dump())
+        prediction_dict = prediction.model_dump()
+
+        # Cache the result
+        await cache.set_voltage_prediction(
+            request.timestamp, prosumer_id, prediction_dict
+        )
+
+        predictions.append(prediction_dict)
+
+    prediction_time_ms = int((time.time() - start_time) * 1000)
 
     return VoltageForecastResponse(
         status="success",
@@ -244,6 +266,11 @@ async def predict_voltage(
             "predictions": predictions,
             "model_version": model_version,
             "is_ml_prediction": inference.is_loaded,
+        },
+        meta={
+            "prediction_time_ms": prediction_time_ms,
+            "cache_hits": cache_hits,
+            "total_predictions": len(request.prosumer_ids),
         },
     )
 

@@ -12,17 +12,76 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { SolarForecastChart, VoltageMonitorChart } from "@/components/charts";
-import {
-  AlertDashboard,
-  DayAheadReport,
-  ForecastComparison,
-  HistoricalAnalysis,
-  ModelPerformance,
-  NetworkTopology,
-} from "@/components/dashboard";
 import { getApiBaseUrl } from "@/lib/api";
+
+// Lazy load heavy chart components (recharts ~480KB)
+const SolarForecastChart = dynamic(
+  () => import("@/components/charts").then((mod) => ({ default: mod.SolarForecastChart })),
+  {
+    loading: () => <ChartSkeleton />,
+    ssr: false,
+  }
+);
+
+const VoltageMonitorChart = dynamic(
+  () => import("@/components/charts").then((mod) => ({ default: mod.VoltageMonitorChart })),
+  {
+    loading: () => <ChartSkeleton />,
+    ssr: false,
+  }
+);
+
+// Lazy load dashboard components
+const AlertDashboard = dynamic(
+  () => import("@/components/dashboard").then((mod) => ({ default: mod.AlertDashboard })),
+  { loading: () => <DashboardSkeleton /> }
+);
+
+const DayAheadReport = dynamic(
+  () => import("@/components/dashboard").then((mod) => ({ default: mod.DayAheadReport })),
+  { loading: () => <DashboardSkeleton /> }
+);
+
+const ForecastComparison = dynamic(
+  () => import("@/components/dashboard").then((mod) => ({ default: mod.ForecastComparison })),
+  { loading: () => <DashboardSkeleton /> }
+);
+
+const HistoricalAnalysis = dynamic(
+  () => import("@/components/dashboard").then((mod) => ({ default: mod.HistoricalAnalysis })),
+  { loading: () => <DashboardSkeleton /> }
+);
+
+const ModelPerformance = dynamic(
+  () => import("@/components/dashboard").then((mod) => ({ default: mod.ModelPerformance })),
+  { loading: () => <DashboardSkeleton /> }
+);
+
+const NetworkTopology = dynamic(
+  () => import("@/components/dashboard").then((mod) => ({ default: mod.NetworkTopology })),
+  { loading: () => <DashboardSkeleton /> }
+);
+
+// Loading skeletons
+function ChartSkeleton() {
+  return (
+    <div className="bg-white rounded-lg shadow p-4 animate-pulse">
+      <div className="h-6 w-1/3 bg-gray-200 rounded mb-4" />
+      <div className="h-[200px] bg-gray-100 rounded" />
+    </div>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="bg-white rounded-lg shadow p-4 animate-pulse">
+      <div className="h-6 w-1/4 bg-gray-200 rounded mb-4" />
+      <div className="h-[180px] bg-gray-100 rounded" />
+    </div>
+  );
+}
 
 interface HealthStatus {
   status: string;
