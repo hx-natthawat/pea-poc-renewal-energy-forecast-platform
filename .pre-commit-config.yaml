@@ -1,0 +1,56 @@
+# =============================================================================
+# Pre-commit hooks for PEA RE Forecast Platform
+# =============================================================================
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+default_language_version:
+  python: python3.14
+
+repos:
+  # Ruff - Fast Python linter and formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.2
+    hooks:
+      - id: ruff
+        name: ruff (lint)
+        args: [--fix, --exit-non-zero-on-fix]
+        files: ^backend/
+      - id: ruff-format
+        name: ruff (format)
+        files: ^backend/
+
+  # Pyrefly - Meta's Python type checker
+  - repo: local
+    hooks:
+      - id: pyrefly
+        name: pyrefly (type check)
+        entry: bash -c 'cd backend && ./venv/bin/pyrefly check'
+        language: system
+        files: ^backend/app/
+        types: [python]
+        pass_filenames: false
+
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(frontend/pnpm-lock\.yaml|.*\.md)$
+      - id: end-of-file-fixer
+        exclude: ^frontend/pnpm-lock\.yaml$
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  # Security checks
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: [--baseline, .secrets.baseline]
+        exclude: ^(frontend/pnpm-lock\.yaml|.*\.example)$

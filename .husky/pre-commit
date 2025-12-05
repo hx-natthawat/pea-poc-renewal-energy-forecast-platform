@@ -1,0 +1,54 @@
+#!/bin/sh
+# =============================================================================
+# Pre-commit hook for PEA RE Forecast Platform
+# Runs backend (ruff + pyrefly) and frontend (biome) checks
+# =============================================================================
+
+echo "🔍 Running pre-commit checks..."
+
+# Get list of staged files
+STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM | grep "^backend/.*\.py$" || true)
+STAGED_TS=$(git diff --cached --name-only --diff-filter=ACM | grep "^frontend/.*\.\(ts\|tsx\|js\|jsx\)$" || true)
+
+# Backend checks (Python)
+if [ -n "$STAGED_PY" ]; then
+    echo ""
+    echo "🐍 Backend: Running ruff check..."
+    # Convert paths to be relative to backend/
+    BACKEND_FILES=$(echo "$STAGED_PY" | sed 's|^backend/||')
+    cd backend
+    if ! ./venv/bin/ruff check $BACKEND_FILES --fix; then
+        echo "❌ Ruff check failed. Please fix the errors and try again."
+        exit 1
+    fi
+
+    echo "🐍 Backend: Running ruff format..."
+    if ! ./venv/bin/ruff format $BACKEND_FILES --check; then
+        echo "❌ Ruff format check failed. Run './venv/bin/ruff format .' to fix."
+        exit 1
+    fi
+
+    echo "🔎 Backend: Running pyrefly type check..."
+    if ! ./venv/bin/pyrefly check; then
+        echo "❌ Pyrefly type check failed. Please fix type errors."
+        exit 1
+    fi
+    cd ..
+    echo "✅ Backend checks passed!"
+fi
+
+# Frontend checks (TypeScript/JavaScript)
+if [ -n "$STAGED_TS" ]; then
+    echo ""
+    echo "⚛️  Frontend: Running biome check..."
+    cd frontend
+    if ! pnpm exec biome check --staged --no-errors-on-unmatched; then
+        echo "❌ Biome check failed. Run 'pnpm run check:fix' to fix."
+        exit 1
+    fi
+    cd ..
+    echo "✅ Frontend checks passed!"
+fi
+
+echo ""
+echo "✅ All pre-commit checks passed!"
