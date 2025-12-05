@@ -11,9 +11,10 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.14"
   NODE_VERSION: "20"
   TRIVY_VERSION: "0.48.3"
+  PNPM_VERSION: "10"
 
   # Container registry
   CONTAINER_REGISTRY: ${CI_REGISTRY}
@@ -46,10 +47,13 @@ lint:python:
   <<: *python_cache
   script:
     - cd backend
-    - pip install ruff black mypy
+    - pip install ruff pyrefly
+    - echo "Running ruff lint..."
     - ruff check app/
-    - black --check app/
-    - mypy app/ --ignore-missing-imports
+    - echo "Running ruff format check..."
+    - ruff format --check app/
+    - echo "Running pyrefly type check..."
+    - pyrefly check
   rules:
     - changes:
         - backend/**/*
@@ -60,9 +64,11 @@ lint:typescript:
   <<: *node_cache
   script:
     - cd frontend
-    - npm install -g pnpm
+    - npm install -g pnpm@${PNPM_VERSION}
     - pnpm install --frozen-lockfile
+    - echo "Running TypeScript type check..."
     - pnpm run type-check
+    - echo "Running Biome lint and format check..."
     - pnpm run check
   rules:
     - changes:
@@ -90,8 +96,8 @@ test:backend:
   script:
     - cd backend
     - pip install -r requirements.txt
-    - pip install pytest pytest-cov pytest-asyncio
-    - pytest tests/ -v --cov=app --cov-report=xml --cov-report=html
+    - pip install pytest pytest-cov pytest-asyncio pytest-forked
+    - pytest tests/ -v --forked --cov=app --cov-report=xml --cov-report=html
   artifacts:
     reports:
       coverage_report:
@@ -111,7 +117,7 @@ test:frontend:
   <<: *node_cache
   script:
     - cd frontend
-    - npm install -g pnpm
+    - npm install -g pnpm@${PNPM_VERSION}
     - pnpm install --frozen-lockfile
     - pnpm run test:coverage
   artifacts:
