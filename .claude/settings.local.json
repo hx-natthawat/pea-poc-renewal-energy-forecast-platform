@@ -105,7 +105,9 @@
       "Bash(./backend/venv/bin/detect-secrets scan:*)",
       "Bash(./backend/venv/bin/pre-commit:*)",
       "Bash(sh:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(pnpm run test:run:*)",
+      "Bash(PYTHONPATH=. DATABASE_URL=\"postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast\" ./venv/bin/pytest:*)"
     ],
     "deny": [],
     "ask": []
