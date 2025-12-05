@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_router
+from app.api.v2.router import api_router as api_router_v2
 from app.core.config import settings
 from app.core.metrics import (
     PrometheusMiddleware,
@@ -72,12 +73,23 @@ app.add_middleware(PrometheusMiddleware)
 rate_limit_config = RateLimitConfig(
     requests_per_minute=120,
     requests_per_second=20,
-    exempt_paths=["/metrics", "/api/v1/health", "/api/v1/docs", "/api/v1/openapi.json"],
+    exempt_paths=[
+        "/metrics",
+        "/api/v1/health",
+        "/api/v1/docs",
+        "/api/v1/openapi.json",
+        "/api/v2/health",
+        "/api/v2/health/live",
+        "/api/v2/health/ready",
+        "/api/v2/docs",
+        "/api/v2/openapi.json",
+    ],
 )
 app.add_middleware(RateLimitMiddleware, config=rate_limit_config)
 
-# Include API router
+# Include API routers
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+app.include_router(api_router_v2, prefix="/api/v2")
 
 # Prometheus metrics endpoint
 app.add_api_route("/metrics", metrics_endpoint, methods=["GET"], include_in_schema=False)
@@ -108,6 +120,18 @@ async def root():
         "name": settings.APP_NAME,
         "version": settings.APP_VERSION,
         "status": "running",
+        "api_versions": {
+            "v1": {
+                "status": "stable",
+                "docs": f"{settings.API_V1_PREFIX}/docs",
+                "health": f"{settings.API_V1_PREFIX}/health",
+            },
+            "v2": {
+                "status": "beta",
+                "docs": "/api/v2/docs",
+                "health": "/api/v2/health",
+            },
+        },
         "docs": f"{settings.API_V1_PREFIX}/docs",
     }
 

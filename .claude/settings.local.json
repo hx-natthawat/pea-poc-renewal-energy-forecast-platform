@@ -96,7 +96,9 @@
       "Bash(pnpm exec biome:*)",
       "Bash(pnpm run build:*)",
       "Bash(PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 ./venv/bin/pip install:*)",
-      "Bash(npx playwright install:*)"
+      "Bash(npx playwright install:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(PYTHONPATH=. ./venv/bin/python:*)"
     ],
     "deny": [],
     "ask": []
