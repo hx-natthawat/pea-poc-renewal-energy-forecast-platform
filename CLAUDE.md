@@ -157,12 +157,28 @@ Custom slash commands are available to invoke specialized agents for this projec
 
 ### Available Commands
 
+#### Project Management (Autonomous Orchestration)
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/pm-director` | **Autonomous Project Orchestrator** | Complex tasks, multi-component work, project coordination |
+| `/sprint-plan` | Sprint planning and task breakdown | Beginning of sprint, prioritization |
+| `/health-check` | Comprehensive project health check | Daily checks, pre-release verification |
+| `/release` | Release management and versioning | Preparing releases, version bumps |
+
+#### Data & ML
+
 | Command | Description | When to Use |
 |---------|-------------|-------------|
 | `/analyze-poc-data` | Analyze POC Data.xlsx | Data exploration and quality assessment |
 | `/simulate-solar` | Generate solar simulation data | When POC data is insufficient |
 | `/simulate-voltage` | Generate voltage simulation data | When POC data is insufficient |
 | `/validate-model` | Validate ML model accuracy | Before marking model as production-ready |
+
+#### Development & Deployment
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
 | `/deploy-local` | Deploy to Kind cluster | For integration testing |
 | `/test-api` | Test all API endpoints | Before deployment |
 | `/review-arch` | Review architecture decisions | For architecture reviews |
@@ -172,6 +188,18 @@ Custom slash commands are available to invoke specialized agents for this projec
 ### Command Usage Examples
 
 ```bash
+# PM Director - Autonomous orchestration (recommended for complex tasks)
+/pm-director
+
+# Sprint planning
+/sprint-plan
+
+# Health check before release
+/health-check
+
+# Prepare a release
+/release
+
 # Analyze the POC data
 /analyze-poc-data
 
@@ -186,6 +214,36 @@ Custom slash commands are available to invoke specialized agents for this projec
 
 # Research latest versions before implementation
 /research-latest
+```
+
+### PM Director Capabilities
+
+The `/pm-director` command provides autonomous project orchestration:
+
+1. **Assesses** current project state automatically
+2. **Delegates** to specialized subagents:
+   - `backend-architect` for API/database work
+   - `test-automator` for test coverage
+   - `security-auditor` for security reviews
+   - `performance-engineer` for optimization
+   - `deployment-engineer` for CI/CD
+3. **Coordinates** parallel workstreams
+4. **Reports** comprehensive status
+
+Example autonomous tasks:
+
+```bash
+# Ask PM Director to improve a feature
+/pm-director
+> "Improve solar forecast accuracy"
+
+# Ask PM Director for project status
+/pm-director
+> "What's the current project health?"
+
+# Ask PM Director to prepare release
+/pm-director
+> "Prepare for v1.2.0 release"
 ```
 
 ### Creating New Commands
