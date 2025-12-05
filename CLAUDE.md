@@ -161,7 +161,7 @@ Custom slash commands are available to invoke specialized agents for this projec
 
 | Command | Description | When to Use |
 |---------|-------------|-------------|
-| `/pm-director` | **Autonomous Project Orchestrator** | Complex tasks, multi-component work, project coordination |
+| `/orchestrate` | **Autonomous Project Orchestrator** | Complex tasks, multi-component work, project coordination |
 | `/sprint-plan` | Sprint planning and task breakdown | Beginning of sprint, prioritization |
 | `/health-check` | Comprehensive project health check | Daily checks, pre-release verification |
 | `/release` | Release management and versioning | Preparing releases, version bumps |
@@ -188,8 +188,8 @@ Custom slash commands are available to invoke specialized agents for this projec
 ### Command Usage Examples
 
 ```bash
-# PM Director - Autonomous orchestration (recommended for complex tasks)
-/pm-director
+# Orchestrate - Autonomous orchestration (recommended for complex tasks)
+/orchestrate
 
 # Sprint planning
 /sprint-plan
@@ -216,9 +216,9 @@ Custom slash commands are available to invoke specialized agents for this projec
 /research-latest
 ```
 
-### PM Director Capabilities
+### Orchestrate Capabilities
 
-The `/pm-director` command provides autonomous project orchestration:
+The `/orchestrate` command provides autonomous project orchestration:
 
 1. **Assesses** current project state automatically
 2. **Delegates** to specialized subagents:
@@ -233,16 +233,16 @@ The `/pm-director` command provides autonomous project orchestration:
 Example autonomous tasks:
 
 ```bash
-# Ask PM Director to improve a feature
-/pm-director
+# Ask orchestrator to improve a feature
+/orchestrate
 > "Improve solar forecast accuracy"
 
-# Ask PM Director for project status
-/pm-director
+# Ask orchestrator for project status
+/orchestrate
 > "What's the current project health?"
 
-# Ask PM Director to prepare release
-/pm-director
+# Ask orchestrator to prepare release
+/orchestrate
 > "Prepare for v1.2.0 release"
 ```
 
