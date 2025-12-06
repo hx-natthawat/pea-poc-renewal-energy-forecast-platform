@@ -93,6 +93,45 @@ cors:
     - "https://pea-forecast.go.th"
     - "https://www.pea-forecast.go.th"
 
+# ML Service (TOR 7.1.1: AI/ML Server - 16 Core, 64GB)
+mlService:
+  enabled: true
+  replicaCount: 2
+  image:
+    tag: v1.0.0
+  resources:
+    requests:
+      memory: "16Gi"
+      cpu: "8000m"
+    limits:
+      memory: "64Gi"
+      cpu: "16000m"
+  env:
+    LOG_LEVEL: WARNING
+    PYTHONPATH: /app
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilization: 60
+    targetMemoryUtilization: 70
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: "longhorn"
+    modelStorage:
+      enabled: true
+      size: 20Gi
+      storageClass: "longhorn"
+  # Schedule on nodes with GPU/high-memory capability
+  nodeSelector:
+    node-type: ml-server
+  tolerations:
+    - key: "ml-workload"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+
 monitoring:
   enabled: true
   prometheus:

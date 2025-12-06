@@ -1,0 +1,222 @@
+{{- if .Values.mlService.enabled }}
+# =============================================================================
+# PEA RE Forecast Platform - ML Service Deployment
+# TOR Reference: Section 7.1.1 - AI/ML Server (16 Core, 64GB)
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: ml-service
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.mlService.autoscaling.enabled }}
+  replicas: {{ .Values.mlService.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: ml-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: ml-service
+        {{- include "pea-re-forecast.selectorLabels" . | nindent 8 }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+        prometheus.io/path: "/metrics"
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: ml-service
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.mlService.image.repository }}:{{ .Values.mlService.image.tag }}"
+          imagePullPolicy: {{ .Values.mlService.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8001
+              name: http
+          env:
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "pea-re-forecast.fullname" . }}-config
+                  key: APP_ENV
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "pea-re-forecast.fullname" . }}-config
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "pea-re-forecast.fullname" . }}-config
+                  key: REDIS_URL
+            - name: MODEL_PATH
+              value: {{ .Values.mlService.modelPath }}
+            - name: MLFLOW_TRACKING_URI
+              value: {{ .Values.mlService.mlflowUri | default "" | quote }}
+            {{- if .Values.mlService.env }}
+            {{- range $key, $value := .Values.mlService.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.mlService.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.mlService.probes.liveness.path }}
+              port: 8001
+            initialDelaySeconds: {{ .Values.mlService.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.mlService.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.mlService.probes.liveness.timeoutSeconds | default 5 }}
+            failureThreshold: {{ .Values.mlService.probes.liveness.failureThreshold | default 3 }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.mlService.probes.readiness.path }}
+              port: 8001
+            initialDelaySeconds: {{ .Values.mlService.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.mlService.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.mlService.probes.readiness.timeoutSeconds | default 5 }}
+            successThreshold: {{ .Values.mlService.probes.readiness.successThreshold | default 1 }}
+          volumeMounts:
+            - name: model-storage
+              mountPath: /app/models
+            {{- if .Values.mlService.persistence.enabled }}
+            - name: ml-data
+              mountPath: /app/data
+            {{- end }}
+      volumes:
+        - name: model-storage
+          {{- if .Values.mlService.persistence.modelStorage.enabled }}
+          persistentVolumeClaim:
+            claimName: ml-service-models
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.mlService.persistence.enabled }}
+        - name: ml-data
+          persistentVolumeClaim:
+            claimName: ml-service-data
+        {{- end }}
+      {{- with .Values.mlService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mlService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mlService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ml-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: ml-service
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.mlService.service.type }}
+  ports:
+    - port: {{ .Values.mlService.service.port }}
+      targetPort: 8001
+      name: http
+  selector:
+    app: ml-service
+{{- if .Values.mlService.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ml-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ml-service
+  minReplicas: {{ .Values.mlService.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.mlService.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.mlService.autoscaling.targetCPUUtilization }}
+    {{- if .Values.mlService.autoscaling.targetMemoryUtilization }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.mlService.autoscaling.targetMemoryUtilization }}
+    {{- end }}
+{{- end }}
+{{- if .Values.mlService.persistence.modelStorage.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ml-service-models
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: ml-service
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mlService.persistence.modelStorage.size }}
+  {{- if .Values.mlService.persistence.modelStorage.storageClass }}
+  storageClassName: {{ .Values.mlService.persistence.modelStorage.storageClass }}
+  {{- end }}
+{{- end }}
+{{- if .Values.mlService.persistence.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ml-service-data
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: ml-service
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mlService.persistence.size }}
+  {{- if .Values.mlService.persistence.storageClass }}
+  storageClassName: {{ .Values.mlService.persistence.storageClass }}
+  {{- end }}
+{{- end }}
+{{- end }}
