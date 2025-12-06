@@ -21,6 +21,7 @@ from app.core.metrics import (
     metrics_endpoint,
     set_model_loaded,
 )
+from app.core.middleware import SecurityHeadersMiddleware
 from app.core.rate_limit import RateLimitConfig, RateLimitMiddleware
 
 
@@ -65,6 +66,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Security headers middleware (OWASP best practices)
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Prometheus metrics middleware
 app.add_middleware(PrometheusMiddleware)
