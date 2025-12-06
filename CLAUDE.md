@@ -185,6 +185,12 @@ Custom slash commands are available to invoke specialized agents for this projec
 | `/research-latest` | Research latest library versions | Before starting new features |
 | `/update-plan` | Update project plan files | After completing tasks |
 
+#### Demo & Stakeholder
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/demo` | **Prepare demo environment** | Before stakeholder demonstrations |
+
 ### Command Usage Examples
 
 ```bash
@@ -214,6 +220,9 @@ Custom slash commands are available to invoke specialized agents for this projec
 
 # Research latest versions before implementation
 /research-latest
+
+# Prepare demo environment for stakeholders
+/demo
 ```
 
 ### Orchestrate Capabilities

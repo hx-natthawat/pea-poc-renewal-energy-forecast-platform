@@ -10,6 +10,7 @@ from app.api.v1.endpoints import (
     comparison,
     data,
     dayahead,
+    demo,
     forecast,
     health,
     history,
@@ -118,6 +119,12 @@ api_router.include_router(
     audit.router,
     prefix="/audit",
     tags=["audit"],
+)
+
+# Demo endpoints for stakeholder demonstrations
+api_router.include_router(
+    demo.router,
+    tags=["demo"],
 )
 
 # WebSocket endpoints for real-time updates
