@@ -1,0 +1,94 @@
+# =============================================================================
+# PEA RE Forecast Platform - ArgoCD Project
+# TOR Reference: Section 7.1.3 - Argo (CI/CD)
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: pea-forecast
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: pea-forecast
+    app.kubernetes.io/part-of: pea-re-forecast-platform
+spec:
+  description: PEA Renewable Energy Forecast Platform - Production Project
+
+  # Source repositories allowed
+  sourceRepos:
+    - 'https://gitlab.pea.co.th/re-forecast/pea-re-forecast.git'
+    - 'https://gitlab.pea.co.th/re-forecast/pea-re-forecast-platform.git'
+
+  # Allowed destinations
+  destinations:
+    - namespace: 'pea-forecast-*'
+      server: https://kubernetes.default.svc
+    - namespace: 'pea-forecast-staging'
+      server: https://kubernetes.default.svc
+    - namespace: 'pea-forecast-prod'
+      server: https://kubernetes.default.svc
+
+  # Cluster resource whitelist
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: 'networking.k8s.io'
+      kind: Ingress
+    - group: 'cert-manager.io'
+      kind: Certificate
+    - group: 'cert-manager.io'
+      kind: ClusterIssuer
+
+  # Namespace resource blacklist (security)
+  namespaceResourceBlacklist:
+    - group: ''
+      kind: ResourceQuota
+    - group: ''
+      kind: LimitRange
+
+  # Roles for project members
+  roles:
+    - name: project-admin
+      description: Full access to all applications in project
+      policies:
+        - p, proj:pea-forecast:project-admin, applications, *, pea-forecast/*, allow
+      groups:
+        - pea-forecast-admins
+
+    - name: developer
+      description: Read-only access with sync capability
+      policies:
+        - p, proj:pea-forecast:developer, applications, get, pea-forecast/*, allow
+        - p, proj:pea-forecast:developer, applications, sync, pea-forecast/*, allow
+      groups:
+        - pea-forecast-developers
+
+    - name: viewer
+      description: Read-only access
+      policies:
+        - p, proj:pea-forecast:viewer, applications, get, pea-forecast/*, allow
+      groups:
+        - pea-forecast-viewers
+
+  # Sync windows (maintenance windows)
+  syncWindows:
+    - kind: allow
+      schedule: '* * * * *'
+      duration: 24h
+      applications:
+        - '*-staging'
+      manualSync: true
+    - kind: deny
+      schedule: '0 9-17 * * 1-5'
+      duration: 8h
+      applications:
+        - '*-production'
+      manualSync: false
+      timeZone: Asia/Bangkok
+
+  # Orphaned resources monitoring
+  orphanedResources:
+    warn: true
+    ignore:
+      - group: ''
+        kind: ConfigMap
+        name: kube-root-ca.crt

@@ -1,0 +1,74 @@
+# =============================================================================
+# PEA RE Forecast Platform - ArgoCD Staging Application
+# TOR Reference: Section 7.1.3 - Argo (CI/CD)
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pea-forecast-staging
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: pea-forecast-staging
+    app.kubernetes.io/part-of: pea-re-forecast-platform
+    environment: staging
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: pea-forecast
+
+  source:
+    repoURL: https://gitlab.pea.co.th/re-forecast/pea-re-forecast.git
+    targetRevision: main
+    path: infrastructure/helm/pea-re-forecast
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-staging.yaml
+      parameters:
+        - name: global.environment
+          value: staging
+        - name: global.imageTag
+          value: latest
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pea-forecast-staging
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Health check settings
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+      jsonPointers:
+        - /spec/minReplicas
+        - /spec/maxReplicas
+
+  # Notifications
+  info:
+    - name: 'Documentation'
+      value: 'https://gitlab.pea.co.th/re-forecast/pea-re-forecast/-/wikis'
+    - name: 'Slack Channel'
+      value: '#pea-forecast-staging'
+
+  # Revision history limit
+  revisionHistoryLimit: 5
