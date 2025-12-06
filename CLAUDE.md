@@ -157,11 +157,11 @@ Custom slash commands are available to invoke specialized agents for this projec
 
 ### Available Commands
 
-#### Project Management (Autonomous Orchestration)
+#### Project Management (Full SDLC Orchestration)
 
 | Command | Description | When to Use |
 |---------|-------------|-------------|
-| `/orchestrate` | **Autonomous Project Orchestrator** | Complex tasks, multi-component work, project coordination |
+| `/orchestrate` | **Autonomous SDLC Orchestrator** - Full lifecycle from dev to production | Complex tasks, releases, production deployments, user feedback |
 | `/sprint-plan` | Sprint planning and task breakdown | Beginning of sprint, prioritization |
 | `/health-check` | Comprehensive project health check | Daily checks, pre-release verification |
 | `/release` | Release management and versioning | Preparing releases, version bumps |
@@ -184,6 +184,12 @@ Custom slash commands are available to invoke specialized agents for this projec
 | `/review-arch` | Review architecture decisions | For architecture reviews |
 | `/research-latest` | Research latest library versions | Before starting new features |
 | `/update-plan` | Update project plan files | After completing tasks |
+
+#### Knowledge Management
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/km-manager` | **Knowledge Management System** | Manage docs, RAG, Knowledge Graph, AI-ready knowledge |
 
 #### Demo & Stakeholder
 
@@ -227,32 +233,87 @@ Custom slash commands are available to invoke specialized agents for this projec
 
 ### Orchestrate Capabilities
 
-The `/orchestrate` command provides autonomous project orchestration:
+The `/orchestrate` command provides **full SDLC orchestration** from development through production:
 
-1. **Assesses** current project state automatically
-2. **Delegates** to specialized subagents:
-   - `backend-architect` for API/database work
-   - `test-automator` for test coverage
-   - `security-auditor` for security reviews
-   - `performance-engineer` for optimization
-   - `deployment-engineer` for CI/CD
-3. **Coordinates** parallel workstreams
-4. **Reports** comprehensive status
+> **Ultimate Goal**: Not just Demo Day - Real Production for Real Users
+
+**SDLC Phases Covered**:
+1. **Plan** - Design solutions and create roadmaps
+2. **Build** - Develop features meeting TOR requirements
+3. **Test** - Ensure quality through comprehensive testing
+4. **Release** - Manage version releases
+5. **Deploy** - Push to production environments
+6. **Monitor** - Track production health
+7. **Learn** - Gather and incorporate user feedback
+8. **Sustain** - Maintain long-term product viability
+
+**Delegates to specialized subagents**:
+- `backend-architect` for API/database work
+- `test-automator` for test coverage
+- `security-auditor` for security reviews
+- `performance-engineer` for optimization
+- `deployment-engineer` for CI/CD
+- `km-manager` for knowledge management
+
+**Integrates with Knowledge Management** for:
+- RAG (Retrieval Augmented Generation)
+- Knowledge Graph
+- CAG (Context Augmented Generation)
+- User feedback repository
 
 Example autonomous tasks:
 
 ```bash
-# Ask orchestrator to improve a feature
+# Full SDLC orchestration
 /orchestrate
-> "Improve solar forecast accuracy"
+> "Release v1.2.0 to production"
 
-# Ask orchestrator for project status
+# User feedback integration
 /orchestrate
-> "What's the current project health?"
+> "Address high-priority user feedback"
 
-# Ask orchestrator to prepare release
+# Production monitoring
 /orchestrate
-> "Prepare for v1.2.0 release"
+> "Check production health and user metrics"
+
+# Knowledge sync
+/orchestrate
+> "Update knowledge base after release"
+```
+
+### KM Manager Capabilities
+
+The `/km-manager` command manages the project knowledge base:
+
+1. **Catalog** - Scan and inventory all knowledge
+2. **Index** - Generate search index for RAG
+3. **Validate** - Check knowledge quality and freshness
+4. **Search** - Semantic search across knowledge base
+5. **Sync** - Update knowledge from code changes
+
+**Knowledge Base Structure**:
+```
+docs/knowledge-base/
+├── index.yaml              # Master index
+├── taxonomy.yaml           # Classification system
+├── graph-schema.yaml       # Knowledge graph schema
+├── domain/                 # Domain knowledge (solar, voltage, grid)
+├── technical/              # API, database, ML docs
+├── operations/             # Runbooks, SOPs
+├── user-feedback/          # Feature requests, bug reports
+└── releases/               # Changelogs, retrospectives
+```
+
+Example commands:
+```bash
+# Catalog all knowledge
+/km-manager catalog
+
+# Search knowledge base
+/km-manager search "solar forecast accuracy"
+
+# Update knowledge after code changes
+/km-manager sync
 ```
 
 ### Creating New Commands

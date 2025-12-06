@@ -1,0 +1,140 @@
+# PEA RE Forecast Platform - Knowledge Taxonomy
+# Classification system for all project knowledge
+
+version: "1.0"
+last_updated: "2024-12-06"
+
+# Document Types
+document_types:
+  adr:
+    name: "Architecture Decision Record"
+    template: "templates/adr.md"
+    required_fields: ["context", "decision", "consequences"]
+
+  runbook:
+    name: "Operational Runbook"
+    template: "templates/runbook.md"
+    required_fields: ["trigger", "steps", "rollback"]
+
+  api:
+    name: "API Documentation"
+    template: "templates/api.md"
+    required_fields: ["endpoint", "method", "request", "response"]
+
+  guide:
+    name: "User/Developer Guide"
+    template: "templates/guide.md"
+    required_fields: ["audience", "prerequisites", "steps"]
+
+  reference:
+    name: "Technical Reference"
+    template: "templates/reference.md"
+    required_fields: ["subject", "details"]
+
+  faq:
+    name: "Frequently Asked Questions"
+    template: "templates/faq.md"
+    required_fields: ["question", "answer"]
+
+  feedback:
+    name: "User Feedback"
+    template: "templates/feedback.md"
+    required_fields: ["source", "type", "description", "priority"]
+
+# Domain Categories
+domains:
+  solar-forecast:
+    name: "Solar Power Forecasting"
+    description: "RE Forecast module for predicting solar PV output"
+    tags: ["ml", "timeseries", "irradiance", "power-prediction"]
+    related: ["voltage-prediction", "grid-operations"]
+
+  voltage-prediction:
+    name: "Voltage Prediction"
+    description: "Predicting voltage levels across distribution network"
+    tags: ["ml", "prosumer", "three-phase", "single-phase"]
+    related: ["solar-forecast", "grid-operations"]
+
+  grid-operations:
+    name: "Grid Operations"
+    description: "PEA grid management and operations"
+    tags: ["pea", "distribution", "transformer", "alerts"]
+    related: ["solar-forecast", "voltage-prediction"]
+
+# Technical Categories
+technical:
+  backend:
+    name: "Backend Services"
+    tags: ["fastapi", "python", "async", "api"]
+
+  frontend:
+    name: "Frontend Application"
+    tags: ["react", "nextjs", "typescript", "dashboard"]
+
+  ml:
+    name: "Machine Learning"
+    tags: ["xgboost", "tensorflow", "training", "inference"]
+
+  database:
+    name: "Database"
+    tags: ["timescaledb", "postgresql", "redis", "schema"]
+
+  infrastructure:
+    name: "Infrastructure"
+    tags: ["kubernetes", "docker", "helm", "ci-cd"]
+
+  security:
+    name: "Security"
+    tags: ["keycloak", "oauth", "audit", "encryption"]
+
+  observability:
+    name: "Observability"
+    tags: ["prometheus", "grafana", "logging", "tracing"]
+
+# Status Values
+status_values:
+  - draft        # Work in progress
+  - active       # Current and valid
+  - review       # Under review
+  - deprecated   # No longer recommended
+  - archived     # Historical reference only
+
+# Priority Levels (for feedback)
+priority_levels:
+  - critical     # Production issue, immediate attention
+  - high         # Important, next sprint
+  - medium       # Should be addressed
+  - low          # Nice to have
+  - backlog      # Future consideration
+
+# Tag Cloud (common tags for search)
+common_tags:
+  # Technical
+  - api
+  - database
+  - ml
+  - frontend
+  - backend
+  - testing
+  - deployment
+  - security
+
+  # Domain
+  - solar
+  - voltage
+  - prosumer
+  - forecast
+  - prediction
+  - alert
+
+  # Operations
+  - runbook
+  - incident
+  - monitoring
+  - performance
+
+  # Process
+  - tor-requirement
+  - release
+  - migration
+  - configuration

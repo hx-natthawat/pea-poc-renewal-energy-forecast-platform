@@ -1,0 +1,110 @@
+# PEA RE Forecast Platform - Knowledge Base Master Index
+# This index enables RAG, CAG, and Knowledge Graph operations
+
+version: "1.0"
+last_updated: "2024-12-06"
+embedding_model: "text-embedding-3-small"
+embedding_dimensions: 1536
+
+# Knowledge Categories
+categories:
+  architecture:
+    path: "architecture/"
+    description: "System architecture, ADRs, design patterns"
+    priority: 1
+
+  domain:
+    path: "domain/"
+    description: "Solar forecast, voltage prediction, PEA grid operations"
+    priority: 0  # Highest - domain knowledge is most important
+
+  technical:
+    path: "technical/"
+    description: "API docs, database schemas, ML models, infrastructure"
+    priority: 2
+
+  operations:
+    path: "operations/"
+    description: "Runbooks, SOPs, troubleshooting guides"
+    priority: 3
+
+  user-feedback:
+    path: "user-feedback/"
+    description: "Feature requests, bug reports, usability feedback"
+    priority: 4
+
+  releases:
+    path: "releases/"
+    description: "Changelogs, migration guides, retrospectives"
+    priority: 5
+
+# Search Configuration
+search:
+  strategy: "hybrid"  # dense + sparse retrieval
+  chunk_size: 512
+  chunk_overlap: 50
+  similarity_threshold: 0.75
+  max_results: 10
+  rerank: true
+
+# Source Priorities (lower = higher priority)
+sources:
+  - path: "CLAUDE.md"
+    priority: 0
+    type: "instructions"
+    refresh: "on-commit"
+
+  - path: "docs/knowledge-base/domain/"
+    priority: 1
+    type: "domain"
+    refresh: "weekly"
+
+  - path: "docs/architecture/"
+    priority: 2
+    type: "architecture"
+    refresh: "on-change"
+
+  - path: "backend/app/"
+    priority: 3
+    type: "code"
+    file_types: [".py"]
+    extract: ["docstrings", "type-hints"]
+    refresh: "on-commit"
+
+  - path: "ml/src/"
+    priority: 3
+    type: "code"
+    file_types: [".py"]
+    refresh: "on-commit"
+
+  - path: "frontend/src/"
+    priority: 4
+    type: "code"
+    file_types: [".ts", ".tsx"]
+    refresh: "on-commit"
+
+# Integration Settings
+integrations:
+  orchestrator:
+    enabled: true
+    context_injection: true
+    post_task_update: true
+
+  rag:
+    enabled: true
+    model: "claude-3-sonnet"
+
+  knowledge_graph:
+    enabled: true
+    backend: "neo4j"  # or "networkx" for local
+
+  cag:
+    enabled: true
+    context_window: 4000
+
+# Maintenance Schedule
+maintenance:
+  reindex: "weekly"
+  validate: "daily"
+  cleanup: "monthly"
+  backup: "daily"

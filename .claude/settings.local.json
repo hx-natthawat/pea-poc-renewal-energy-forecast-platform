@@ -124,7 +124,16 @@
       "Bash(frontend/src/components/filters/ )",
       "Bash(frontend/src/components/tables/ )",
       "Bash(frontend/src/types/audit.ts )",
-      "Bash(./venv/bin/ruff format:*)"
+      "Bash(./venv/bin/ruff format:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform status)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff --stat)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform log --oneline -5)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform add )",
+      "Bash(.claude/commands/demo.md )",
+      "Bash(backend/app/api/v1/endpoints/demo.py )",
+      "Bash(ml/scripts/generate_demo_data.py )",
+      "Bash(CLAUDE.md)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform commit -m \"$(cat <<''EOF''\nfeat: Add /demo command and endpoints for stakeholder demonstrations\n\n- Add .claude/commands/demo.md slash command for demo preparation\n- Create ml/scripts/generate_demo_data.py for seeding demo data\n- Add backend/app/api/v1/endpoints/demo.py with 5 endpoints:\n  - GET /demo/status - Environment status check\n  - GET /demo/credentials - Demo user credentials\n  - GET /demo/scenarios - Available demo scenarios\n  - GET /demo/summary - Comprehensive demo briefing\n  - POST /demo/reset-alerts - Reset demo alerts\n- Update CLAUDE.md with demo command documentation\n\nDemo scenarios cover:\n1. Solar Power Forecasting (MAPE < 10%)\n2. Voltage Monitoring (MAE < 2V)\n3. Alert Management (Email + LINE Notify)\n4. Audit Compliance (TOR 7.1.6)\n5. Multi-Region Support (4 PEA zones)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,501 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "PEA RE Forecast Platform - Agent Registry",
+  "lastUpdated": "2024-12-06",
+
+  "subagents": {
+    "description": "Built-in Task tool subagents for specialized work",
+    "agents": {
+      "Explore": {
+        "type": "builtin",
+        "purpose": "Fast codebase exploration",
+        "capabilities": ["file_search", "code_search", "architecture_analysis"],
+        "sdlcPhases": ["plan", "learn"],
+        "tools": ["Glob", "Grep", "Read"],
+        "useCases": [
+          "Find files by patterns",
+          "Search code for keywords",
+          "Answer codebase questions"
+        ]
+      },
+      "Plan": {
+        "type": "builtin",
+        "purpose": "Software architect for implementation planning",
+        "capabilities": ["design", "planning", "architecture"],
+        "sdlcPhases": ["plan"],
+        "tools": ["*"],
+        "useCases": [
+          "Design implementation strategy",
+          "Create step-by-step plans",
+          "Identify critical files"
+        ]
+      },
+      "SWE": {
+        "type": "builtin",
+        "purpose": "Software engineering expert",
+        "capabilities": ["coding", "debugging", "optimization", "refactoring"],
+        "sdlcPhases": ["build"],
+        "tools": ["*"],
+        "useCases": [
+          "Complex coding challenges",
+          "Debugging difficult issues",
+          "Performance optimization"
+        ]
+      },
+      "backend-architect": {
+        "type": "builtin",
+        "purpose": "Backend system design",
+        "capabilities": ["api_design", "database_schema", "microservices"],
+        "sdlcPhases": ["plan", "build"],
+        "tools": ["*"],
+        "useCases": [
+          "Design RESTful APIs",
+          "Create database schemas",
+          "Plan service architecture"
+        ]
+      },
+      "test-automator": {
+        "type": "builtin",
+        "purpose": "Test suite creation",
+        "capabilities": ["unit_tests", "integration_tests", "e2e_tests", "ci_cd"],
+        "sdlcPhases": ["test"],
+        "tools": ["*"],
+        "useCases": [
+          "Create comprehensive test suites",
+          "Improve test coverage",
+          "Set up test automation"
+        ]
+      },
+      "code-reviewer": {
+        "type": "builtin",
+        "purpose": "Code quality analysis",
+        "capabilities": ["code_review", "security_analysis", "best_practices"],
+        "sdlcPhases": ["build", "test"],
+        "tools": ["*"],
+        "useCases": [
+          "Review code changes",
+          "Check security vulnerabilities",
+          "Ensure best practices"
+        ]
+      },
+      "security-auditor": {
+        "type": "builtin",
+        "purpose": "Security vulnerability assessment",
+        "capabilities": ["vulnerability_scan", "auth_review", "owasp_compliance"],
+        "sdlcPhases": ["test", "deploy"],
+        "tools": ["*"],
+        "useCases": [
+          "Review authentication flows",
+          "Check OWASP compliance",
+          "Audit security configurations"
+        ]
+      },
+      "performance-engineer": {
+        "type": "builtin",
+        "purpose": "Performance optimization",
+        "capabilities": ["profiling", "caching", "load_testing", "optimization"],
+        "sdlcPhases": ["test", "monitor"],
+        "tools": ["*"],
+        "useCases": [
+          "Profile bottlenecks",
+          "Implement caching",
+          "Conduct load tests"
+        ]
+      },
+      "deployment-engineer": {
+        "type": "builtin",
+        "purpose": "CI/CD and containerization",
+        "capabilities": ["docker", "kubernetes", "ci_cd", "helm"],
+        "sdlcPhases": ["deploy"],
+        "tools": ["*"],
+        "useCases": [
+          "Create Docker configurations",
+          "Set up Kubernetes deployments",
+          "Configure CI/CD pipelines"
+        ]
+      },
+      "terraform-specialist": {
+        "type": "builtin",
+        "purpose": "Infrastructure as Code",
+        "capabilities": ["terraform", "iac", "cloud_resources"],
+        "sdlcPhases": ["deploy"],
+        "tools": ["*"],
+        "useCases": [
+          "Write Terraform modules",
+          "Manage cloud infrastructure",
+          "Import existing resources"
+        ]
+      },
+      "devops-troubleshooter": {
+        "type": "builtin",
+        "purpose": "Production incident response",
+        "capabilities": ["debugging", "log_analysis", "incident_response"],
+        "sdlcPhases": ["monitor"],
+        "tools": ["*"],
+        "useCases": [
+          "Debug production issues",
+          "Analyze system logs",
+          "Root cause analysis"
+        ]
+      },
+      "architect-reviewer": {
+        "type": "builtin",
+        "purpose": "Architecture consistency review",
+        "capabilities": ["pattern_review", "solid_principles", "maintainability"],
+        "sdlcPhases": ["plan", "sustain"],
+        "tools": ["*"],
+        "useCases": [
+          "Review architectural changes",
+          "Check pattern adherence",
+          "Assess maintainability"
+        ]
+      },
+      "cloud-architect": {
+        "type": "builtin",
+        "purpose": "Cloud infrastructure design",
+        "capabilities": ["aws", "azure", "gcp", "multi_region", "scaling"],
+        "sdlcPhases": ["plan", "deploy"],
+        "tools": ["*"],
+        "useCases": [
+          "Design cloud architecture",
+          "Plan multi-region deployments",
+          "Optimize cloud costs"
+        ]
+      },
+      "network-engineer": {
+        "type": "builtin",
+        "purpose": "Network troubleshooting",
+        "capabilities": ["connectivity", "load_balancer", "ssl_tls", "cdn"],
+        "sdlcPhases": ["deploy", "monitor"],
+        "tools": ["*"],
+        "useCases": [
+          "Debug network issues",
+          "Configure load balancers",
+          "Set up SSL/TLS"
+        ]
+      },
+      "dx-optimizer": {
+        "type": "builtin",
+        "purpose": "Developer experience improvement",
+        "capabilities": ["tooling", "automation", "onboarding"],
+        "sdlcPhases": ["sustain"],
+        "tools": ["*"],
+        "useCases": [
+          "Improve dev workflows",
+          "Automate repetitive tasks",
+          "Simplify onboarding"
+        ]
+      }
+    }
+  },
+
+  "commands": {
+    "description": "Custom slash commands for project-specific tasks",
+    "agents": {
+      "orchestrate": {
+        "type": "command",
+        "path": ".claude/commands/orchestrate.md",
+        "purpose": "Autonomous SDLC orchestration",
+        "capabilities": ["sdlc", "delegation", "coordination", "release"],
+        "sdlcPhases": ["*"],
+        "delegatesTo": ["*"],
+        "useCases": [
+          "Complex multi-component tasks",
+          "Production releases",
+          "User feedback integration"
+        ]
+      },
+      "km-manager": {
+        "type": "command",
+        "path": ".claude/commands/km-manager.md",
+        "purpose": "Knowledge management system",
+        "capabilities": ["rag", "knowledge_graph", "cag", "documentation"],
+        "sdlcPhases": ["*"],
+        "integrations": ["orchestrate"],
+        "useCases": [
+          "Manage knowledge base",
+          "Enable RAG retrieval",
+          "Track user feedback"
+        ]
+      },
+      "sprint-plan": {
+        "type": "command",
+        "path": ".claude/commands/sprint-plan.md",
+        "purpose": "Sprint planning",
+        "capabilities": ["planning", "prioritization", "task_breakdown"],
+        "sdlcPhases": ["plan"],
+        "useCases": [
+          "Create sprint plans",
+          "Prioritize backlog",
+          "Break down tasks"
+        ]
+      },
+      "health-check": {
+        "type": "command",
+        "path": ".claude/commands/health-check.md",
+        "purpose": "Project health verification",
+        "capabilities": ["testing", "linting", "security_scan"],
+        "sdlcPhases": ["test", "monitor"],
+        "useCases": [
+          "Pre-release checks",
+          "Daily health verification",
+          "CI/CD validation"
+        ]
+      },
+      "release": {
+        "type": "command",
+        "path": ".claude/commands/release.md",
+        "purpose": "Release management",
+        "capabilities": ["versioning", "changelog", "tagging"],
+        "sdlcPhases": ["release"],
+        "useCases": [
+          "Version bumping",
+          "Generate changelogs",
+          "Create releases"
+        ]
+      },
+      "demo": {
+        "type": "command",
+        "path": ".claude/commands/demo.md",
+        "purpose": "Demo environment preparation",
+        "capabilities": ["demo_setup", "data_seeding"],
+        "sdlcPhases": ["release"],
+        "useCases": [
+          "Prepare stakeholder demos",
+          "Seed demo data",
+          "Verify demo scenarios"
+        ]
+      },
+      "analyze-poc-data": {
+        "type": "command",
+        "path": ".claude/commands/analyze-poc-data.md",
+        "purpose": "POC data analysis",
+        "capabilities": ["data_analysis", "quality_check"],
+        "sdlcPhases": ["plan"],
+        "useCases": [
+          "Explore POC Data.xlsx",
+          "Assess data quality"
+        ]
+      },
+      "simulate-solar": {
+        "type": "command",
+        "path": ".claude/commands/simulate-solar.md",
+        "purpose": "Solar data simulation",
+        "capabilities": ["data_generation", "simulation"],
+        "sdlcPhases": ["build"],
+        "useCases": [
+          "Generate solar test data",
+          "Augment training data"
+        ]
+      },
+      "simulate-voltage": {
+        "type": "command",
+        "path": ".claude/commands/simulate-voltage.md",
+        "purpose": "Voltage data simulation",
+        "capabilities": ["data_generation", "simulation"],
+        "sdlcPhases": ["build"],
+        "useCases": [
+          "Generate voltage test data",
+          "Augment training data"
+        ]
+      },
+      "validate-model": {
+        "type": "command",
+        "path": ".claude/commands/validate-model.md",
+        "purpose": "ML model validation",
+        "capabilities": ["model_validation", "accuracy_check"],
+        "sdlcPhases": ["test"],
+        "useCases": [
+          "Validate MAPE < 10%",
+          "Validate MAE < 2V",
+          "Check model readiness"
+        ]
+      },
+      "deploy-local": {
+        "type": "command",
+        "path": ".claude/commands/deploy-local.md",
+        "purpose": "Local Kind cluster deployment",
+        "capabilities": ["kubernetes", "local_deploy"],
+        "sdlcPhases": ["deploy"],
+        "useCases": [
+          "Test K8s deployments",
+          "Integration testing"
+        ]
+      },
+      "test-api": {
+        "type": "command",
+        "path": ".claude/commands/test-api.md",
+        "purpose": "API endpoint testing",
+        "capabilities": ["api_testing", "endpoint_validation"],
+        "sdlcPhases": ["test"],
+        "useCases": [
+          "Test all endpoints",
+          "Verify API contracts"
+        ]
+      },
+      "review-arch": {
+        "type": "command",
+        "path": ".claude/commands/review-arch.md",
+        "purpose": "Architecture review",
+        "capabilities": ["architecture_review", "adr"],
+        "sdlcPhases": ["plan", "sustain"],
+        "useCases": [
+          "Review architecture decisions",
+          "Create ADRs"
+        ]
+      },
+      "research-latest": {
+        "type": "command",
+        "path": ".claude/commands/research-latest.md",
+        "purpose": "Research latest versions",
+        "capabilities": ["version_research", "dependency_check"],
+        "sdlcPhases": ["plan"],
+        "useCases": [
+          "Check library versions",
+          "Research dependencies"
+        ]
+      },
+      "update-plan": {
+        "type": "command",
+        "path": ".claude/commands/update-plan.md",
+        "purpose": "Update project plans",
+        "capabilities": ["plan_update", "progress_tracking"],
+        "sdlcPhases": ["*"],
+        "useCases": [
+          "Update sprint status",
+          "Mark tasks complete"
+        ]
+      }
+    }
+  },
+
+  "delegationMatrix": {
+    "description": "Task-to-agent mapping for orchestrator delegation",
+    "mappings": {
+      "new_api_endpoint": {
+        "primary": "backend-architect",
+        "backup": "SWE",
+        "phase": "build"
+      },
+      "bug_fix": {
+        "primary": "SWE",
+        "backup": "devops-troubleshooter",
+        "phase": "build"
+      },
+      "performance_issue": {
+        "primary": "performance-engineer",
+        "backup": "SWE",
+        "phase": "monitor"
+      },
+      "security_concern": {
+        "primary": "security-auditor",
+        "backup": "code-reviewer",
+        "phase": "test"
+      },
+      "test_coverage": {
+        "primary": "test-automator",
+        "backup": "SWE",
+        "phase": "test"
+      },
+      "deploy_issue": {
+        "primary": "deployment-engineer",
+        "backup": "devops-troubleshooter",
+        "phase": "deploy"
+      },
+      "architecture_decision": {
+        "primary": "architect-reviewer",
+        "backup": "Plan",
+        "phase": "plan"
+      },
+      "code_quality": {
+        "primary": "code-reviewer",
+        "backup": "SWE",
+        "phase": "build"
+      },
+      "database_changes": {
+        "primary": "backend-architect",
+        "backup": "SWE",
+        "phase": "build"
+      },
+      "frontend_feature": {
+        "primary": "SWE",
+        "backup": "code-reviewer",
+        "phase": "build"
+      },
+      "ml_model_update": {
+        "primary": "SWE",
+        "backup": "performance-engineer",
+        "phase": "build"
+      },
+      "infrastructure": {
+        "primary": "terraform-specialist",
+        "backup": "deployment-engineer",
+        "phase": "deploy"
+      },
+      "knowledge_update": {
+        "primary": "km-manager",
+        "backup": "Explore",
+        "phase": "sustain"
+      },
+      "user_feedback": {
+        "primary": "km-manager",
+        "backup": "Plan",
+        "phase": "learn"
+      },
+      "codebase_exploration": {
+        "primary": "Explore",
+        "backup": "Plan",
+        "phase": "plan"
+      }
+    }
+  },
+
+  "sdlcPhases": {
+    "description": "SDLC phases covered by the orchestrator",
+    "phases": {
+      "plan": {
+        "name": "Plan",
+        "description": "Design solutions and create roadmaps",
+        "agents": ["Plan", "Explore", "backend-architect", "architect-reviewer"]
+      },
+      "build": {
+        "name": "Build",
+        "description": "Develop features meeting requirements",
+        "agents": ["SWE", "backend-architect", "code-reviewer"]
+      },
+      "test": {
+        "name": "Test",
+        "description": "Ensure quality through testing",
+        "agents": ["test-automator", "code-reviewer", "security-auditor", "performance-engineer"]
+      },
+      "release": {
+        "name": "Release",
+        "description": "Manage version releases",
+        "commands": ["release", "demo"]
+      },
+      "deploy": {
+        "name": "Deploy",
+        "description": "Push to production environments",
+        "agents": ["deployment-engineer", "terraform-specialist", "security-auditor"]
+      },
+      "monitor": {
+        "name": "Monitor",
+        "description": "Track production health",
+        "agents": ["devops-troubleshooter", "performance-engineer"],
+        "commands": ["health-check"]
+      },
+      "learn": {
+        "name": "Learn",
+        "description": "Gather and incorporate user feedback",
+        "commands": ["km-manager"]
+      },
+      "sustain": {
+        "name": "Sustain",
+        "description": "Maintain long-term product viability",
+        "agents": ["architect-reviewer", "dx-optimizer"],
+        "commands": ["km-manager"]
+      }
+    }
+  }
+}

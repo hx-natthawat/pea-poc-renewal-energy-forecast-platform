@@ -1,0 +1,230 @@
+# PEA RE Forecast Platform - Knowledge Graph Schema
+# Defines entities and relationships for knowledge graph
+
+version: "1.0"
+last_updated: "2024-12-06"
+
+# Entity Types
+entities:
+  # System Components
+  Component:
+    description: "System component (backend, frontend, ml)"
+    properties:
+      - name: string
+      - type: enum[backend, frontend, ml, infrastructure]
+      - path: string
+      - version: string
+
+  Service:
+    description: "Business/application service"
+    properties:
+      - name: string
+      - module: string
+      - endpoints: list[string]
+
+  API:
+    description: "API endpoint"
+    properties:
+      - path: string
+      - method: enum[GET, POST, PUT, DELETE, PATCH]
+      - version: string
+      - auth_required: boolean
+
+  Model:
+    description: "ML model"
+    properties:
+      - name: string
+      - type: enum[solar, voltage]
+      - version: string
+      - accuracy_metrics: object
+
+  Table:
+    description: "Database table"
+    properties:
+      - name: string
+      - database: string
+      - type: enum[hypertable, regular, view]
+      - columns: list[string]
+
+  # Features & Requirements
+  Feature:
+    description: "User-facing feature"
+    properties:
+      - name: string
+      - status: enum[planned, in-progress, completed]
+      - priority: enum[critical, high, medium, low]
+
+  Requirement:
+    description: "TOR requirement"
+    properties:
+      - id: string  # e.g., "TOR-7.1.6"
+      - description: string
+      - status: enum[pending, implemented, verified]
+
+  # Documentation
+  Document:
+    description: "Knowledge document"
+    properties:
+      - id: string
+      - title: string
+      - type: enum[adr, runbook, api, guide, reference, faq]
+      - path: string
+      - status: enum[draft, active, deprecated, archived]
+
+  Decision:
+    description: "Architecture decision"
+    properties:
+      - id: string  # ADR number
+      - title: string
+      - status: enum[proposed, accepted, deprecated, superseded]
+      - date: date
+
+  Runbook:
+    description: "Operational procedure"
+    properties:
+      - id: string
+      - title: string
+      - trigger: string
+      - severity: enum[info, warning, critical]
+
+  # Feedback & Users
+  User:
+    description: "User persona or actual user"
+    properties:
+      - id: string
+      - type: enum[operator, admin, analyst, developer]
+      - region: string
+
+  Feedback:
+    description: "User feedback item"
+    properties:
+      - id: string
+      - type: enum[feature-request, bug-report, usability]
+      - priority: enum[critical, high, medium, low]
+      - status: enum[new, triaged, in-progress, resolved, wont-fix]
+
+  Release:
+    description: "Software release"
+    properties:
+      - version: string
+      - date: date
+      - type: enum[major, minor, patch]
+
+  Issue:
+    description: "Known issue or incident"
+    properties:
+      - id: string
+      - severity: enum[critical, high, medium, low]
+      - status: enum[open, investigating, resolved]
+
+# Relationship Types
+relationships:
+  # Component relationships
+  DEPENDS_ON:
+    from: [Component, Service]
+    to: [Component, Service, Table, Model]
+    properties:
+      - type: enum[runtime, build, optional]
+
+  CONTAINS:
+    from: [Component]
+    to: [Service, API, Model]
+
+  # Feature relationships
+  IMPLEMENTS:
+    from: [Feature, API, Service]
+    to: [Requirement]
+    properties:
+      - coverage: float  # 0.0 to 1.0
+
+  REQUESTED_BY:
+    from: [Feature, Feedback]
+    to: [User]
+    properties:
+      - date: date
+      - channel: string
+
+  # Data relationships
+  USES:
+    from: [API, Service]
+    to: [Model, Table]
+    properties:
+      - operation: enum[read, write, both]
+
+  STORES_IN:
+    from: [Service, Model]
+    to: [Table]
+
+  QUERIES:
+    from: [API, Service]
+    to: [Table]
+    properties:
+      - query_type: enum[select, insert, update, delete]
+
+  # Documentation relationships
+  DOCUMENTED_BY:
+    from: [Component, Service, API, Model, Feature]
+    to: [Document]
+
+  SUPERSEDES:
+    from: [Decision, Document]
+    to: [Decision, Document]
+
+  REFERENCES:
+    from: [Document, Runbook]
+    to: [Document, API, Table, Service]
+
+  # Operations relationships
+  RESOLVES:
+    from: [Runbook]
+    to: [Issue]
+
+  TRIGGERS:
+    from: [Issue, Feedback]
+    to: [Runbook, Feature]
+
+  # Release relationships
+  RELEASED_IN:
+    from: [Feature, Component]
+    to: [Release]
+
+  FIXED_IN:
+    from: [Issue, Feedback]
+    to: [Release]
+
+  # Feedback loop
+  INFORMS:
+    from: [Feedback]
+    to: [Feature, Decision, Requirement]
+    properties:
+      - impact: enum[new, modify, remove]
+
+# Example Queries (Cypher-like syntax)
+example_queries:
+  # Find all documents for a component
+  docs_for_component: |
+    MATCH (c:Component {name: $name})-[:DOCUMENTED_BY]->(d:Document)
+    RETURN d
+
+  # Find unimplemented requirements
+  pending_requirements: |
+    MATCH (r:Requirement)
+    WHERE r.status = 'pending'
+    AND NOT EXISTS((r)<-[:IMPLEMENTS]-())
+    RETURN r
+
+  # Find feature request impact
+  feedback_impact: |
+    MATCH (f:Feedback)-[:INFORMS]->(target)
+    WHERE f.priority = 'high'
+    RETURN f, target
+
+  # Trace API to tables
+  api_data_flow: |
+    MATCH (a:API)-[:USES|QUERIES*]->(t:Table)
+    RETURN a.path, collect(t.name)
+
+  # Find related runbooks for issue
+  runbooks_for_issue: |
+    MATCH (i:Issue)<-[:RESOLVES]-(r:Runbook)
+    RETURN r
