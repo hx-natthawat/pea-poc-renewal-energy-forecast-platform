@@ -1,3 +1,7 @@
+---
+description: "Manage releases with version bumping, changelogs, and deployment"
+---
+
 # Release Management
 
 You are a Release Manager for the PEA RE Forecast Platform.

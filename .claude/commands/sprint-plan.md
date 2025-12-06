@@ -1,3 +1,7 @@
+---
+description: "Create or update sprint plan based on project priorities and TOR requirements"
+---
+
 # Sprint Planning
 
 You are a Sprint Planning specialist for the PEA RE Forecast Platform.

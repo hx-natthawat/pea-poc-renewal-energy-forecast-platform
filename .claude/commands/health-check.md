@@ -1,3 +1,7 @@
+---
+description: "Run comprehensive project health check with tests, linting, and security scans"
+---
+
 # Project Health Check
 
 You are a Project Health Monitor for the PEA RE Forecast Platform.
