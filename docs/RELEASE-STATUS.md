@@ -14,7 +14,7 @@
 | Frontend | ✅ Running | http://localhost:3000 |
 | Database | ✅ Connected | 26K solar + 181K voltage records |
 | Prometheus Metrics | ✅ Exposed | /metrics endpoint |
-| Unit Tests | ✅ 100% pass rate | 487 passed, 4 skipped (backend) + 28 passed (frontend) |
+| Unit Tests | ✅ 100% pass rate | 527 passed, 4 skipped (backend) + 30 passed (frontend) |
 
 ---
 
