@@ -127,6 +127,18 @@ None - all critical issues resolved.
 |---------|--------|----------------|
 | Audit Log UI (TOR 7.1.6) | ✅ Complete | Full viewer with filters, export, stats |
 
+### Phase 2: TOR Extended Functions (IN PROGRESS)
+
+| Function | TOR Ref | Endpoint | Status |
+|----------|---------|----------|--------|
+| Load Forecast | 7.5.1.3 | `/api/v1/load-forecast/predict` | ✅ API Ready (Simulation) |
+| Demand Forecast | 7.5.1.2 | `/api/v1/demand-forecast/predict` | ✅ API Ready (Simulation) |
+| Imbalance Forecast | 7.5.1.4 | `/api/v1/imbalance-forecast/predict` | ✅ API Ready (Simulation) |
+| DOE | 7.5.1.6 | Planned | ⏳ Phase 2b |
+| Hosting Capacity | 7.5.1.7 | Planned | ⏳ Phase 3 |
+
+*Phase 2a completed December 6, 2024. ML models to be trained with real data.*
+
 ### Next Steps
 
 1. ~~Fix remaining test failures~~ ✅ Complete
@@ -134,9 +146,11 @@ None - all critical issues resolved.
 3. ~~Implement Model Retraining Pipeline~~ ✅ Complete
 4. ~~Add multi-channel alerting (Email, LINE Notify)~~ ✅ Complete
 5. ~~Add multi-region support~~ ✅ Complete
-6. Deploy to staging environment
-7. Conduct UAT with stakeholders
-8. Production deployment
+6. ~~Phase 2a: Load/Demand/Imbalance APIs~~ ✅ Complete
+7. Deploy to staging environment
+8. Conduct UAT with stakeholders
+9. Production deployment
+10. Phase 2b: DOE implementation (requires network model)
 
 ---
 
