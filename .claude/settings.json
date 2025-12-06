@@ -21,5 +21,11 @@
     "coding": "sonnet",
     "review": "opus",
     "quick_tasks": "haiku"
+  },
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "30000",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "32768",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_DISABLE_ANALYTICS": "1"
   }
 }
