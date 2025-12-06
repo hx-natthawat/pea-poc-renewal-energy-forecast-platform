@@ -58,13 +58,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# CORS middleware - explicit allow lists for security
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+        "Accept",
+        "Origin",
+        "X-Requested-With",
+        "X-Request-ID",
+    ],
+    expose_headers=["X-Request-ID", "X-RateLimit-Remaining"],
+    max_age=600,  # Cache preflight requests for 10 minutes
 )
 
 # Security headers middleware (OWASP best practices)
