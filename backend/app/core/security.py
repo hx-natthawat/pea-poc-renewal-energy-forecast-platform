@@ -154,7 +154,7 @@ async def decode_token(token: str) -> TokenPayload:
         logger.warning(f"JWT validation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid token: {e!s}",
+            detail="Invalid or expired token",  # Generic message for security
         )
 
 
