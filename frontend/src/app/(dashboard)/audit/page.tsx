@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import AuditLogViewer from "@/components/admin/AuditLogViewer";
+import { DashboardShell } from "@/components/layout";
 
 export const metadata: Metadata = {
   title: "Audit Logs | PEA RE Forecast",
@@ -8,10 +9,8 @@ export const metadata: Metadata = {
 
 export default function AuditPage() {
   return (
-    <main className="min-h-screen bg-gray-50 py-6">
-      <div className="container mx-auto px-4">
-        <AuditLogViewer />
-      </div>
-    </main>
+    <DashboardShell activeTab="audit">
+      <AuditLogViewer />
+    </DashboardShell>
   );
 }

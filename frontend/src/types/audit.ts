@@ -31,15 +31,20 @@ export interface AuditLogFilter {
 }
 
 export interface AuditLogStats {
-  total_entries: number;
+  // API returns these fields
+  total_requests: number;
   unique_users: number;
+  successful_requests: number;
+  failed_requests: number;
   actions_breakdown: Record<string, number>;
-  top_resources: Array<{
-    resource_type: string;
+  resources_breakdown: Record<string, number>;
+  top_users: Array<{
+    user_id: string;
     count: number;
   }>;
-  status_breakdown: Record<string, number>;
-  methods_breakdown: Record<string, number>;
+  error_rate: number;
+  period_start: string;
+  period_end: string;
 }
 
 export interface AuditLogResponse {

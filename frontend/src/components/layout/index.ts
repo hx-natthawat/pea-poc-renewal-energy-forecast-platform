@@ -1,3 +1,4 @@
+export { DashboardShell } from "./DashboardShell";
 export { BottomNavigation, MobileNavigation } from "./MobileNavigation";
 export {
   DesktopOnly,

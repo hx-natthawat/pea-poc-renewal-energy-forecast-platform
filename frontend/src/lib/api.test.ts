@@ -5,11 +5,14 @@ describe("getApiBaseUrl", () => {
   const originalLocation = window.location;
 
   beforeEach(() => {
-    // Reset window.location for each test
+    // Reset window.location and env vars for each test
     Object.defineProperty(window, "location", {
       value: { ...originalLocation },
       writable: true,
     });
+    // Clear env vars by default
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "");
+    vi.stubEnv("NEXT_PUBLIC_WS_URL", "");
   });
 
   afterEach(() => {
@@ -20,7 +23,13 @@ describe("getApiBaseUrl", () => {
     vi.unstubAllEnvs();
   });
 
-  it("returns localhost:8000 for localhost hostname", () => {
+  it("returns env var when NEXT_PUBLIC_API_URL is set", () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://api.example.com");
+
+    expect(getApiBaseUrl()).toBe("http://api.example.com");
+  });
+
+  it("returns localhost:8000 for localhost hostname when no env var", () => {
     Object.defineProperty(window, "location", {
       value: {
         hostname: "localhost",
@@ -68,6 +77,9 @@ describe("getWebSocketBaseUrl", () => {
       value: { ...originalLocation },
       writable: true,
     });
+    // Clear env vars by default
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "");
+    vi.stubEnv("NEXT_PUBLIC_WS_URL", "");
   });
 
   afterEach(() => {
@@ -75,6 +87,13 @@ describe("getWebSocketBaseUrl", () => {
       value: originalLocation,
       writable: true,
     });
+    vi.unstubAllEnvs();
+  });
+
+  it("returns env var when NEXT_PUBLIC_WS_URL is set", () => {
+    vi.stubEnv("NEXT_PUBLIC_WS_URL", "wss://ws.example.com/ws");
+
+    expect(getWebSocketBaseUrl()).toBe("wss://ws.example.com/ws");
   });
 
   it("returns ws://localhost:8000 for localhost", () => {

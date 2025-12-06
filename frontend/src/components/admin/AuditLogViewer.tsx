@@ -16,6 +16,11 @@ import type { AuditLogEntry, AuditLogFilter, AuditLogStats } from "@/types/audit
 import AuditLogFilters from "../filters/AuditLogFilters";
 import AuditLogTable from "../tables/AuditLogTable";
 
+// Helper to safely format numbers
+const formatNumber = (value: number | undefined | null): string => {
+  return (value ?? 0).toLocaleString();
+};
+
 export default function AuditLogViewer() {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [stats, setStats] = useState<AuditLogStats | null>(null);
@@ -102,44 +107,15 @@ export default function AuditLogViewer() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#74045F] to-[#5A0349] rounded-lg shadow-lg p-4 sm:p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="bg-white/10 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
-              <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-white">Audit Logs</h1>
-              <p className="text-sm sm:text-base text-[#D4A43D] font-medium">
-                ประวัติการใช้งานระบบ (TOR 7.1.6)
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              type="button"
-              onClick={handleRefresh}
-              className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-              title="Refresh"
-            >
-              <RefreshCw
-                className={`w-4 h-4 sm:w-5 sm:h-5 text-white ${isLoading ? "animate-spin" : ""}`}
-              />
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Statistics Cards */}
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-blue-500">
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-gray-500">Total Entries</p>
+                <p className="text-xs sm:text-sm text-gray-500">Total Requests</p>
                 <p className="text-lg sm:text-2xl font-bold text-gray-800">
-                  {stats.total_entries.toLocaleString()}
+                  {formatNumber(stats.total_requests)}
                 </p>
               </div>
               <BarChart3 className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500 opacity-80" />
@@ -151,7 +127,7 @@ export default function AuditLogViewer() {
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm text-gray-500">Unique Users</p>
                 <p className="text-lg sm:text-2xl font-bold text-gray-800">
-                  {stats.unique_users.toLocaleString()}
+                  {formatNumber(stats.unique_users)}
                 </p>
               </div>
               <Users className="w-8 h-8 sm:w-10 sm:h-10 text-purple-500 opacity-80" />
@@ -161,14 +137,11 @@ export default function AuditLogViewer() {
           <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-green-500">
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-gray-500">Top Action</p>
-                <p className="text-sm sm:text-lg font-bold text-gray-800 truncate">
-                  {Object.entries(stats.actions_breakdown).sort((a, b) => b[1] - a[1])[0]?.[0] ||
-                    "N/A"}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {Object.entries(stats.actions_breakdown).sort((a, b) => b[1] - a[1])[0]?.[1] || 0}{" "}
-                  times
+                <p className="text-xs sm:text-sm text-gray-500">Success Rate</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-800">
+                  {stats.total_requests > 0
+                    ? `${((1 - stats.error_rate) * 100).toFixed(1)}%`
+                    : "N/A"}
                 </p>
               </div>
               <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-green-500 opacity-80" />
@@ -180,10 +153,17 @@ export default function AuditLogViewer() {
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm text-gray-500">Top Resource</p>
                 <p className="text-sm sm:text-lg font-bold text-gray-800 truncate">
-                  {stats.top_resources[0]?.resource_type || "N/A"}
+                  {Object.entries(stats.resources_breakdown || {}).sort(
+                    (a, b) => b[1] - a[1]
+                  )[0]?.[0] || "N/A"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {stats.top_resources[0]?.count || 0} accesses
+                  {formatNumber(
+                    Object.entries(stats.resources_breakdown || {}).sort(
+                      (a, b) => b[1] - a[1]
+                    )[0]?.[1]
+                  )}{" "}
+                  accesses
                 </p>
               </div>
               <AlertCircle className="w-8 h-8 sm:w-10 sm:h-10 text-amber-500 opacity-80" />
@@ -215,6 +195,15 @@ export default function AuditLogViewer() {
             </p>
           </div>
           <div className="flex space-x-2">
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="flex items-center px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded transition-colors disabled:opacity-50"
+              title="Refresh"
+            >
+              <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 ${isLoading ? "animate-spin" : ""}`} />
+            </button>
             <button
               type="button"
               onClick={() => handleExport("csv")}
