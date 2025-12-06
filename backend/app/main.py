@@ -92,13 +92,20 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 app.include_router(api_router_v2, prefix="/api/v2")
 
 # Prometheus metrics endpoint
-app.add_api_route("/metrics", metrics_endpoint, methods=["GET"], include_in_schema=False)
+app.add_api_route(
+    "/metrics", metrics_endpoint, methods=["GET"], include_in_schema=False
+)
 
 
 # Global exception handler to ensure CORS headers on errors
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Handle all unhandled exceptions with proper JSON response and CORS headers."""
+    import logging
+
+    logger = logging.getLogger(__name__)
+    logger.error(f"Unhandled exception on {request.url.path}: {exc}", exc_info=True)
+
     origin = request.headers.get("origin", "")
     headers = {}
     if origin in settings.CORS_ORIGINS:
@@ -106,9 +113,15 @@ async def global_exception_handler(request: Request, exc: Exception):
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Credentials": "true",
         }
+
+    # Only expose error details in debug mode
+    content = {"detail": "Internal server error"}
+    if settings.DEBUG:
+        content["error"] = str(exc)
+
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error", "error": str(exc)},
+        content=content,
         headers=headers,
     )
 
