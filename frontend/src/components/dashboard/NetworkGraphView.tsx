@@ -410,164 +410,282 @@ function createNodesAndEdges(
 
   const isHorizontal = layout === "horizontal";
 
-  // Layout constants for vertical (top-to-bottom)
-  const VERTICAL = {
-    TRANSFORMER_X: 400,
-    TRANSFORMER_Y: 50,
-    PHASE_Y: 180,
-    PROSUMER_START_Y: 320,
-    PROSUMER_ROW_HEIGHT: 140,
-    PHASE_SPACING: 250,
+  // Symmetric layout configuration
+  const CONFIG = {
+    // Canvas dimensions (logical units)
+    CANVAS_WIDTH: 900,
+    CANVAS_HEIGHT: 600,
+    // Node sizes for centering calculations
+    TRANSFORMER_WIDTH: 160,
+    TRANSFORMER_HEIGHT: 100,
+    PHASE_WIDTH: 100,
+    PHASE_HEIGHT: 60,
+    PROSUMER_WIDTH: 90,
+    PROSUMER_HEIGHT: 110,
+    // Gaps between elements
+    GAP_TRANSFORMER_TO_PHASE: 120,
+    GAP_PHASE_TO_PROSUMER: 140,
+    GAP_BETWEEN_PROSUMERS: 130,
+    GAP_BETWEEN_PHASES: 180,
+    // Padding from edges
+    PADDING: 40,
   };
 
-  // Layout constants for horizontal (left-to-right)
-  // Designed for 600px height container, centered vertically
-  const HORIZONTAL = {
-    TRANSFORMER_X: 80,
-    TRANSFORMER_Y: 220, // Centered vertically for 600px height
-    PHASE_X: 280, // More space from transformer
-    PHASE_START_Y: 80, // Start phases from top with padding
-    PROSUMER_START_X: 450, // More space from phase nodes
-    PROSUMER_COL_WIDTH: 150, // More space between prosumers
-    PHASE_SPACING: 200, // More space between phases to prevent overlap
-  };
-
-  // 1. Add Transformer node
-  nodes.push({
-    id: "transformer",
-    type: "transformer",
-    position: isHorizontal
-      ? { x: HORIZONTAL.TRANSFORMER_X, y: HORIZONTAL.TRANSFORMER_Y }
-      : { x: VERTICAL.TRANSFORMER_X - 80, y: VERTICAL.TRANSFORMER_Y },
-    data: {
-      label: topology.transformer.name,
-      capacity_kva: topology.transformer.capacity_kva,
-      voltage_primary: topology.transformer.voltage_primary,
-      voltage_secondary: topology.transformer.voltage_secondary,
-      layout,
-    },
-  });
-
-  // 2. Add Phase nodes and prosumer nodes
   const phaseOrder = ["A", "B", "C"];
   const sortedPhases = [...topology.phases].sort(
     (a, b) => phaseOrder.indexOf(a.phase) - phaseOrder.indexOf(b.phase)
   );
+  const numPhases = sortedPhases.length;
 
-  sortedPhases.forEach((phase, phaseIndex) => {
-    const phaseId = `phase-${phase.phase}`;
+  if (isHorizontal) {
+    // ==================== HORIZONTAL LAYOUT ====================
+    // Transformer on left, phases vertically centered, prosumers to the right
 
-    let phasePosition: { x: number; y: number };
-    if (isHorizontal) {
-      phasePosition = {
-        x: HORIZONTAL.PHASE_X,
-        y: HORIZONTAL.PHASE_START_Y + phaseIndex * HORIZONTAL.PHASE_SPACING,
-      };
-    } else {
-      const phaseX = VERTICAL.TRANSFORMER_X + (phaseIndex - 1) * VERTICAL.PHASE_SPACING;
-      phasePosition = { x: phaseX - 50, y: VERTICAL.PHASE_Y };
-    }
+    // Calculate total height needed for phases (including gaps)
+    const totalPhaseHeight =
+      numPhases * CONFIG.PHASE_HEIGHT + (numPhases - 1) * CONFIG.GAP_BETWEEN_PHASES;
 
-    // Add phase node
+    // Center phases vertically
+    const phaseStartY = (CONFIG.CANVAS_HEIGHT - totalPhaseHeight) / 2;
+
+    // Transformer centered vertically
+    const transformerX = CONFIG.PADDING;
+    const transformerY = (CONFIG.CANVAS_HEIGHT - CONFIG.TRANSFORMER_HEIGHT) / 2;
+
+    // Phase X position (after transformer)
+    const phaseX = transformerX + CONFIG.TRANSFORMER_WIDTH + CONFIG.GAP_TRANSFORMER_TO_PHASE;
+
+    // Prosumer start X (after phases)
+    const prosumerStartX = phaseX + CONFIG.PHASE_WIDTH + CONFIG.GAP_PHASE_TO_PROSUMER;
+
+    // 1. Add Transformer node (centered vertically)
     nodes.push({
-      id: phaseId,
-      type: "phase",
-      position: phasePosition,
+      id: "transformer",
+      type: "transformer",
+      position: { x: transformerX, y: transformerY },
       data: {
-        label: `Phase ${phase.phase}`,
-        phase: phase.phase,
-        avg_voltage: phase.avg_voltage,
-        total_power: phase.total_power,
-        prosumerCount: phase.prosumers.length,
+        label: topology.transformer.name,
+        capacity_kva: topology.transformer.capacity_kva,
+        voltage_primary: topology.transformer.voltage_primary,
+        voltage_secondary: topology.transformer.voltage_secondary,
         layout,
       },
     });
 
-    // Edge from transformer to phase (main feeder)
-    edges.push({
-      id: `transformer-${phaseId}`,
-      source: "transformer",
-      target: phaseId,
-      style: { stroke: "#74045F", strokeWidth: 3 },
-      animated: true,
-      className: "electrical-main",
-    });
+    // 2. Add Phase and Prosumer nodes
+    sortedPhases.forEach((phase, phaseIndex) => {
+      const phaseId = `phase-${phase.phase}`;
 
-    // Add prosumer nodes for this phase
-    const sortedProsumers = [...phase.prosumers].sort((a, b) => a.position - b.position);
-
-    sortedProsumers.forEach((prosumer, prosumerIndex) => {
-      let prosumerPosition: { x: number; y: number };
-      if (isHorizontal) {
-        prosumerPosition = {
-          x: HORIZONTAL.PROSUMER_START_X + prosumerIndex * HORIZONTAL.PROSUMER_COL_WIDTH,
-          y: phasePosition.y - 5, // Center align with phase node
-        };
-      } else {
-        const phaseX = VERTICAL.TRANSFORMER_X + (phaseIndex - 1) * VERTICAL.PHASE_SPACING;
-        prosumerPosition = {
-          x: phaseX - 45,
-          y: VERTICAL.PROSUMER_START_Y + prosumerIndex * VERTICAL.PROSUMER_ROW_HEIGHT,
-        };
-      }
+      // Phase position - evenly distributed vertically
+      const phaseY = phaseStartY + phaseIndex * (CONFIG.PHASE_HEIGHT + CONFIG.GAP_BETWEEN_PHASES);
 
       nodes.push({
-        id: prosumer.id,
-        type: "prosumer",
-        position: prosumerPosition,
+        id: phaseId,
+        type: "phase",
+        position: { x: phaseX, y: phaseY },
         data: {
-          label: prosumer.id,
-          name: prosumer.name,
-          phase: prosumer.phase,
-          position: prosumer.position,
-          has_pv: prosumer.has_pv,
-          has_ev: prosumer.has_ev,
-          has_battery: prosumer.has_battery,
-          voltage: prosumer.current_voltage,
-          power: prosumer.active_power,
-          status: prosumer.voltage_status,
+          label: `Phase ${phase.phase}`,
+          phase: phase.phase,
+          avg_voltage: phase.avg_voltage,
+          total_power: phase.total_power,
+          prosumerCount: phase.prosumers.length,
           layout,
         },
       });
 
-      // Edge from phase to prosumer (or prosumer to prosumer for chain)
-      const edgeColor =
-        prosumer.voltage_status === "critical"
-          ? "#EF4444"
-          : prosumer.voltage_status === "warning"
-            ? "#F59E0B"
-            : "#22C55E";
+      // Edge from transformer to phase
+      edges.push({
+        id: `transformer-${phaseId}`,
+        source: "transformer",
+        target: phaseId,
+        style: { stroke: "#74045F", strokeWidth: 3 },
+        animated: true,
+        className: "electrical-main",
+      });
 
-      if (prosumerIndex === 0) {
-        // First prosumer connects to phase
-        edges.push({
-          id: `${phaseId}-${prosumer.id}`,
-          source: phaseId,
-          target: prosumer.id,
-          style: {
-            stroke: edgeColor,
-            strokeWidth: 2,
+      // Add prosumers - evenly distributed horizontally, aligned with phase
+      const sortedProsumers = [...phase.prosumers].sort((a, b) => a.position - b.position);
+
+      sortedProsumers.forEach((prosumer, prosumerIndex) => {
+        // Equal gap distribution for prosumers
+        const prosumerX = prosumerStartX + prosumerIndex * CONFIG.GAP_BETWEEN_PROSUMERS;
+        // Center prosumer vertically with its phase (offset for node height difference)
+        const prosumerY = phaseY + (CONFIG.PHASE_HEIGHT - CONFIG.PROSUMER_HEIGHT) / 2;
+
+        nodes.push({
+          id: prosumer.id,
+          type: "prosumer",
+          position: { x: prosumerX, y: prosumerY },
+          data: {
+            label: prosumer.id,
+            name: prosumer.name,
+            phase: prosumer.phase,
+            position: prosumer.position,
+            has_pv: prosumer.has_pv,
+            has_ev: prosumer.has_ev,
+            has_battery: prosumer.has_battery,
+            voltage: prosumer.current_voltage,
+            power: prosumer.active_power,
+            status: prosumer.voltage_status,
+            layout,
           },
-          animated: true,
-          className: "electrical-phase",
         });
-      } else {
-        // Chain prosumers together
-        const prevProsumer = sortedProsumers[prosumerIndex - 1];
-        edges.push({
-          id: `${prevProsumer.id}-${prosumer.id}`,
-          source: prevProsumer.id,
-          target: prosumer.id,
-          style: {
-            stroke: edgeColor,
-            strokeWidth: 1.5,
-          },
-          animated: true,
-          className: "electrical-prosumer",
-        });
-      }
+
+        // Edge connections
+        const edgeColor =
+          prosumer.voltage_status === "critical"
+            ? "#EF4444"
+            : prosumer.voltage_status === "warning"
+              ? "#F59E0B"
+              : "#22C55E";
+
+        if (prosumerIndex === 0) {
+          edges.push({
+            id: `${phaseId}-${prosumer.id}`,
+            source: phaseId,
+            target: prosumer.id,
+            style: { stroke: edgeColor, strokeWidth: 2 },
+            animated: true,
+            className: "electrical-phase",
+          });
+        } else {
+          const prevProsumer = sortedProsumers[prosumerIndex - 1];
+          edges.push({
+            id: `${prevProsumer.id}-${prosumer.id}`,
+            source: prevProsumer.id,
+            target: prosumer.id,
+            style: { stroke: edgeColor, strokeWidth: 1.5 },
+            animated: true,
+            className: "electrical-prosumer",
+          });
+        }
+      });
     });
-  });
+  } else {
+    // ==================== VERTICAL LAYOUT ====================
+    // Transformer on top, phases horizontally centered, prosumers below
+
+    // Calculate total width needed for phases (including gaps)
+    const totalPhaseWidth =
+      numPhases * CONFIG.PHASE_WIDTH + (numPhases - 1) * CONFIG.GAP_BETWEEN_PHASES;
+
+    // Center phases horizontally
+    const phaseStartX = (CONFIG.CANVAS_WIDTH - totalPhaseWidth) / 2;
+
+    // Transformer centered horizontally
+    const transformerX = (CONFIG.CANVAS_WIDTH - CONFIG.TRANSFORMER_WIDTH) / 2;
+    const transformerY = CONFIG.PADDING;
+
+    // Phase Y position (below transformer)
+    const phaseY = transformerY + CONFIG.TRANSFORMER_HEIGHT + CONFIG.GAP_TRANSFORMER_TO_PHASE;
+
+    // Prosumer start Y (below phases)
+    const prosumerStartY = phaseY + CONFIG.PHASE_HEIGHT + CONFIG.GAP_PHASE_TO_PROSUMER;
+
+    // 1. Add Transformer node (centered horizontally)
+    nodes.push({
+      id: "transformer",
+      type: "transformer",
+      position: { x: transformerX, y: transformerY },
+      data: {
+        label: topology.transformer.name,
+        capacity_kva: topology.transformer.capacity_kva,
+        voltage_primary: topology.transformer.voltage_primary,
+        voltage_secondary: topology.transformer.voltage_secondary,
+        layout,
+      },
+    });
+
+    // 2. Add Phase and Prosumer nodes
+    sortedPhases.forEach((phase, phaseIndex) => {
+      const phaseId = `phase-${phase.phase}`;
+
+      // Phase position - evenly distributed horizontally
+      const phaseX = phaseStartX + phaseIndex * (CONFIG.PHASE_WIDTH + CONFIG.GAP_BETWEEN_PHASES);
+
+      nodes.push({
+        id: phaseId,
+        type: "phase",
+        position: { x: phaseX, y: phaseY },
+        data: {
+          label: `Phase ${phase.phase}`,
+          phase: phase.phase,
+          avg_voltage: phase.avg_voltage,
+          total_power: phase.total_power,
+          prosumerCount: phase.prosumers.length,
+          layout,
+        },
+      });
+
+      // Edge from transformer to phase
+      edges.push({
+        id: `transformer-${phaseId}`,
+        source: "transformer",
+        target: phaseId,
+        style: { stroke: "#74045F", strokeWidth: 3 },
+        animated: true,
+        className: "electrical-main",
+      });
+
+      // Add prosumers - evenly distributed vertically, aligned with phase
+      const sortedProsumers = [...phase.prosumers].sort((a, b) => a.position - b.position);
+
+      sortedProsumers.forEach((prosumer, prosumerIndex) => {
+        // Center prosumer horizontally with its phase
+        const prosumerX = phaseX + (CONFIG.PHASE_WIDTH - CONFIG.PROSUMER_WIDTH) / 2;
+        // Equal gap distribution for prosumers vertically
+        const prosumerY = prosumerStartY + prosumerIndex * CONFIG.GAP_BETWEEN_PROSUMERS;
+
+        nodes.push({
+          id: prosumer.id,
+          type: "prosumer",
+          position: { x: prosumerX, y: prosumerY },
+          data: {
+            label: prosumer.id,
+            name: prosumer.name,
+            phase: prosumer.phase,
+            position: prosumer.position,
+            has_pv: prosumer.has_pv,
+            has_ev: prosumer.has_ev,
+            has_battery: prosumer.has_battery,
+            voltage: prosumer.current_voltage,
+            power: prosumer.active_power,
+            status: prosumer.voltage_status,
+            layout,
+          },
+        });
+
+        // Edge connections
+        const edgeColor =
+          prosumer.voltage_status === "critical"
+            ? "#EF4444"
+            : prosumer.voltage_status === "warning"
+              ? "#F59E0B"
+              : "#22C55E";
+
+        if (prosumerIndex === 0) {
+          edges.push({
+            id: `${phaseId}-${prosumer.id}`,
+            source: phaseId,
+            target: prosumer.id,
+            style: { stroke: edgeColor, strokeWidth: 2 },
+            animated: true,
+            className: "electrical-phase",
+          });
+        } else {
+          const prevProsumer = sortedProsumers[prosumerIndex - 1];
+          edges.push({
+            id: `${prevProsumer.id}-${prosumer.id}`,
+            source: prevProsumer.id,
+            target: prosumer.id,
+            style: { stroke: edgeColor, strokeWidth: 1.5 },
+            animated: true,
+            className: "electrical-prosumer",
+          });
+        }
+      });
+    });
+  }
 
   return { nodes, edges };
 }
