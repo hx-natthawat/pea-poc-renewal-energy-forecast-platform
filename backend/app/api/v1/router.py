@@ -10,10 +10,13 @@ from app.api.v1.endpoints import (
     comparison,
     data,
     dayahead,
+    demand_forecast,
     demo,
     forecast,
     health,
     history,
+    imbalance_forecast,
+    load_forecast,
     monitoring,
     notifications,
     regions,
@@ -125,6 +128,27 @@ api_router.include_router(
 api_router.include_router(
     demo.router,
     tags=["demo"],
+)
+
+# Phase 2: Load Forecast endpoints (TOR Function 3)
+api_router.include_router(
+    load_forecast.router,
+    prefix="/load-forecast",
+    tags=["load-forecast", "phase2"],
+)
+
+# Phase 2: Demand Forecast endpoints (TOR Function 2)
+api_router.include_router(
+    demand_forecast.router,
+    prefix="/demand-forecast",
+    tags=["demand-forecast", "phase2"],
+)
+
+# Phase 2: Imbalance Forecast endpoints (TOR Function 4)
+api_router.include_router(
+    imbalance_forecast.router,
+    prefix="/imbalance-forecast",
+    tags=["imbalance-forecast", "phase2"],
 )
 
 # WebSocket endpoints for real-time updates
