@@ -59,7 +59,7 @@ services:
     container_name: pea-backend
     environment:
       - APP_ENV=${APP_ENV:-development}
-      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@timescaledb:5432/${DB_NAME:-pea_forecast}
+      - DATABASE_URL=postgresql+asyncpg://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@timescaledb:5432/${DB_NAME:-pea_forecast}
       - REDIS_URL=redis://redis:6379/0
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       # Keycloak Authentication
@@ -125,7 +125,7 @@ services:
     container_name: pea-ml-service
     environment:
       - MODEL_REGISTRY_PATH=/app/models
-      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@timescaledb:5432/${DB_NAME:-pea_forecast}
+      - DATABASE_URL=postgresql+asyncpg://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@timescaledb:5432/${DB_NAME:-pea_forecast}
       - REDIS_URL=redis://redis:6379/0
     ports:
       - "8001:8001"

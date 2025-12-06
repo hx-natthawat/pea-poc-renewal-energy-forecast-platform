@@ -18,9 +18,16 @@ const API_ROUTES = ["/api/v1/forecast/", "/api/v1/alerts/", "/api/v1/data/"];
 self.addEventListener("install", (event) => {
   console.log("[SW] Installing service worker...");
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
+    caches.open(STATIC_CACHE).then(async (cache) => {
       console.log("[SW] Caching static assets");
-      return cache.addAll(STATIC_ASSETS);
+      // Cache assets individually to handle failures gracefully
+      for (const asset of STATIC_ASSETS) {
+        try {
+          await cache.add(asset);
+        } catch (err) {
+          console.warn("[SW] Failed to cache:", asset, err.message);
+        }
+      }
     })
   );
   self.skipWaiting();
@@ -149,11 +156,6 @@ async function networkFirstStrategy(request) {
 // Navigation strategy with offline fallback
 async function navigationStrategy(request) {
   try {
-    const preloadResponse = await event.preloadResponse;
-    if (preloadResponse) {
-      return preloadResponse;
-    }
-
     const networkResponse = await fetch(request);
     return networkResponse;
   } catch (_error) {
