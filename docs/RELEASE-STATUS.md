@@ -121,6 +121,12 @@ None - all critical issues resolved.
 | Enhanced Alerting (F002) | ✅ Complete | Email + LINE Notify |
 | Multi-Region Support (F003) | ✅ Complete | 4 PEA zones with RBAC |
 
+### P2 - Compliance Features
+
+| Feature | Status | Implementation |
+|---------|--------|----------------|
+| Audit Log UI (TOR 7.1.6) | ✅ Complete | Full viewer with filters, export, stats |
+
 ### Next Steps
 
 1. ~~Fix remaining test failures~~ ✅ Complete
@@ -168,7 +174,7 @@ cd backend && ./venv/bin/pytest tests/ -v
 | Helm Template | ✅ PASS | All resources render correctly |
 | Backend Linting (Ruff) | ✅ PASS | All checks passed |
 | Frontend Linting (Biome) | ✅ PASS | 29 files checked, no issues |
-| Backend Tests | ✅ PASS | 487 passed, 4 skipped |
+| Backend Tests | ✅ PASS | 527 passed, 4 skipped |
 | Frontend Tests | ✅ PASS | 28 passed |
 
 ### Deployment Readiness
@@ -176,7 +182,7 @@ cd backend && ./venv/bin/pytest tests/ -v
 The platform is **ready for staging deployment**:
 
 1. ✅ All TOR requirements met
-2. ✅ All tests passing (515 total)
+2. ✅ All tests passing (555 total)
 3. ✅ Helm charts validated
 4. ✅ Linting passes (Ruff + Biome)
 5. ✅ v1.1.0 features complete
