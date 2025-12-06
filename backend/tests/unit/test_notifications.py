@@ -5,14 +5,14 @@ Tests notification models and endpoints.
 """
 
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
 
 from app.api.v1.endpoints.notifications import (
-    SendNotificationRequest,
     NotificationPreferencesRequest,
+    SendNotificationRequest,
     TestNotificationRequest,
 )
 from app.core.security import CurrentUser

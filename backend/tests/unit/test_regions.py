@@ -5,13 +5,11 @@ Tests region CRUD, hierarchy, stats, and access control.
 """
 
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
-from fastapi.testclient import TestClient
 
-from app.api.v1.endpoints.regions import router
 from app.core.security import CurrentUser
 from app.models.domain.region import AccessLevel, Region, RegionType, UserRegionAccess
 

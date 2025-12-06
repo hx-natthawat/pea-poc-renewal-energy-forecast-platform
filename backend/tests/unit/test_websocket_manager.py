@@ -4,8 +4,9 @@ Unit tests for WebSocket connection manager.
 Tests the connection manager, channel subscriptions, and broadcasting.
 """
 
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 
 from app.api.v1.websocket.manager import ConnectionManager
 
