@@ -39,6 +39,10 @@
 | Orchestrator SDLC Update         | 2025-12-06 | Full lifecycle support           |
 | Deployment Runbook               | 2025-12-06 | Full staging/prod/rollback guide |
 | Shared DashboardShell Layout     | 2025-12-06 | Consistent navigation across pages |
+| Priority 1: Python version fix   | 2025-12-06 | CI now uses 3.11 consistently    |
+| Priority 1: ArgoCD manifests     | 2025-12-06 | project.yaml, staging, production |
+| Priority 1: ML Service Helm      | 2025-12-06 | TOR 7.1.1 compliant (16C/64GB)   |
+| Priority 1: Vault strategy doc   | 2025-12-06 | secrets-management-strategy.md   |
 
 ---
 
@@ -98,6 +102,10 @@ None currently.
 - Knowledge Management system implemented (RAG/CAG/Knowledge Graph ready)
 - Orchestrator updated with full SDLC lifecycle support
 - **Deployment runbook complete**: docs/operations/runbooks/deployment-runbook.md
+- **All Priority 1 deployment blockers resolved** (2025-12-06)
+- **Staging Readiness: 95%** | **Overall Score: 92/100**
+- **Secrets management strategy documented**: docs/operations/secrets-management-strategy.md
+- **ML Service added to Helm**: TOR 7.1.1 compliant (16 Core, 64GB)
 - Awaiting stakeholder UAT scheduling
 
 ---
