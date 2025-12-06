@@ -143,7 +143,20 @@
       "Bash(export PYTHONPATH=$PWD:*)",
       "Bash(./venv/bin/pytest tests/unit/ -q --tb=no)",
       "Bash(npm audit:*)",
-      "Bash(pnpm run lint:*)"
+      "Bash(pnpm run lint:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform log --oneline -3)",
+      "Bash(frontend/src/components/charts/DemandForecastChart.tsx )",
+      "Bash(frontend/src/components/charts/ImbalanceMonitor.tsx )",
+      "Bash(frontend/src/components/charts/LoadForecastChart.tsx )",
+      "Bash(frontend/src/components/charts/index.ts )",
+      "Bash(docs/RELEASE-STATUS.md )",
+      "Bash(backend/tests/unit/test_cache.py )",
+      "Bash(backend/tests/unit/test_history.py )",
+      "Bash(backend/tests/unit/test_notification_service.py)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform commit -m \"$(cat <<''EOF''\nfeat: Add Grid Operations UI for TOR 7.5 extended functions\n\n- Add LoadForecastChart component (TOR 7.5.1.3) with level selector\n- Add DemandForecastChart component (TOR 7.5.1.2) with net/gross/RE\n- Add ImbalanceMonitor component (TOR 7.5.1.4) with severity indicators\n- Add new Grid Operations dashboard tab\n- Fix backend test linting errors (lambda self -> _)\n- Update RELEASE-STATUS.md with Phase 2a UI completion\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff --stat backend/tests/unit/)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff backend/tests/unit/test_notifications.py backend/tests/unit/test_regions.py backend/tests/unit/test_websocket_manager.py)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform add backend/tests/)"
     ],
     "deny": [],
     "ask": []

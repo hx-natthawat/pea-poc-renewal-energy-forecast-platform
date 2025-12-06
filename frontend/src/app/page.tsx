@@ -208,7 +208,7 @@ export default function Home() {
 
         {/* Navigation Tabs - Desktop */}
         <div className="container mx-auto px-3 sm:px-4 hidden sm:block">
-          <nav className="flex space-x-1 overflow-x-auto scrollbar-hide">
+          <nav className="flex space-x-1 overflow-x-auto scrollbar-hide" suppressHydrationWarning>
             {tabs.map((tab) => (
               <button
                 type="button"
@@ -231,7 +231,7 @@ export default function Home() {
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
           <div className="sm:hidden bg-[#5A0349] border-t border-white/10">
-            <nav className="container mx-auto px-3 py-2">
+            <nav className="container mx-auto px-3 py-2" suppressHydrationWarning>
               {tabs.map((tab) => (
                 <button
                   type="button"
@@ -256,7 +256,7 @@ export default function Home() {
 
         {/* Mobile Bottom Navigation */}
         <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
-          <nav className="flex justify-around">
+          <nav className="flex justify-around" suppressHydrationWarning>
             {tabs.map((tab) => (
               <button
                 type="button"
