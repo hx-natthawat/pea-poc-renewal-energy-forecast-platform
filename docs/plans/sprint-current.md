@@ -43,6 +43,8 @@
 | Priority 1: ArgoCD manifests     | 2025-12-06 | project.yaml, staging, production |
 | Priority 1: ML Service Helm      | 2025-12-06 | TOR 7.1.1 compliant (16C/64GB)   |
 | Priority 1: Vault strategy doc   | 2025-12-06 | secrets-management-strategy.md   |
+| Priority 2: PodDisruptionBudgets | 2025-12-06 | templates/pdb.yaml               |
+| Priority 2: NetworkPolicies      | 2025-12-06 | templates/networkpolicy.yaml     |
 
 ---
 
@@ -103,7 +105,9 @@ None currently.
 - Orchestrator updated with full SDLC lifecycle support
 - **Deployment runbook complete**: docs/operations/runbooks/deployment-runbook.md
 - **All Priority 1 deployment blockers resolved** (2025-12-06)
-- **Staging Readiness: 95%** | **Overall Score: 92/100**
+- **Priority 2 HA configurations added** (2025-12-06): PDBs + NetworkPolicies
+- **Staging Readiness: 98%** | **Overall Score: 95/100**
+- **Production Readiness: 60%**
 - **Secrets management strategy documented**: docs/operations/secrets-management-strategy.md
 - **ML Service added to Helm**: TOR 7.1.1 compliant (16 Core, 64GB)
 - Awaiting stakeholder UAT scheduling
