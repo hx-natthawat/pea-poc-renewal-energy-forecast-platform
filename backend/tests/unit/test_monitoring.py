@@ -4,7 +4,6 @@ Unit tests for model monitoring endpoints.
 Tests the /api/v1/monitoring endpoints.
 """
 
-import pytest
 from fastapi.testclient import TestClient
 
 
@@ -66,8 +65,7 @@ class TestModelPerformance:
     def test_performance_with_days(self, test_client: TestClient):
         """Test performance with custom days."""
         response = test_client.get(
-            "/api/v1/monitoring/performance/solar",
-            params={"days": 14}
+            "/api/v1/monitoring/performance/solar", params={"days": 14}
         )
 
         assert response.status_code == 200
@@ -120,8 +118,7 @@ class TestPredictionAccuracy:
     def test_get_solar_accuracy(self, test_client: TestClient):
         """Test getting solar prediction accuracy."""
         response = test_client.get(
-            "/api/v1/monitoring/predictions/accuracy",
-            params={"model_type": "solar"}
+            "/api/v1/monitoring/predictions/accuracy", params={"model_type": "solar"}
         )
 
         assert response.status_code == 200
@@ -132,8 +129,7 @@ class TestPredictionAccuracy:
     def test_get_voltage_accuracy(self, test_client: TestClient):
         """Test getting voltage prediction accuracy."""
         response = test_client.get(
-            "/api/v1/monitoring/predictions/accuracy",
-            params={"model_type": "voltage"}
+            "/api/v1/monitoring/predictions/accuracy", params={"model_type": "voltage"}
         )
 
         assert response.status_code == 200
@@ -142,7 +138,7 @@ class TestPredictionAccuracy:
         """Test accuracy with custom hours."""
         response = test_client.get(
             "/api/v1/monitoring/predictions/accuracy",
-            params={"model_type": "solar", "hours": 48}
+            params={"model_type": "solar", "hours": 48},
         )
 
         assert response.status_code == 200

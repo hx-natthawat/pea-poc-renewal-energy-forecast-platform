@@ -4,12 +4,13 @@ Unit tests for the region service.
 Tests cover region CRUD, access control, and statistics.
 """
 
-import pytest
 from datetime import datetime, timedelta
 
+import pytest
+
 from app.models.domain.region import (
-    AccessLevel,
     PEA_REGIONS,
+    AccessLevel,
     Region,
     RegionType,
     UserRegionAccess,
@@ -20,10 +21,8 @@ from app.models.domain.region import (
 )
 from app.services.region_service import (
     RegionService,
-    RegionServiceConfig,
     get_region_service,
 )
-
 
 # =============================================================================
 # Region Domain Model Tests
@@ -45,7 +44,7 @@ class TestRegionDomainModel:
         assert region.name == "Test Region"
         assert region.name_th == "ภาคทดสอบ"
         assert region.region_type == RegionType.REGION
-        assert region.is_active == True
+        assert region.is_active is True
 
     def test_region_with_coordinates(self):
         """Test region with valid coordinates."""
@@ -100,9 +99,9 @@ class TestUserRegionAccess:
         write_access = UserRegionAccess("u1", "r1", AccessLevel.WRITE)
         admin_access = UserRegionAccess("u1", "r1", AccessLevel.ADMIN)
 
-        assert read_access.can_read() == True
-        assert write_access.can_read() == True
-        assert admin_access.can_read() == True
+        assert read_access.can_read() is True
+        assert write_access.can_read() is True
+        assert admin_access.can_read() is True
 
     def test_access_can_write(self):
         """Test can_write for different access levels."""
@@ -110,37 +109,41 @@ class TestUserRegionAccess:
         write_access = UserRegionAccess("u1", "r1", AccessLevel.WRITE)
         admin_access = UserRegionAccess("u1", "r1", AccessLevel.ADMIN)
 
-        assert read_access.can_write() == False
-        assert write_access.can_write() == True
-        assert admin_access.can_write() == True
+        assert read_access.can_write() is False
+        assert write_access.can_write() is True
+        assert admin_access.can_write() is True
 
     def test_access_is_admin(self):
         """Test is_admin for different access levels."""
         read_access = UserRegionAccess("u1", "r1", AccessLevel.READ)
         admin_access = UserRegionAccess("u1", "r1", AccessLevel.ADMIN)
 
-        assert read_access.is_admin() == False
-        assert admin_access.is_admin() == True
+        assert read_access.is_admin() is False
+        assert admin_access.is_admin() is True
 
     def test_access_expiration(self):
         """Test access expiration check."""
         # Non-expired
         access1 = UserRegionAccess(
-            "u1", "r1", AccessLevel.READ,
+            "u1",
+            "r1",
+            AccessLevel.READ,
             expires_at=datetime.now() + timedelta(days=1),
         )
-        assert access1.is_expired() == False
+        assert access1.is_expired() is False
 
         # Expired
         access2 = UserRegionAccess(
-            "u1", "r1", AccessLevel.READ,
+            "u1",
+            "r1",
+            AccessLevel.READ,
             expires_at=datetime.now() - timedelta(days=1),
         )
-        assert access2.is_expired() == True
+        assert access2.is_expired() is True
 
         # No expiration
         access3 = UserRegionAccess("u1", "r1", AccessLevel.READ)
-        assert access3.is_expired() == False
+        assert access3.is_expired() is False
 
 
 # =============================================================================
@@ -289,15 +292,17 @@ class TestRegionService:
         """Test deleting (deactivating) a region."""
         service = RegionService()
         # Create a region without children
-        service.create_region(Region(
-            id="deletable",
-            name="Deletable",
-            region_type=RegionType.STATION,
-            parent_id="central",
-        ))
+        service.create_region(
+            Region(
+                id="deletable",
+                name="Deletable",
+                region_type=RegionType.STATION,
+                parent_id="central",
+            )
+        )
         deleted = service.delete_region("deletable")
-        assert deleted == True
-        assert service.get_region("deletable").is_active == False
+        assert deleted is True
+        assert service.get_region("deletable").is_active is False
 
     def test_delete_region_with_children(self):
         """Test deleting region with children fails."""
@@ -338,13 +343,13 @@ class TestRegionAccessControl:
         service = RegionService()
         service.grant_access("user1", "central", AccessLevel.READ)
         revoked = service.revoke_access("user1", "central")
-        assert revoked == True
+        assert revoked is True
 
     def test_revoke_access_not_found(self):
         """Test revoking non-existent access."""
         service = RegionService()
         revoked = service.revoke_access("user1", "central")
-        assert revoked == False
+        assert revoked is False
 
     def test_get_user_regions(self):
         """Test getting user's accessible regions."""
@@ -358,24 +363,24 @@ class TestRegionAccessControl:
         """Test checking read access."""
         service = RegionService()
         service.grant_access("user1", "central", AccessLevel.READ)
-        assert service.check_access("user1", "central", AccessLevel.READ) == True
-        assert service.check_access("user1", "central", AccessLevel.WRITE) == False
+        assert service.check_access("user1", "central", AccessLevel.READ) is True
+        assert service.check_access("user1", "central", AccessLevel.WRITE) is False
 
     def test_check_access_write(self):
         """Test checking write access."""
         service = RegionService()
         service.grant_access("user1", "central", AccessLevel.WRITE)
-        assert service.check_access("user1", "central", AccessLevel.READ) == True
-        assert service.check_access("user1", "central", AccessLevel.WRITE) == True
-        assert service.check_access("user1", "central", AccessLevel.ADMIN) == False
+        assert service.check_access("user1", "central", AccessLevel.READ) is True
+        assert service.check_access("user1", "central", AccessLevel.WRITE) is True
+        assert service.check_access("user1", "central", AccessLevel.ADMIN) is False
 
     def test_check_access_admin(self):
         """Test checking admin access."""
         service = RegionService()
         service.grant_access("user1", "central", AccessLevel.ADMIN)
-        assert service.check_access("user1", "central", AccessLevel.READ) == True
-        assert service.check_access("user1", "central", AccessLevel.WRITE) == True
-        assert service.check_access("user1", "central", AccessLevel.ADMIN) == True
+        assert service.check_access("user1", "central", AccessLevel.READ) is True
+        assert service.check_access("user1", "central", AccessLevel.WRITE) is True
+        assert service.check_access("user1", "central", AccessLevel.ADMIN) is True
 
     def test_get_accessible_regions(self):
         """Test getting accessible regions for a user."""

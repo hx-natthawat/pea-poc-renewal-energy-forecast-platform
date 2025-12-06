@@ -4,7 +4,6 @@ Unit tests for network topology endpoints.
 Tests the /api/v1/topology endpoints.
 """
 
-import pytest
 from fastapi.testclient import TestClient
 
 
@@ -49,8 +48,7 @@ class TestGetNetworkTopology:
     def test_get_topology_without_voltage(self, test_client: TestClient):
         """Test getting topology without voltage data."""
         response = test_client.get(
-            "/api/v1/topology/",
-            params={"include_voltage": False}
+            "/api/v1/topology/", params={"include_voltage": False}
         )
 
         assert response.status_code == 200
@@ -116,8 +114,7 @@ class TestGetProsumerDetails:
     def test_get_prosumer_with_hours_param(self, test_client: TestClient):
         """Test getting prosumer with custom hours."""
         response = test_client.get(
-            "/api/v1/topology/prosumer/prosumer2",
-            params={"hours": 48}
+            "/api/v1/topology/prosumer/prosumer2", params={"hours": 48}
         )
 
         assert response.status_code == 200

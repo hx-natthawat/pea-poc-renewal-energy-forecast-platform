@@ -4,7 +4,6 @@ Unit tests for alert management endpoints.
 Tests the /api/v1/alerts endpoints.
 """
 
-import pytest
 from fastapi.testclient import TestClient
 
 
@@ -104,8 +103,7 @@ class TestAlertTimeline:
     def test_get_alert_timeline_custom_params(self, test_client: TestClient):
         """Test getting alert timeline with custom parameters."""
         response = test_client.get(
-            "/api/v1/alerts/timeline",
-            params={"hours": 48, "interval": "6h"}
+            "/api/v1/alerts/timeline", params={"hours": 48, "interval": "6h"}
         )
 
         assert response.status_code == 200
@@ -117,8 +115,7 @@ class TestAlertTimeline:
         """Test different interval options."""
         for interval in ["15m", "1h", "6h", "1d"]:
             response = test_client.get(
-                "/api/v1/alerts/timeline",
-                params={"interval": interval}
+                "/api/v1/alerts/timeline", params={"interval": interval}
             )
             assert response.status_code == 200
 
@@ -140,8 +137,7 @@ class TestProsumerAlerts:
     def test_get_prosumer_alerts_with_params(self, test_client: TestClient):
         """Test getting prosumer alerts with custom parameters."""
         response = test_client.get(
-            "/api/v1/alerts/prosumer/prosumer2",
-            params={"hours": 48, "limit": 100}
+            "/api/v1/alerts/prosumer/prosumer2", params={"hours": 48, "limit": 100}
         )
 
         assert response.status_code == 200
@@ -156,9 +152,7 @@ class TestCheckVoltage:
         """Test checking voltage violations."""
         response = test_client.post(
             "/api/v1/alerts/check-voltage",
-            json={
-                "prosumer_ids": ["prosumer1", "prosumer2"]
-            }
+            json={"prosumer_ids": ["prosumer1", "prosumer2"]},
         )
 
         assert response.status_code == 200
@@ -169,10 +163,7 @@ class TestCheckVoltage:
 
     def test_check_voltage_default_prosumers(self, test_client: TestClient):
         """Test checking voltage with default prosumer list."""
-        response = test_client.post(
-            "/api/v1/alerts/check-voltage",
-            json={}
-        )
+        response = test_client.post("/api/v1/alerts/check-voltage", json={})
 
         assert response.status_code == 200
         data = response.json()

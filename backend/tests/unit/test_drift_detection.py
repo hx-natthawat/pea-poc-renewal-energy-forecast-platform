@@ -4,9 +4,9 @@ Unit tests for drift detection service.
 Tests the v1.1.0 Model Retraining Pipeline feature.
 """
 
-import numpy as np
-import pytest
 from datetime import datetime, timedelta
+
+import numpy as np
 
 from app.services.drift_detection_service import (
     DriftDetectionService,
@@ -48,7 +48,7 @@ class TestDriftDetectionService:
 
         assert result.drift_type == DriftType.DATA_DRIFT
         assert result.feature_name == "test_feature"
-        assert result.drift_detected == False
+        assert not result.drift_detected
         assert result.severity in [DriftSeverity.NONE, DriftSeverity.LOW]
 
     def test_detect_data_drift_significant_drift(self):
@@ -77,7 +77,7 @@ class TestDriftDetectionService:
 
         result = service.detect_data_drift(baseline, current, "small_feature")
 
-        assert result.drift_detected is False
+        assert not result.drift_detected
         assert "Insufficient" in result.recommendation
 
     def test_detect_performance_drift_no_issue(self):
@@ -91,7 +91,7 @@ class TestDriftDetectionService:
         )
 
         assert result.drift_type == DriftType.PERFORMANCE_DRIFT
-        assert result.drift_detected is False
+        assert not result.drift_detected
         assert result.severity in [DriftSeverity.NONE, DriftSeverity.LOW]
 
     def test_detect_performance_drift_exceeded(self):
@@ -106,7 +106,11 @@ class TestDriftDetectionService:
 
         assert result.drift_type == DriftType.PERFORMANCE_DRIFT
         assert result.drift_detected is True
-        assert result.severity in [DriftSeverity.MEDIUM, DriftSeverity.HIGH, DriftSeverity.CRITICAL]
+        assert result.severity in [
+            DriftSeverity.MEDIUM,
+            DriftSeverity.HIGH,
+            DriftSeverity.CRITICAL,
+        ]
 
     def test_detect_performance_drift_voltage(self):
         """Test performance drift for voltage model."""

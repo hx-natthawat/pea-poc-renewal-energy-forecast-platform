@@ -4,7 +4,6 @@ Unit tests for data endpoints.
 Tests the /api/v1/data endpoints for solar and voltage measurements.
 """
 
-import pytest
 from fastapi.testclient import TestClient
 
 
@@ -32,8 +31,7 @@ class TestSolarDataLatest:
     def test_get_solar_data_custom_station(self, test_client: TestClient):
         """Test getting solar data for custom station."""
         response = test_client.get(
-            "/api/v1/data/solar/latest",
-            params={"station_id": "CUSTOM_STATION"}
+            "/api/v1/data/solar/latest", params={"station_id": "CUSTOM_STATION"}
         )
 
         assert response.status_code == 200
@@ -41,10 +39,7 @@ class TestSolarDataLatest:
 
     def test_get_solar_data_custom_hours(self, test_client: TestClient):
         """Test getting solar data with custom hours."""
-        response = test_client.get(
-            "/api/v1/data/solar/latest",
-            params={"hours": 12}
-        )
+        response = test_client.get("/api/v1/data/solar/latest", params={"hours": 12})
 
         assert response.status_code == 200
 
@@ -114,10 +109,7 @@ class TestVoltageDataLatest:
 
     def test_get_voltage_data_custom_hours(self, test_client: TestClient):
         """Test getting voltage data with custom hours."""
-        response = test_client.get(
-            "/api/v1/data/voltage/latest",
-            params={"hours": 8}
-        )
+        response = test_client.get("/api/v1/data/voltage/latest", params={"hours": 8})
 
         assert response.status_code == 200
 
@@ -168,8 +160,7 @@ class TestProsumerVoltage:
     def test_prosumer_voltage_with_hours(self, test_client: TestClient):
         """Test getting prosumer voltage with custom hours."""
         response = test_client.get(
-            "/api/v1/data/voltage/prosumer/prosumer1",
-            params={"hours": 48}
+            "/api/v1/data/voltage/prosumer/prosumer1", params={"hours": 48}
         )
 
         assert response.status_code == 200
@@ -241,27 +232,20 @@ class TestDataPagination:
 
     def test_solar_data_limit(self, test_client: TestClient):
         """Test solar data respects limit parameter."""
-        response = test_client.get(
-            "/api/v1/data/solar/latest",
-            params={"limit": 50}
-        )
+        response = test_client.get("/api/v1/data/solar/latest", params={"limit": 50})
 
         assert response.status_code == 200
 
     def test_voltage_data_limit(self, test_client: TestClient):
         """Test voltage data respects limit parameter."""
-        response = test_client.get(
-            "/api/v1/data/voltage/latest",
-            params={"limit": 50}
-        )
+        response = test_client.get("/api/v1/data/voltage/latest", params={"limit": 50})
 
         assert response.status_code == 200
 
     def test_prosumer_voltage_limit(self, test_client: TestClient):
         """Test prosumer voltage respects limit parameter."""
         response = test_client.get(
-            "/api/v1/data/voltage/prosumer/prosumer1",
-            params={"limit": 100}
+            "/api/v1/data/voltage/prosumer/prosumer1", params={"limit": 100}
         )
 
         assert response.status_code == 200

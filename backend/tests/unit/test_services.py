@@ -4,15 +4,14 @@ Unit tests for service layer.
 Tests the business logic services.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import numpy as np
 import pandas as pd
-import pytest
 
+from app.models.schemas.weather import WeatherCondition
 from app.services.ramp_rate_service import RampRateConfig, RampRateService
 from app.services.weather_service import WeatherService
-from app.models.schemas.weather import WeatherCondition
 
 
 class TestRampRateService:
@@ -152,11 +151,13 @@ class TestRampRateService:
         service = RampRateService()
         timestamps = pd.date_range("2025-01-01 08:00", periods=20, freq="5min")
         # Clear -> cloudy -> clear pattern
-        irradiance = np.concatenate([
-            np.array([800] * 5),  # Clear kt=0.8
-            np.array([200] * 10),  # Cloudy kt=0.2
-            np.array([800] * 5),  # Clear again kt=0.8
-        ])
+        irradiance = np.concatenate(
+            [
+                np.array([800] * 5),  # Clear kt=0.8
+                np.array([200] * 10),  # Cloudy kt=0.2
+                np.array([800] * 5),  # Clear again kt=0.8
+            ]
+        )
         clear_sky = np.array([1000] * 20)
 
         events = service.detect_cloud_events(irradiance, clear_sky, timestamps)
@@ -295,14 +296,14 @@ class TestWeatherService:
         """Test cache validity check with expired entry."""
         service = WeatherService()
         service._cache["test_key"] = "data"
-        service._cache_times["test_key"] = datetime.now(timezone.utc) - timedelta(hours=1)
+        service._cache_times["test_key"] = datetime.now(UTC) - timedelta(hours=1)
         assert service._is_cache_valid("test_key") is False
 
     def test_is_cache_valid_fresh(self):
         """Test cache validity check with fresh entry."""
         service = WeatherService()
         service._cache["test_key"] = "data"
-        service._cache_times["test_key"] = datetime.now(timezone.utc)
+        service._cache_times["test_key"] = datetime.now(UTC)
         assert service._is_cache_valid("test_key") is True
 
     def test_generate_alerts_from_station_heavy_rain(self):

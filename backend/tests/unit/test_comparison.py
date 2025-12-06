@@ -4,7 +4,6 @@ Unit tests for forecast comparison endpoints.
 Tests the /api/v1/comparison endpoints.
 """
 
-import pytest
 from fastapi.testclient import TestClient
 
 
@@ -25,8 +24,7 @@ class TestSolarComparison:
     def test_solar_comparison_with_station(self, test_client: TestClient):
         """Test solar comparison with specific station."""
         response = test_client.get(
-            "/api/v1/comparison/solar",
-            params={"station_id": "POC_STATION_1"}
+            "/api/v1/comparison/solar", params={"station_id": "POC_STATION_1"}
         )
 
         assert response.status_code == 200
@@ -34,10 +32,7 @@ class TestSolarComparison:
 
     def test_solar_comparison_with_hours(self, test_client: TestClient):
         """Test solar comparison with custom hours."""
-        response = test_client.get(
-            "/api/v1/comparison/solar",
-            params={"hours": 48}
-        )
+        response = test_client.get("/api/v1/comparison/solar", params={"hours": 48})
 
         assert response.status_code == 200
         assert response.json()["data"]["period_hours"] == 48
@@ -77,8 +72,7 @@ class TestVoltageComparison:
     def test_voltage_comparison_with_prosumer(self, test_client: TestClient):
         """Test voltage comparison for specific prosumer."""
         response = test_client.get(
-            "/api/v1/comparison/voltage",
-            params={"prosumer_id": "prosumer1"}
+            "/api/v1/comparison/voltage", params={"prosumer_id": "prosumer1"}
         )
 
         assert response.status_code == 200

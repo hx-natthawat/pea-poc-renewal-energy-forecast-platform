@@ -4,13 +4,11 @@ Unit tests for model retraining API models.
 Tests request/response models for retraining endpoints.
 """
 
-import pytest
-
 from app.api.v1.endpoints.retraining import (
-    DriftDetectionRequest,
-    RetrainingEvaluationRequest,
     ABTestRequest,
+    DriftDetectionRequest,
     ModelPromotionRequest,
+    RetrainingEvaluationRequest,
     RetrainingTriggerConfig,
 )
 
@@ -36,8 +34,7 @@ class TestDriftDetectionRequest:
 
     def test_with_features(self):
         request = DriftDetectionRequest(
-            model_type="solar",
-            features=["pyrano1", "ambtemp"]
+            model_type="solar", features=["pyrano1", "ambtemp"]
         )
         assert request.features == ["pyrano1", "ambtemp"]
 

@@ -9,8 +9,6 @@ Tests cover:
 - Weather event logging
 """
 
-import pytest
-from datetime import datetime
 from fastapi.testclient import TestClient
 
 

@@ -14,7 +14,6 @@ Usage:
 
 import argparse
 import asyncio
-import json
 import statistics
 import time
 from dataclasses import dataclass
@@ -25,6 +24,7 @@ try:
 except ImportError:
     print("Installing aiohttp...")
     import subprocess
+
     subprocess.run(["pip", "install", "aiohttp"], check=True)
     import aiohttp
 
@@ -32,6 +32,7 @@ except ImportError:
 @dataclass
 class LoadTestResult:
     """Results from a load test run."""
+
     endpoint: str
     total_requests: int
     successful: int
@@ -63,7 +64,9 @@ class APILoadTester:
         except Exception:
             return False, (time.perf_counter() - start) * 1000
 
-    async def test_solar_forecast(self, session: aiohttp.ClientSession) -> tuple[bool, float]:
+    async def test_solar_forecast(
+        self, session: aiohttp.ClientSession
+    ) -> tuple[bool, float]:
         """Test solar forecast endpoint."""
         payload = {
             "timestamp": datetime.now().isoformat(),
@@ -75,39 +78,41 @@ class APILoadTester:
                 "pvtemp1": 45.2,
                 "pvtemp2": 44.8,
                 "ambtemp": 32.5,
-                "windspeed": 2.3
-            }
+                "windspeed": 2.3,
+            },
         }
         start = time.perf_counter()
         try:
             async with session.post(
-                f"{self.base_url}/api/v1/forecast/solar",
-                json=payload
+                f"{self.base_url}/api/v1/forecast/solar", json=payload
             ) as resp:
                 success = resp.status == 200
                 return success, (time.perf_counter() - start) * 1000
         except Exception:
             return False, (time.perf_counter() - start) * 1000
 
-    async def test_voltage_forecast(self, session: aiohttp.ClientSession) -> tuple[bool, float]:
+    async def test_voltage_forecast(
+        self, session: aiohttp.ClientSession
+    ) -> tuple[bool, float]:
         """Test voltage forecast endpoint."""
         payload = {
             "timestamp": datetime.now().isoformat(),
             "prosumer_ids": ["prosumer1", "prosumer3", "prosumer5"],
-            "horizon_minutes": 15
+            "horizon_minutes": 15,
         }
         start = time.perf_counter()
         try:
             async with session.post(
-                f"{self.base_url}/api/v1/forecast/voltage",
-                json=payload
+                f"{self.base_url}/api/v1/forecast/voltage", json=payload
             ) as resp:
                 success = resp.status == 200
                 return success, (time.perf_counter() - start) * 1000
         except Exception:
             return False, (time.perf_counter() - start) * 1000
 
-    async def test_solar_data(self, session: aiohttp.ClientSession) -> tuple[bool, float]:
+    async def test_solar_data(
+        self, session: aiohttp.ClientSession
+    ) -> tuple[bool, float]:
         """Test solar data endpoint."""
         start = time.perf_counter()
         try:
@@ -119,7 +124,9 @@ class APILoadTester:
         except Exception:
             return False, (time.perf_counter() - start) * 1000
 
-    async def test_voltage_data(self, session: aiohttp.ClientSession) -> tuple[bool, float]:
+    async def test_voltage_data(
+        self, session: aiohttp.ClientSession
+    ) -> tuple[bool, float]:
         """Test voltage data endpoint."""
         start = time.perf_counter()
         try:
@@ -136,7 +143,7 @@ class APILoadTester:
         test_func,
         endpoint_name: str,
         concurrent: int = 10,
-        total_requests: int = 100
+        total_requests: int = 100,
     ) -> LoadTestResult:
         """Run load test for a specific endpoint."""
         print(f"\n{'='*60}")
@@ -153,7 +160,9 @@ class APILoadTester:
 
         start_time = time.perf_counter()
 
-        async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
+        async with aiohttp.ClientSession(
+            connector=connector, timeout=timeout
+        ) as session:
             # Create semaphore to limit concurrency
             sem = asyncio.Semaphore(concurrent)
 
@@ -193,7 +202,7 @@ class APILoadTester:
             p95_ms=sorted_times[int(len(sorted_times) * 0.95)],
             p99_ms=sorted_times[int(len(sorted_times) * 0.99)],
             requests_per_second=total_requests / total_duration,
-            total_duration_s=total_duration
+            total_duration_s=total_duration,
         )
 
         self.results.append(result)
@@ -206,21 +215,25 @@ class APILoadTester:
         target_met = result.p95_ms < 500
 
         print(f"\n📊 Results for {result.endpoint}:")
-        print(f"   Success Rate: {success_rate:.1f}% ({result.successful}/{result.total_requests})")
+        print(
+            f"   Success Rate: {success_rate:.1f}% ({result.successful}/{result.total_requests})"
+        )
         print(f"   Avg Response:  {result.avg_response_ms:.1f} ms")
         print(f"   Min Response:  {result.min_response_ms:.1f} ms")
         print(f"   Max Response:  {result.max_response_ms:.1f} ms")
         print(f"   P50 (median):  {result.p50_ms:.1f} ms")
-        print(f"   P95:           {result.p95_ms:.1f} ms {'✅' if target_met else '❌'} (target: <500ms)")
+        print(
+            f"   P95:           {result.p95_ms:.1f} ms {'✅' if target_met else '❌'} (target: <500ms)"
+        )
         print(f"   P99:           {result.p99_ms:.1f} ms")
         print(f"   Throughput:    {result.requests_per_second:.1f} req/s")
         print(f"   Total Time:    {result.total_duration_s:.2f} s")
 
     def print_summary(self):
         """Print summary of all load tests."""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("LOAD TEST SUMMARY")
-        print("="*70)
+        print("=" * 70)
 
         all_passed = True
         for result in self.results:
@@ -232,14 +245,16 @@ class APILoadTester:
                 all_passed = False
 
             print(f"\n{result.endpoint}:")
-            print(f"   {status} | P95: {result.p95_ms:.1f}ms | Success: {success_rate:.1f}% | {result.requests_per_second:.1f} req/s")
+            print(
+                f"   {status} | P95: {result.p95_ms:.1f}ms | Success: {success_rate:.1f}% | {result.requests_per_second:.1f} req/s"
+            )
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         if all_passed:
             print("✅ ALL LOAD TESTS PASSED")
         else:
             print("❌ SOME LOAD TESTS FAILED")
-        print("="*70)
+        print("=" * 70)
 
         return all_passed
 
@@ -247,17 +262,21 @@ class APILoadTester:
 async def main():
     parser = argparse.ArgumentParser(description="Load test PEA RE Forecast API")
     parser.add_argument("--url", default="http://localhost:8000", help="API base URL")
-    parser.add_argument("--concurrent", type=int, default=20, help="Concurrent requests")
-    parser.add_argument("--requests", type=int, default=100, help="Total requests per endpoint")
+    parser.add_argument(
+        "--concurrent", type=int, default=20, help="Concurrent requests"
+    )
+    parser.add_argument(
+        "--requests", type=int, default=100, help="Total requests per endpoint"
+    )
     args = parser.parse_args()
 
-    print("="*70)
+    print("=" * 70)
     print("PEA RE Forecast Platform - API Load Testing")
-    print("="*70)
+    print("=" * 70)
     print(f"Base URL: {args.url}")
     print(f"Concurrent Requests: {args.concurrent}")
     print(f"Total Requests per Endpoint: {args.requests}")
-    print(f"Target: P95 Response Time < 500ms")
+    print("Target: P95 Response Time < 500ms")
 
     tester = APILoadTester(args.url)
 
@@ -272,10 +291,7 @@ async def main():
 
     for test_func, name in endpoints:
         await tester.run_load_test(
-            test_func,
-            name,
-            concurrent=args.concurrent,
-            total_requests=args.requests
+            test_func, name, concurrent=args.concurrent, total_requests=args.requests
         )
 
     # Print summary

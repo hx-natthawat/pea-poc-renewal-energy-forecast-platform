@@ -5,12 +5,9 @@ Tests the solar and voltage prediction inference services.
 """
 
 from datetime import datetime
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import numpy as np
 import pandas as pd
-import pytest
 
 from app.ml.solar_inference import SolarInference, get_solar_inference
 from app.ml.voltage_inference import (
@@ -181,12 +178,12 @@ class TestVoltageInference:
     def test_prosumer_phases(self):
         """Test all prosumers have valid phases."""
         valid_phases = {"A", "B", "C"}
-        for prosumer_id, config in PROSUMER_CONFIG.items():
+        for _prosumer_id, config in PROSUMER_CONFIG.items():
             assert config["phase"] in valid_phases
 
     def test_prosumer_positions(self):
         """Test all prosumers have valid positions (1-3)."""
-        for prosumer_id, config in PROSUMER_CONFIG.items():
+        for _prosumer_id, config in PROSUMER_CONFIG.items():
             assert 1 <= config["position"] <= 3
 
     def test_predict_fallback(self):
@@ -222,7 +219,7 @@ class TestVoltageInference:
         """Test prediction for all configured prosumers."""
         inference = VoltageInference(model_path="/nonexistent/path/model.joblib")
 
-        for prosumer_id in PROSUMER_CONFIG.keys():
+        for prosumer_id in PROSUMER_CONFIG:
             result = inference.predict(
                 timestamp=datetime(2025, 1, 15, 12, 0),
                 prosumer_id=prosumer_id,

@@ -4,7 +4,6 @@ Unit tests for day-ahead forecast endpoints.
 Tests the /api/v1/dayahead endpoints.
 """
 
-import pytest
 from fastapi.testclient import TestClient
 
 
@@ -33,8 +32,7 @@ class TestSolarDayAhead:
     def test_solar_day_ahead_with_date(self, test_client: TestClient):
         """Test solar day-ahead with specific date."""
         response = test_client.get(
-            "/api/v1/dayahead/solar",
-            params={"target_date": "2025-01-15"}
+            "/api/v1/dayahead/solar", params={"target_date": "2025-01-15"}
         )
 
         assert response.status_code == 200
@@ -79,8 +77,7 @@ class TestVoltageDayAhead:
     def test_voltage_day_ahead_with_prosumer(self, test_client: TestClient):
         """Test voltage day-ahead for specific prosumer."""
         response = test_client.get(
-            "/api/v1/dayahead/voltage",
-            params={"prosumer_id": "prosumer1"}
+            "/api/v1/dayahead/voltage", params={"prosumer_id": "prosumer1"}
         )
 
         assert response.status_code == 200
@@ -100,19 +97,13 @@ class TestDayAheadReport:
 
     def test_get_report_json(self, test_client: TestClient):
         """Test getting day-ahead report in JSON format."""
-        response = test_client.get(
-            "/api/v1/dayahead/report",
-            params={"format": "json"}
-        )
+        response = test_client.get("/api/v1/dayahead/report", params={"format": "json"})
 
         assert response.status_code == 200
 
     def test_get_report_html(self, test_client: TestClient):
         """Test getting day-ahead report in HTML format."""
-        response = test_client.get(
-            "/api/v1/dayahead/report",
-            params={"format": "html"}
-        )
+        response = test_client.get("/api/v1/dayahead/report", params={"format": "html"})
 
         assert response.status_code == 200
         assert "text/html" in response.headers.get("content-type", "")

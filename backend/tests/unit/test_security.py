@@ -4,22 +4,16 @@ Unit tests for security module.
 Tests authentication, authorization, and JWT handling.
 """
 
-from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
-from fastapi import HTTPException
-
 from app.core.security import (
     CurrentUser,
     JWKSClient,
     TokenPayload,
-    require_roles,
     require_admin,
-    require_operator,
     require_analyst,
-    require_viewer,
     require_api,
+    require_operator,
+    require_roles,
+    require_viewer,
 )
 
 

@@ -6,7 +6,6 @@ Tests cover:
 - Readiness probe
 """
 
-import pytest
 from fastapi.testclient import TestClient
 
 

@@ -10,8 +10,8 @@ This module provides:
 
 import asyncio
 import os
-from datetime import datetime, timedelta, timezone
-from typing import AsyncGenerator, Generator
+from collections.abc import Generator
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from fastapi.testclient import TestClient
@@ -20,12 +20,13 @@ from fastapi.testclient import TestClient
 os.environ["APP_ENV"] = "test"
 os.environ["AUTH_ENABLED"] = "false"
 # Use asyncpg driver for async SQLAlchemy
-os.environ["DATABASE_URL"] = "postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast"
+os.environ["DATABASE_URL"] = (
+    "postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast"
+)
 
 # Import app modules after setting environment
 from app.core.security import CurrentUser, get_current_user
 from app.main import app
-
 
 # =============================================================================
 # Event Loop Configuration
@@ -111,7 +112,7 @@ def mock_api_user() -> CurrentUser:
 
 
 @pytest.fixture(scope="session")
-def test_client(mock_admin_user: CurrentUser) -> Generator[TestClient, None, None]:
+def test_client(mock_admin_user: CurrentUser) -> Generator[TestClient]:
     """Create a synchronous test client with mock authentication.
 
     Uses session scope to avoid lifespan issues when running multiple tests.
@@ -129,7 +130,7 @@ def test_client(mock_admin_user: CurrentUser) -> Generator[TestClient, None, Non
 
 
 @pytest.fixture(scope="session")
-def unauthenticated_client() -> Generator[TestClient, None, None]:
+def unauthenticated_client() -> Generator[TestClient]:
     """Create a test client without authentication.
 
     Uses session scope to avoid lifespan issues when running multiple tests.
@@ -160,7 +161,7 @@ def sample_solar_features() -> dict:
 def sample_solar_request(sample_solar_features: dict) -> dict:
     """Sample solar forecast request."""
     return {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "station_id": "POC_STATION_1",
         "horizon_minutes": 60,
         "features": sample_solar_features,
@@ -171,7 +172,7 @@ def sample_solar_request(sample_solar_features: dict) -> dict:
 def sample_voltage_request() -> dict:
     """Sample voltage forecast request."""
     return {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "prosumer_ids": ["prosumer1", "prosumer2", "prosumer3"],
         "horizon_minutes": 15,
     }
@@ -181,8 +182,13 @@ def sample_voltage_request() -> dict:
 def sample_prosumer_ids() -> list:
     """List of all prosumer IDs."""
     return [
-        "prosumer1", "prosumer2", "prosumer3",
-        "prosumer4", "prosumer5", "prosumer6", "prosumer7",
+        "prosumer1",
+        "prosumer2",
+        "prosumer3",
+        "prosumer4",
+        "prosumer5",
+        "prosumer6",
+        "prosumer7",
     ]
 
 
@@ -256,16 +262,16 @@ def mock_voltage_prediction() -> dict:
 @pytest.fixture
 def current_timestamp() -> datetime:
     """Current timestamp for tests."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 @pytest.fixture
 def past_timestamp() -> datetime:
     """Timestamp from 24 hours ago."""
-    return datetime.now(timezone.utc) - timedelta(hours=24)
+    return datetime.now(UTC) - timedelta(hours=24)
 
 
 @pytest.fixture
 def future_timestamp() -> datetime:
     """Timestamp 1 hour in the future."""
-    return datetime.now(timezone.utc) + timedelta(hours=1)
+    return datetime.now(UTC) + timedelta(hours=1)

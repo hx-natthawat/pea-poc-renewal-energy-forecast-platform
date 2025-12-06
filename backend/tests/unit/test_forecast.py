@@ -9,12 +9,12 @@ Tests cover:
 - Authentication and authorization
 """
 
+from datetime import UTC, datetime
+
 import pytest
-from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 
-from app.core.security import get_current_user, CurrentUser
-from app.main import app
+from app.core.security import CurrentUser
 
 
 class TestSolarForecast:
@@ -45,7 +45,7 @@ class TestSolarForecast:
     ):
         """Test solar forecast with high irradiance values."""
         request = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "station_id": "POC_STATION_1",
             "horizon_minutes": 60,
             "features": {
@@ -71,7 +71,7 @@ class TestSolarForecast:
     ):
         """Test solar forecast with zero irradiance (nighttime)."""
         request = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "station_id": "POC_STATION_1",
             "horizon_minutes": 60,
             "features": {
@@ -97,7 +97,7 @@ class TestSolarForecast:
     ):
         """Test solar forecast with invalid irradiance values."""
         request = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "station_id": "POC_STATION_1",
             "horizon_minutes": 60,
             "features": {
@@ -171,7 +171,9 @@ class TestVoltageForecast:
         data = response.json()
         assert data["status"] == "success"
         assert "predictions" in data["data"]
-        assert len(data["data"]["predictions"]) == len(sample_voltage_request["prosumer_ids"])
+        assert len(data["data"]["predictions"]) == len(
+            sample_voltage_request["prosumer_ids"]
+        )
 
     def test_voltage_forecast_all_prosumers(
         self,
@@ -180,7 +182,7 @@ class TestVoltageForecast:
     ):
         """Test voltage prediction for all prosumers."""
         request = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "prosumer_ids": sample_prosumer_ids,
             "horizon_minutes": 15,
         }
@@ -197,7 +199,7 @@ class TestVoltageForecast:
     ):
         """Test voltage prediction for a single prosumer."""
         request = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "prosumer_ids": ["prosumer1"],
             "horizon_minutes": 15,
         }
@@ -270,7 +272,7 @@ class TestForecastHistory:
 
     @pytest.mark.skipif(
         True,  # Skip if database is not available
-        reason="Requires database connection"
+        reason="Requires database connection",
     )
     def test_solar_history_success(
         self,
@@ -288,7 +290,7 @@ class TestForecastHistory:
 
     @pytest.mark.skipif(
         True,  # Skip if database is not available
-        reason="Requires database connection"
+        reason="Requires database connection",
     )
     def test_solar_history_with_pagination(
         self,
@@ -307,7 +309,7 @@ class TestForecastHistory:
 
     @pytest.mark.skipif(
         True,  # Skip if database is not available
-        reason="Requires database connection"
+        reason="Requires database connection",
     )
     def test_voltage_history_success(
         self,
@@ -323,7 +325,7 @@ class TestForecastHistory:
 
     @pytest.mark.skipif(
         True,  # Skip if database is not available
-        reason="Requires database connection"
+        reason="Requires database connection",
     )
     def test_voltage_history_with_pagination(
         self,
@@ -396,7 +398,7 @@ class TestForecastValidation:
     ):
         """Test solar forecast with missing features."""
         request = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "station_id": "POC_STATION_1",
             "horizon_minutes": 60,
             "features": {
@@ -414,7 +416,7 @@ class TestForecastValidation:
     ):
         """Test voltage forecast with empty prosumer list."""
         request = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "prosumer_ids": [],
             "horizon_minutes": 15,
         }
@@ -431,7 +433,7 @@ class TestForecastValidation:
     ):
         """Test solar forecast with invalid horizon."""
         request = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "station_id": "POC_STATION_1",
             "horizon_minutes": 10000,  # Too large
             "features": sample_solar_features,
