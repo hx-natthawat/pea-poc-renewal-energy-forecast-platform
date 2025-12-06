@@ -6,6 +6,7 @@ import {
   BarChart3,
   Bell,
   Calendar,
+  Gauge,
   Menu,
   Settings,
   Shield,
@@ -28,6 +29,30 @@ const SolarForecastChart = dynamic(
 
 const VoltageMonitorChart = dynamic(
   () => import("@/components/charts").then((mod) => ({ default: mod.VoltageMonitorChart })),
+  {
+    loading: () => <ChartSkeleton />,
+    ssr: false,
+  }
+);
+
+const LoadForecastChart = dynamic(
+  () => import("@/components/charts").then((mod) => ({ default: mod.LoadForecastChart })),
+  {
+    loading: () => <ChartSkeleton />,
+    ssr: false,
+  }
+);
+
+const DemandForecastChart = dynamic(
+  () => import("@/components/charts").then((mod) => ({ default: mod.DemandForecastChart })),
+  {
+    loading: () => <ChartSkeleton />,
+    ssr: false,
+  }
+);
+
+const ImbalanceMonitor = dynamic(
+  () => import("@/components/charts").then((mod) => ({ default: mod.ImbalanceMonitor })),
   {
     loading: () => <ChartSkeleton />,
     ssr: false,
@@ -94,7 +119,7 @@ export default function Home() {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "solar" | "voltage" | "alerts" | "history"
+    "overview" | "solar" | "voltage" | "grid" | "alerts" | "history"
   >("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -120,6 +145,7 @@ export default function Home() {
     { id: "overview", label: "Overview", shortLabel: "Home", icon: BarChart3 },
     { id: "solar", label: "Solar Forecast", shortLabel: "Solar", icon: Sun },
     { id: "voltage", label: "Voltage Monitor", shortLabel: "Voltage", icon: Zap },
+    { id: "grid", label: "Grid Operations", shortLabel: "Grid", icon: Gauge },
     { id: "alerts", label: "Alerts", shortLabel: "Alerts", icon: Bell },
     { id: "history", label: "History", shortLabel: "History", icon: Calendar },
   ];
@@ -347,6 +373,30 @@ export default function Home() {
           <div className="space-y-4 sm:space-y-6">
             <VoltageMonitorChart height={280} />
             <NetworkTopology />
+          </div>
+        )}
+
+        {/* Grid Operations Tab */}
+        {activeTab === "grid" && (
+          <div className="space-y-4 sm:space-y-6">
+            {/* TOR Functions Header */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Grid Operations - TOR Extended Functions
+              </h2>
+              <p className="text-sm text-gray-600">
+                Load Forecast (7.5.1.3) | Demand Forecast (7.5.1.2) | Imbalance Forecast (7.5.1.4)
+              </p>
+            </div>
+
+            {/* Load and Demand Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <LoadForecastChart height={260} level="system" />
+              <DemandForecastChart height={260} />
+            </div>
+
+            {/* Imbalance Monitor */}
+            <ImbalanceMonitor height={280} area="system" />
           </div>
         )}
 

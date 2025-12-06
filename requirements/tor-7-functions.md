@@ -622,8 +622,8 @@ CALCULATION PROCESS:
 OUTPUT:
 {
   "connection_point": "TR001_P1",
-  "timestamp": "2024-03-15T10:00:00",
-  "valid_until": "2024-03-15T10:15:00",
+  "timestamp": "2025-03-15T10:00:00",
+  "valid_until": "2025-03-15T10:15:00",
   "export_limit_kw": 8.5,
   "import_limit_kw": 15.0,
   "limiting_factor": "voltage_rise",
@@ -1044,5 +1044,5 @@ CONCLUSION: Yes, TOR specifications support all 7 functions
 ---
 
 *Document Version: 2.0 - Complete 7 Functions*
-*Last Updated: December 2024*
+*Last Updated: December 2025*
 *Based on: TOR Diagram and Requirements*

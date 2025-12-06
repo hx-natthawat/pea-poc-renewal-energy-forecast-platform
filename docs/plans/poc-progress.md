@@ -41,7 +41,7 @@
 - [x] Create database schema (init-db/01-init.sql)
 - [x] Create data loading script (ml/scripts/load_poc_data.py)
 - [x] Start Docker and load data (8,928 solar + 62,496 voltage records)
-- [x] Verify data integrity (all prosumers aligned May 16 - June 15, 2024)
+- [x] Verify data integrity (all prosumers aligned May 16 - June 15, 2025)
 
 ### 1.3 Infrastructure
 

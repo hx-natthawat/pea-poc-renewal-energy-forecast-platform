@@ -167,7 +167,7 @@ class TestSendNotification:
         mock_result.channels_sent = [NotificationChannel.DASHBOARD]
         mock_result.channels_failed = []
         mock_result.errors = []
-        mock_result.sent_at = datetime(2024, 1, 1)
+        mock_result.sent_at = datetime(2025, 1, 1)
         mock_service.send.return_value = mock_result
 
         request = SendNotificationRequest(
@@ -208,7 +208,9 @@ class TestSendNotification:
             await send_notification(
                 request=request,
                 background_tasks=MagicMock(),
-                current_user=CurrentUser(id="admin-1", username="admin", roles=["admin"]),
+                current_user=CurrentUser(
+                    id="admin-1", username="admin", roles=["admin"]
+                ),
                 notification_service=mock_service,
             )
 
@@ -320,11 +322,15 @@ class TestGetAvailableChannels:
         assert result["status"] == "success"
         assert len(result["data"]["channels"]) == 3
 
-        email_channel = next(c for c in result["data"]["channels"] if c["name"] == "email")
+        email_channel = next(
+            c for c in result["data"]["channels"] if c["name"] == "email"
+        )
         assert email_channel["enabled"] is True
         assert email_channel["configured"] is True
 
-        line_channel = next(c for c in result["data"]["channels"] if c["name"] == "line")
+        line_channel = next(
+            c for c in result["data"]["channels"] if c["name"] == "line"
+        )
         assert line_channel["configured"] is False
 
 

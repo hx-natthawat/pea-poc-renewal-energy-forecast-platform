@@ -179,4 +179,4 @@ Proprietary - Provincial Electricity Authority of Thailand
 
 ---
 
-**Version**: 1.0.0 | **Last Updated**: December 2024
+**Version**: 1.0.0 | **Last Updated**: December 2025

@@ -4,35 +4,28 @@ Unit tests for the notification service.
 Tests cover email provider, LINE provider, and the main notification service.
 """
 
-import pytest
-from datetime import datetime
-from unittest.mock import MagicMock, patch
-
 from app.services.notification_service import (
+    ALERT_TEMPLATES,
     NotificationChannel,
     NotificationConfig,
     NotificationLanguage,
     NotificationPriority,
     NotificationRequest,
     NotificationService,
-    ALERT_TEMPLATES,
     get_notification_service,
 )
 from app.services.providers.email_provider import (
     EmailConfig,
     EmailMessage,
     EmailProvider,
-    EmailResult,
     get_email_provider,
 )
 from app.services.providers.line_provider import (
     LineConfig,
     LineMessage,
     LineProvider,
-    LineResult,
     get_line_provider,
 )
-
 
 # =============================================================================
 # Email Provider Tests
@@ -53,13 +46,13 @@ class TestEmailProvider:
         """Test that unconfigured provider reports not configured."""
         config = EmailConfig(smtp_user="", smtp_password="")
         provider = EmailProvider(config)
-        assert provider.is_configured == False
+        assert provider.is_configured is False
 
     def test_email_provider_configured(self):
         """Test that configured provider reports configured."""
         config = EmailConfig(smtp_user="user@test.com", smtp_password="password")
         provider = EmailProvider(config)
-        assert provider.is_configured == True
+        assert provider.is_configured is True
 
     def test_email_simulate_send(self):
         """Test simulated email send for unconfigured provider."""
@@ -70,7 +63,7 @@ class TestEmailProvider:
             body_html="<p>Test body</p>",
         )
         result = provider.send(message)
-        assert result.success == True
+        assert result.success is True
         assert "simulated" in result.message_id.lower()
         assert "test@example.com" in result.recipients_sent
 
@@ -82,7 +75,7 @@ class TestEmailProvider:
             subject="Alert Test",
             body_html="<p>Alert content</p>",
         )
-        assert result.success == True
+        assert result.success is True
 
     def test_email_message_with_cc_bcc(self):
         """Test email message with CC and BCC recipients."""
@@ -119,27 +112,27 @@ class TestLineProvider:
         """Test that unconfigured provider reports not configured."""
         config = LineConfig(access_token="")
         provider = LineProvider(config)
-        assert provider.is_configured == False
+        assert provider.is_configured is False
 
     def test_line_provider_configured(self):
         """Test that configured provider reports configured."""
         config = LineConfig(access_token="test-token-123")
         provider = LineProvider(config)
-        assert provider.is_configured == True
+        assert provider.is_configured is True
 
     def test_line_simulate_send(self):
         """Test simulated LINE send for unconfigured provider."""
         provider = LineProvider()  # Unconfigured
         message = LineMessage(message="Test notification")
         result = provider.send(message)
-        assert result.success == True
+        assert result.success is True
         assert result.status_code == 200
 
     def test_line_send_alert_convenience(self):
         """Test send_alert convenience method."""
         provider = LineProvider()
         result = provider.send_alert(message="Test alert message")
-        assert result.success == True
+        assert result.success is True
 
     def test_line_message_with_image(self):
         """Test LINE message with image attachment."""
@@ -149,7 +142,7 @@ class TestLineProvider:
             image_url="https://example.com/image.png",
         )
         result = provider.send(message)
-        assert result.success == True
+        assert result.success is True
 
     def test_line_message_with_sticker(self):
         """Test LINE message with sticker."""
@@ -160,7 +153,7 @@ class TestLineProvider:
             sticker_id=1,
         )
         result = provider.send(message)
-        assert result.success == True
+        assert result.success is True
 
     def test_line_build_payload(self):
         """Test LINE message payload building."""
@@ -192,8 +185,8 @@ class TestNotificationService:
         service = NotificationService()
         assert service.config is not None
         assert service.config.default_language == NotificationLanguage.TH
-        assert service.config.email_enabled == True
-        assert service.config.line_enabled == True
+        assert service.config.email_enabled is True
+        assert service.config.line_enabled is True
 
     def test_notification_service_custom_config(self):
         """Test notification service with custom configuration."""
@@ -203,7 +196,7 @@ class TestNotificationService:
         )
         service = NotificationService(config=config)
         assert service.config.default_language == NotificationLanguage.EN
-        assert service.config.email_enabled == False
+        assert service.config.email_enabled is False
 
     def test_send_dashboard_notification(self):
         """Test sending notification to dashboard channel."""
@@ -219,11 +212,11 @@ class TestNotificationService:
                 "prosumer_id": "prosumer1",
                 "voltage": 245.5,
                 "threshold": 242.0,
-                "timestamp": "2024-01-15 10:00:00",
+                "timestamp": "2025-01-15 10:00:00",
             },
         )
         result = service.send(request)
-        assert result.success == True
+        assert result.success is True
         assert NotificationChannel.DASHBOARD in result.channels_sent
 
     def test_send_email_notification(self):
@@ -240,11 +233,11 @@ class TestNotificationService:
                 "prosumer_id": "prosumer1",
                 "voltage": 245.5,
                 "threshold": 242.0,
-                "timestamp": "2024-01-15 10:00:00",
+                "timestamp": "2025-01-15 10:00:00",
             },
         )
         result = service.send(request)
-        assert result.success == True
+        assert result.success is True
         assert NotificationChannel.EMAIL in result.channels_sent
 
     def test_send_line_notification(self):
@@ -265,7 +258,7 @@ class TestNotificationService:
             },
         )
         result = service.send(request)
-        assert result.success == True
+        assert result.success is True
         assert NotificationChannel.LINE in result.channels_sent
 
     def test_send_multi_channel_notification(self):
@@ -286,11 +279,11 @@ class TestNotificationService:
                 "prosumer_id": "prosumer1",
                 "voltage": 250.0,
                 "threshold": 242.0,
-                "timestamp": "2024-01-15 10:00:00",
+                "timestamp": "2025-01-15 10:00:00",
             },
         )
         result = service.send(request)
-        assert result.success == True
+        assert result.success is True
         assert len(result.channels_sent) == 3
 
     def test_dashboard_notification_storage(self):
@@ -308,7 +301,7 @@ class TestNotificationService:
                 "ramp_rate": 35.5,
                 "time_window": 5,
                 "direction": "down",
-                "timestamp": "2024-01-15 10:00:00",
+                "timestamp": "2025-01-15 10:00:00",
             },
         )
         service.send(request)
@@ -338,7 +331,7 @@ class TestNotificationService:
 
         # Mark as read
         result = service.mark_notification_read("test-006")
-        assert result == True
+        assert result is True
 
         # Verify it's marked as read
         notifications = service.get_dashboard_notifications(unread_only=True)
@@ -407,12 +400,12 @@ class TestAlertTemplates:
                 "prosumer_id": "PROSUMER-001",
                 "voltage": 245.5,
                 "threshold": 242.0,
-                "timestamp": "2024-01-15 10:00:00",
+                "timestamp": "2025-01-15 10:00:00",
             },
         )
         # The send will use fallback rendering
         result = service.send(request)
-        assert result.success == True
+        assert result.success is True
 
     def test_storm_warning_template_thai(self):
         """Test storm warning template in Thai."""
@@ -433,7 +426,7 @@ class TestAlertTemplates:
             },
         )
         result = service.send(request)
-        assert result.success == True
+        assert result.success is True
 
 
 # =============================================================================

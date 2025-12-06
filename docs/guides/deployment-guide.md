@@ -151,7 +151,7 @@ curl "http://localhost:8000/api/v1/data/voltage/latest?hours=2"
 curl -X POST http://localhost:8000/api/v1/forecast/solar \
   -H "Content-Type: application/json" \
   -d '{
-    "timestamp": "2024-06-01T12:00:00",
+    "timestamp": "2025-06-01T12:00:00",
     "pyrano1": 800,
     "pyrano2": 795,
     "pvtemp1": 45,
@@ -166,7 +166,7 @@ curl -X POST http://localhost:8000/api/v1/forecast/solar \
 curl -X POST http://localhost:8000/api/v1/forecast/voltage \
   -H "Content-Type: application/json" \
   -d '{
-    "timestamp": "2024-06-01T12:00:00",
+    "timestamp": "2025-06-01T12:00:00",
     "prosumer_id": "prosumer1"
   }'
 ```

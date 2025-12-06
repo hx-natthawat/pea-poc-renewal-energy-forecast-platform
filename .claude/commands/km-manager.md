@@ -68,8 +68,8 @@ title: "Document Title"
 type: "adr|runbook|api|guide|reference|faq"
 domain: ["solar-forecast", "voltage-prediction", "infrastructure"]
 tags: ["machine-learning", "timescaledb", "api", "deployment"]
-created: "2024-12-01"
-updated: "2024-12-06"
+created: "2025-12-01"
+updated: "2025-12-06"
 author: "author-name"
 status: "draft|active|deprecated|archived"
 related_docs: ["doc-id-1", "doc-id-2"]
@@ -107,7 +107,7 @@ Create master index for RAG retrieval:
 # docs/knowledge-base/index.yaml
 ---
 version: "1.0"
-last_updated: "2024-12-06"
+last_updated: "2025-12-06"
 total_documents: 150
 embedding_dimensions: 1536
 

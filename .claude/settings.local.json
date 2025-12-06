@@ -137,7 +137,13 @@
       "Bash(git reset:*)",
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform status --short)",
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform add docs/plans/poc-qa.md)",
-      "Bash(./venv/bin/pytest tests/ -v --tb=short -q)"
+      "Bash(./venv/bin/pytest tests/ -v --tb=short -q)",
+      "Bash(pytest:*)",
+      "Bash(PYTHONPATH=/Users/fero/Desktop/PEA/pea-re-forecast-platform/backend source venv/bin/activate)",
+      "Bash(export PYTHONPATH=$PWD:*)",
+      "Bash(./venv/bin/pytest tests/unit/ -q --tb=no)",
+      "Bash(npm audit:*)",
+      "Bash(pnpm run lint:*)"
     ],
     "deny": [],
     "ask": []

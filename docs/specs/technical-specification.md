@@ -3,7 +3,7 @@
 > **Project**: PEA RE Forecast Platform
 > **Version**: 1.0.0
 > **Status**: Draft
-> **Last Updated**: 2024-12-01
+> **Last Updated**: 2025-12-01
 
 ## 1. Introduction
 
@@ -112,7 +112,7 @@ The platform provides:
 
 ```json
 {
-  "timestamp": "2024-01-15T10:00:00+07:00",
+  "timestamp": "2025-01-15T10:00:00+07:00",
   "station_id": "PLANT_001",
   "measurements": {
     "pvtemp1": 45.2,
@@ -130,7 +130,7 @@ The platform provides:
 
 ```json
 {
-  "timestamp": "2024-01-15T10:00:00+07:00",
+  "timestamp": "2025-01-15T10:00:00+07:00",
   "prosumer_id": "PROSUMER_001",
   "measurements": {
     "active_power": 2.5,
@@ -145,7 +145,7 @@ The platform provides:
 
 ```json
 {
-  "timestamp": "2024-01-15T10:00:00+07:00",
+  "timestamp": "2025-01-15T10:00:00+07:00",
   "meter_id": "TX_METER_001",
   "phase_a": {
     "voltage": 231.5,
@@ -191,7 +191,7 @@ Predict solar power output.
 
 ```json
 {
-  "timestamp": "2024-01-15T10:00:00+07:00",
+  "timestamp": "2025-01-15T10:00:00+07:00",
   "station_id": "PLANT_001",
   "horizon_minutes": 60,
   "features": {
@@ -211,7 +211,7 @@ Predict solar power output.
 {
   "status": "success",
   "data": {
-    "timestamp": "2024-01-15T11:00:00+07:00",
+    "timestamp": "2025-01-15T11:00:00+07:00",
     "station_id": "PLANT_001",
     "prediction": {
       "power_kw": 3650.0,
@@ -235,7 +235,7 @@ Predict voltage levels for prosumers.
 
 ```json
 {
-  "timestamp": "2024-01-15T10:00:00+07:00",
+  "timestamp": "2025-01-15T10:00:00+07:00",
   "prosumer_ids": ["PROSUMER_001", "PROSUMER_002"],
   "horizon_minutes": 15
 }

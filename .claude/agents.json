@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "PEA RE Forecast Platform - Agent Registry",
-  "lastUpdated": "2024-12-06",
+  "lastUpdated": "2025-12-06",
 
   "subagents": {
     "description": "Built-in Task tool subagents for specialized work",

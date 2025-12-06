@@ -2,7 +2,7 @@
 # This index enables RAG, CAG, and Knowledge Graph operations
 
 version: "1.0"
-last_updated: "2024-12-06"
+last_updated: "2025-12-06"
 embedding_model: "text-embedding-3-small"
 embedding_dimensions: 1536
 

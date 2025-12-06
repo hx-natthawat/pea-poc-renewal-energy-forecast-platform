@@ -1,6 +1,6 @@
 # =============================================================================
 # PEA RE Forecast Platform - Frontend Dockerfile
-# Node 22 LTS (latest as of Dec 2024)
+# Node 22 LTS (latest as of Dec 2025)
 # =============================================================================
 
 FROM node:22-alpine AS base

@@ -962,7 +962,7 @@ Audit Trail Implementation (TOR 7.1.6):
 1. User Activity Logs:
    ```json
    {
-     "timestamp": "2024-03-15T10:30:00Z",
+     "timestamp": "2025-03-15T10:30:00Z",
      "user_id": "u12345",
      "username": "operator1",
      "action": "VIEW_FORECAST",
@@ -1440,8 +1440,8 @@ Data Export Capabilities:
       ```
       GET /api/v1/forecast/export
       ?plant_id=001
-      &start_date=2024-03-01
-      &end_date=2024-03-15
+      &start_date=2025-03-01
+      &end_date=2025-03-15
       &format=csv
       ```
 
@@ -2277,5 +2277,5 @@ Nationwide Scaling Analysis:
 ---
 
 *Document Version: 1.0*
-*Last Updated: December 2024*
+*Last Updated: December 2025*
 *Prepared for: PEA RE Forecast Platform POC*

@@ -24,7 +24,7 @@ ephem>=4.1.0
 openpyxl>=3.1.0
 pyarrow>=15.0.0
 # fastparquet - may have build issues on Python 3.14
-# fastparquet>=2024.2.0
+# fastparquet>=2025.2.0
 
 # MLflow - may have build issues due to scipy dependency
 # mlflow>=2.15.0

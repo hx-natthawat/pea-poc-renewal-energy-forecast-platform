@@ -225,10 +225,12 @@ class TestConnectionManager:
         ws = AsyncMock()
         await manager.connect(ws, ["solar"])
 
-        await manager.broadcast({"type": "test", "timestamp": "2024-01-01T00:00:00"}, "solar")
+        await manager.broadcast(
+            {"type": "test", "timestamp": "2025-01-01T00:00:00"}, "solar"
+        )
 
         call_args = ws.send_json.call_args[0][0]
-        assert call_args["timestamp"] == "2024-01-01T00:00:00"
+        assert call_args["timestamp"] == "2025-01-01T00:00:00"
 
     @pytest.mark.asyncio
     async def test_broadcast_includes_all_subscribers(self):

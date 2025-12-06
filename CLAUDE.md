@@ -1,8 +1,8 @@
 # CLAUDE.md - PEA RE Forecast Platform
 
-> **Version**: 2.0.0  
-> **Last Updated**: December 2024  
-> **Project Code**: PEA-REF-2024  
+> **Version**: 2.0.0
+> **Last Updated**: December 2025
+> **Project Code**: PEA-REF-2025
 > **TOR Reference**: Terms of Reference (TOR) แพลตฟอร์มสำหรับศูนย์ข้อมูลพยากรณ์พลังงานหมุนเวียนของ กฟภ. (PEA RE Forecast Platform)
 
 ---
@@ -159,42 +159,42 @@ Custom slash commands are available to invoke specialized agents for this projec
 
 #### Project Management (Full SDLC Orchestration)
 
-| Command | Description | When to Use |
-|---------|-------------|-------------|
-| `/orchestrate` | **Autonomous SDLC Orchestrator** - Full lifecycle from dev to production | Complex tasks, releases, production deployments, user feedback |
-| `/sprint-plan` | Sprint planning and task breakdown | Beginning of sprint, prioritization |
-| `/health-check` | Comprehensive project health check | Daily checks, pre-release verification |
-| `/release` | Release management and versioning | Preparing releases, version bumps |
+| Command           | Description                                                                    | When to Use                                                    |
+| ----------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| `/orchestrate`  | **Autonomous SDLC Orchestrator** - Full lifecycle from dev to production | Complex tasks, releases, production deployments, user feedback |
+| `/sprint-plan`  | Sprint planning and task breakdown                                             | Beginning of sprint, prioritization                            |
+| `/health-check` | Comprehensive project health check                                             | Daily checks, pre-release verification                         |
+| `/release`      | Release management and versioning                                              | Preparing releases, version bumps                              |
 
 #### Data & ML
 
-| Command | Description | When to Use |
-|---------|-------------|-------------|
-| `/analyze-poc-data` | Analyze POC Data.xlsx | Data exploration and quality assessment |
-| `/simulate-solar` | Generate solar simulation data | When POC data is insufficient |
-| `/simulate-voltage` | Generate voltage simulation data | When POC data is insufficient |
-| `/validate-model` | Validate ML model accuracy | Before marking model as production-ready |
+| Command               | Description                      | When to Use                              |
+| --------------------- | -------------------------------- | ---------------------------------------- |
+| `/analyze-poc-data` | Analyze POC Data.xlsx            | Data exploration and quality assessment  |
+| `/simulate-solar`   | Generate solar simulation data   | When POC data is insufficient            |
+| `/simulate-voltage` | Generate voltage simulation data | When POC data is insufficient            |
+| `/validate-model`   | Validate ML model accuracy       | Before marking model as production-ready |
 
 #### Development & Deployment
 
-| Command | Description | When to Use |
-|---------|-------------|-------------|
-| `/deploy-local` | Deploy to Kind cluster | For integration testing |
-| `/test-api` | Test all API endpoints | Before deployment |
-| `/review-arch` | Review architecture decisions | For architecture reviews |
+| Command              | Description                      | When to Use                  |
+| -------------------- | -------------------------------- | ---------------------------- |
+| `/deploy-local`    | Deploy to Kind cluster           | For integration testing      |
+| `/test-api`        | Test all API endpoints           | Before deployment            |
+| `/review-arch`     | Review architecture decisions    | For architecture reviews     |
 | `/research-latest` | Research latest library versions | Before starting new features |
-| `/update-plan` | Update project plan files | After completing tasks |
+| `/update-plan`     | Update project plan files        | After completing tasks       |
 
 #### Knowledge Management
 
-| Command | Description | When to Use |
-|---------|-------------|-------------|
+| Command         | Description                           | When to Use                                           |
+| --------------- | ------------------------------------- | ----------------------------------------------------- |
 | `/km-manager` | **Knowledge Management System** | Manage docs, RAG, Knowledge Graph, AI-ready knowledge |
 
 #### Demo & Stakeholder
 
-| Command | Description | When to Use |
-|---------|-------------|-------------|
+| Command   | Description                        | When to Use                       |
+| --------- | ---------------------------------- | --------------------------------- |
 | `/demo` | **Prepare demo environment** | Before stakeholder demonstrations |
 
 ### Command Usage Examples
@@ -238,6 +238,7 @@ The `/orchestrate` command provides **full SDLC orchestration** from development
 > **Ultimate Goal**: Not just Demo Day - Real Production for Real Users
 
 **SDLC Phases Covered**:
+
 1. **Plan** - Design solutions and create roadmaps
 2. **Build** - Develop features meeting TOR requirements
 3. **Test** - Ensure quality through comprehensive testing
@@ -248,6 +249,7 @@ The `/orchestrate` command provides **full SDLC orchestration** from development
 8. **Sustain** - Maintain long-term product viability
 
 **Delegates to specialized subagents**:
+
 - `backend-architect` for API/database work
 - `test-automator` for test coverage
 - `security-auditor` for security reviews
@@ -256,6 +258,7 @@ The `/orchestrate` command provides **full SDLC orchestration** from development
 - `km-manager` for knowledge management
 
 **Integrates with Knowledge Management** for:
+
 - RAG (Retrieval Augmented Generation)
 - Knowledge Graph
 - CAG (Context Augmented Generation)
@@ -292,6 +295,7 @@ The `/km-manager` command manages the project knowledge base:
 5. **Sync** - Update knowledge from code changes
 
 **Knowledge Base Structure**:
+
 ```
 docs/knowledge-base/
 ├── index.yaml              # Master index
@@ -305,6 +309,7 @@ docs/knowledge-base/
 ```
 
 Example commands:
+
 ```bash
 # Catalog all knowledge
 /km-manager catalog
@@ -348,11 +353,12 @@ You are a [role] for the PEA RE Forecast Platform.
 The **PEA Renewable Energy Forecast Platform** (แพลตฟอร์มศูนย์ข้อมูลพยากรณ์พลังงานหมุนเวียน) is a comprehensive system for the Provincial Electricity Authority of Thailand (กฟภ.) that provides:
 
 1. **RE Forecast Module (พยากรณ์กำลังผลิตไฟฟ้าพลังงานหมุนเวียน)**
+
    - Predicts solar PV power output from environmental parameters
    - Supports day-ahead, intraday, and real-time forecasting
    - Target accuracy: MAPE < 10%, RMSE < 100 kW, R² > 0.95
-
 2. **Voltage Prediction Module (พยากรณ์แรงดันไฟฟ้า)**
+
    - Predicts voltage levels across low-voltage distribution networks
    - Monitors prosumer connections across three phases
    - Target accuracy: MAE < 2V
@@ -374,11 +380,11 @@ The **PEA Renewable Energy Forecast Platform** (แพลตฟอร์มศ�
 
 The contractor must install and configure the PEA RE Forecast Platform on PEA's server resources as specified:
 
-| Server Type | CPU | RAM | Storage | OS |
-|-------------|-----|-----|---------|-----|
-| **Web Server** | 4 Core | 6 GB | C: 50 GB, D: 80 GB | Ubuntu Server 22.04 LTS |
-| **AI/ML Server** | 16 Core | 64 GB | C: 50 GB, D: 100 GB | Ubuntu Server 22.04 LTS |
-| **Database Server** | 8 Core | 32 GB | C: 50 GB, D: 200 GB | Ubuntu Server 22.04 LTS |
+| Server Type               | CPU     | RAM   | Storage             | OS                      |
+| ------------------------- | ------- | ----- | ------------------- | ----------------------- |
+| **Web Server**      | 4 Core  | 6 GB  | C: 50 GB, D: 80 GB  | Ubuntu Server 22.04 LTS |
+| **AI/ML Server**    | 16 Core | 64 GB | C: 50 GB, D: 100 GB | Ubuntu Server 22.04 LTS |
+| **Database Server** | 8 Core  | 32 GB | C: 50 GB, D: 200 GB | Ubuntu Server 22.04 LTS |
 
 > **ตารางที่ 1**: ตารางแสดงทรัพยากรที่ กฟภ. จัดให้ผู้รับจ้างใช้ในการพัฒนาระบบ PEA RE Forecast Platform
 
@@ -408,6 +414,7 @@ System must be developed using software from Table 2 (see [Required Software Sta
 #### 7.1.6 - Security and Audit Requirements (Log และ Audit Trail)
 
 System must implement per PEA standards (ตามมาตรฐานที่ กฟภ. กำหนด):
+
 - **Access Logs** (Log การเข้าใช้งาน)
 - **Attack Detection Logs** (การโจมตีระบบ)
 - **Audit Trail** for compliance
@@ -415,6 +422,7 @@ System must implement per PEA standards (ตามมาตรฐานที่
 #### 7.1.7 - Scalability Requirements (ความสามารถรองรับข้อมูล)
 
 Platform must support data import from:
+
 - **≥ 2,000 RE Power Plants** (แหล่งผลิตไฟฟ้าพลังงานหมุนเวียน จำนวนไม่น้อยกว่า 2,000 โรงไฟฟ้า)
   - Connected to PEA grid (จุดเชื่อมต่อระบบโครงข่ายไฟฟ้า กฟภ.)
 - **≥ 300,000 Electricity Consumers** (ผู้ใช้ไฟฟ้าไม่น้อยกว่า 300,000 ราย)
@@ -510,22 +518,22 @@ database_server:
 
 > ตารางแสดง Software ที่กำหนดให้ผู้รับจ้างใช้ในการพัฒนาระบบ PEA RE Forecast Platform
 
-| Category | Required Tools | Implementation |
-|----------|----------------|----------------|
-| **Application Definition & Image Build** | Helm | K8s package manager |
-| **CI/CD** | Argo, GitLab | GitLab CI + ArgoCD GitOps |
-| **Database** | Microsoft SQL, PostgreSQL, Redis | PostgreSQL + TimescaleDB, Redis |
-| **Streaming & Messaging** | RabbitMQ, Kafka | Apache Kafka |
-| **Scheduling & Orchestration** | Kubernetes | K8s 1.28+ |
-| **API Gateway** | Kong, ApiSix | Kong Gateway |
-| **Storage** | MINIO, Longhorn, Ceph | Longhorn for K8s |
-| **Security & Compliance** | Keycloak, Black Duck, Trivy, Sonarqube, Fortify SCA, Nessus | Full stack |
-| **Container Registry** | GitLab Registry | Integrated CI/CD |
-| **Observability** | Fluentbit, Prometheus, Jaeger, Grafana, Opensearch, Sentry | Full observability |
-| **Cloud Native Network** | Cilium | eBPF networking |
-| **Key Management** | Hashicorp Vault | Secrets management |
-| **Container Runtime** | Containerd | K8s runtime |
-| **Service Proxy** | Nginx | Ingress + reverse proxy |
+| Category                                       | Required Tools                                              | Implementation                  |
+| ---------------------------------------------- | ----------------------------------------------------------- | ------------------------------- |
+| **Application Definition & Image Build** | Helm                                                        | K8s package manager             |
+| **CI/CD**                                | Argo, GitLab                                                | GitLab CI + ArgoCD GitOps       |
+| **Database**                             | Microsoft SQL, PostgreSQL, Redis                            | PostgreSQL + TimescaleDB, Redis |
+| **Streaming & Messaging**                | RabbitMQ, Kafka                                             | Apache Kafka                    |
+| **Scheduling & Orchestration**           | Kubernetes                                                  | K8s 1.28+                       |
+| **API Gateway**                          | Kong, ApiSix                                                | Kong Gateway                    |
+| **Storage**                              | MINIO, Longhorn, Ceph                                       | Longhorn for K8s                |
+| **Security & Compliance**                | Keycloak, Black Duck, Trivy, Sonarqube, Fortify SCA, Nessus | Full stack                      |
+| **Container Registry**                   | GitLab Registry                                             | Integrated CI/CD                |
+| **Observability**                        | Fluentbit, Prometheus, Jaeger, Grafana, Opensearch, Sentry  | Full observability              |
+| **Cloud Native Network**                 | Cilium                                                      | eBPF networking                 |
+| **Key Management**                       | Hashicorp Vault                                             | Secrets management              |
+| **Container Runtime**                    | Containerd                                                  | K8s runtime                     |
+| **Service Proxy**                        | Nginx                                                       | Ingress + reverse proxy         |
 
 ### Software Version Matrix
 
@@ -602,24 +610,24 @@ proxy:
 
 ### Architecture Decision Records
 
-| Component | TOR Requirement | Implementation | Justification |
-|-----------|-----------------|----------------|---------------|
-| Primary DB | PostgreSQL | **TimescaleDB 2.23** | PostgreSQL extension, optimized for time-series, hypertables for solar/voltage data |
-| Cache | Redis | **Redis 7.2** | Per TOR, prediction caching |
-| Backend | Not specified | **FastAPI + Python 3.11** | Async, auto-docs, ML ecosystem |
-| Frontend | Not specified | **React 18 + TypeScript** | Industry standard, rich ecosystem |
-| ML Framework | Not specified | **XGBoost + TensorFlow** | Tabular (XGBoost) + Sequence (LSTM) |
-| Container Runtime | Containerd | **Containerd 1.7** | Per TOR |
-| Orchestration | Kubernetes | **Kubernetes 1.28** | Per TOR |
-| CI/CD | GitLab, Argo | **GitLab CI + ArgoCD** | Per TOR |
-| API Gateway | Kong | **Kong 3.5** | Per TOR |
-| Auth | Keycloak | **Keycloak 23** | Per TOR |
-| Secrets | Vault | **Hashicorp Vault 1.15** | Per TOR |
-| Monitoring | Prometheus, Grafana | **Prometheus + Grafana** | Per TOR |
-| Logging | Fluentbit, Opensearch | **Fluentbit → Opensearch** | Per TOR |
-| Tracing | Jaeger | **Jaeger 1.52** | Per TOR |
-| Network | Cilium | **Cilium 1.14** | Per TOR |
-| Storage | Longhorn | **Longhorn 1.5** | Per TOR, K8s native |
+| Component         | TOR Requirement       | Implementation                    | Justification                                                                       |
+| ----------------- | --------------------- | --------------------------------- | ----------------------------------------------------------------------------------- |
+| Primary DB        | PostgreSQL            | **TimescaleDB 2.23**        | PostgreSQL extension, optimized for time-series, hypertables for solar/voltage data |
+| Cache             | Redis                 | **Redis 7.2**               | Per TOR, prediction caching                                                         |
+| Backend           | Not specified         | **FastAPI + Python 3.11**   | Async, auto-docs, ML ecosystem                                                      |
+| Frontend          | Not specified         | **React 18 + TypeScript**   | Industry standard, rich ecosystem                                                   |
+| ML Framework      | Not specified         | **XGBoost + TensorFlow**    | Tabular (XGBoost) + Sequence (LSTM)                                                 |
+| Container Runtime | Containerd            | **Containerd 1.7**          | Per TOR                                                                             |
+| Orchestration     | Kubernetes            | **Kubernetes 1.28**         | Per TOR                                                                             |
+| CI/CD             | GitLab, Argo          | **GitLab CI + ArgoCD**      | Per TOR                                                                             |
+| API Gateway       | Kong                  | **Kong 3.5**                | Per TOR                                                                             |
+| Auth              | Keycloak              | **Keycloak 23**             | Per TOR                                                                             |
+| Secrets           | Vault                 | **Hashicorp Vault 1.15**    | Per TOR                                                                             |
+| Monitoring        | Prometheus, Grafana   | **Prometheus + Grafana**    | Per TOR                                                                             |
+| Logging           | Fluentbit, Opensearch | **Fluentbit → Opensearch** | Per TOR                                                                             |
+| Tracing           | Jaeger                | **Jaeger 1.52**             | Per TOR                                                                             |
+| Network           | Cilium                | **Cilium 1.14**             | Per TOR                                                                             |
+| Storage           | Longhorn              | **Longhorn 1.5**            | Per TOR, K8s native                                                                 |
 
 ---
 
@@ -833,22 +841,22 @@ CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 CREATE TABLE solar_measurements (
     time TIMESTAMPTZ NOT NULL,
     station_id VARCHAR(50) DEFAULT 'POC_STATION_1',
-    
+  
     -- Temperature sensors (°C)
     pvtemp1 DOUBLE PRECISION,
     pvtemp2 DOUBLE PRECISION,
     ambtemp DOUBLE PRECISION,
-    
+  
     -- Irradiance sensors (W/m²)
     pyrano1 DOUBLE PRECISION,
     pyrano2 DOUBLE PRECISION,
-    
+  
     -- Environmental
     windspeed DOUBLE PRECISION,
-    
+  
     -- Output (Target variable)
     power_kw DOUBLE PRECISION,
-    
+  
     created_at TIMESTAMPTZ DEFAULT NOW(),
     PRIMARY KEY (time, station_id)
 );
@@ -895,14 +903,14 @@ INSERT INTO prosumers (id, name, phase, position_in_phase, has_pv, has_ev) VALUE
 CREATE TABLE single_phase_meters (
     time TIMESTAMPTZ NOT NULL,
     prosumer_id VARCHAR(50) NOT NULL REFERENCES prosumers(id),
-    
+  
     active_power DOUBLE PRECISION,
     reactive_power DOUBLE PRECISION,
     energy_meter_active_power DOUBLE PRECISION,
     energy_meter_current DOUBLE PRECISION,
     energy_meter_voltage DOUBLE PRECISION,  -- Target for prediction
     energy_meter_reactive_power DOUBLE PRECISION,
-    
+  
     created_at TIMESTAMPTZ DEFAULT NOW(),
     PRIMARY KEY (time, prosumer_id)
 );
@@ -921,30 +929,30 @@ CREATE INDEX idx_single_phase_voltage ON single_phase_meters (energy_meter_volta
 CREATE TABLE three_phase_meters (
     time TIMESTAMPTZ NOT NULL,
     meter_id VARCHAR(50) NOT NULL DEFAULT 'TX_METER_01',
-    
+  
     -- Phase A
     p1_amp DOUBLE PRECISION,
     p1_volt DOUBLE PRECISION,
     p1_w DOUBLE PRECISION,
-    
+  
     -- Phase B
     p2_amp DOUBLE PRECISION,
     p2_volt DOUBLE PRECISION,
     p2_w DOUBLE PRECISION,
-    
+  
     -- Phase C
     p3_amp DOUBLE PRECISION,
     p3_volt DOUBLE PRECISION,
     p3_w DOUBLE PRECISION,
-    
+  
     -- Reactive power
     q1_var DOUBLE PRECISION,
     q2_var DOUBLE PRECISION,
     q3_var DOUBLE PRECISION,
-    
+  
     -- Total
     total_w DOUBLE PRECISION,
-    
+  
     created_at TIMESTAMPTZ DEFAULT NOW(),
     PRIMARY KEY (time, meter_id)
 );
@@ -963,15 +971,15 @@ CREATE TABLE predictions (
     model_version VARCHAR(50) NOT NULL,
     target_id VARCHAR(50),
     horizon_minutes INTEGER,
-    
+  
     predicted_value DOUBLE PRECISION NOT NULL,
     confidence_lower DOUBLE PRECISION,
     confidence_upper DOUBLE PRECISION,
     actual_value DOUBLE PRECISION,
-    
+  
     features JSONB,
     prediction_time_ms INTEGER,
-    
+  
     created_at TIMESTAMPTZ DEFAULT NOW(),
     PRIMARY KEY (id, time)
 );
@@ -1104,7 +1112,7 @@ Authorization: Bearer <access_token>
 ```json
 // Request
 {
-  "timestamp": "2024-01-15T10:00:00+07:00",
+  "timestamp": "2025-01-15T10:00:00+07:00",
   "horizon_minutes": 60,
   "features": {
     "pyrano1": 850.5,
@@ -1120,7 +1128,7 @@ Authorization: Bearer <access_token>
 {
   "status": "success",
   "data": {
-    "timestamp": "2024-01-15T10:00:00+07:00",
+    "timestamp": "2025-01-15T10:00:00+07:00",
     "prediction": {
       "power_kw": 3542.5,
       "confidence_interval": {
@@ -1138,7 +1146,7 @@ Authorization: Bearer <access_token>
 ```json
 // Request
 {
-  "timestamp": "2024-01-15T10:00:00+07:00",
+  "timestamp": "2025-01-15T10:00:00+07:00",
   "prosumer_ids": ["prosumer1", "prosumer2"]
 }
 
@@ -1169,35 +1177,35 @@ Authorization: Bearer <access_token>
 
 class SolarFeatureEngineer:
     """Feature engineering for RE Forecast (solar power prediction)."""
-    
+  
     REQUIRED_COLUMNS = [
         'timestamp', 'pyrano1', 'pyrano2',
         'pvtemp1', 'pvtemp2', 'ambtemp', 'windspeed'
     ]
-    
+  
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.copy()
-        
+      
         # Temporal features
         df['hour'] = df['timestamp'].dt.hour
         df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 24)
         df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 24)
         df['is_peak_hour'] = df['hour'].between(10, 14).astype(int)
-        
+      
         # Derived features
         df['pyrano_avg'] = (df['pyrano1'] + df['pyrano2']) / 2
         df['pvtemp_avg'] = (df['pvtemp1'] + df['pvtemp2']) / 2
         df['temp_delta'] = df['pvtemp_avg'] - df['ambtemp']
-        
+      
         # Lag features
         for lag in [1, 2, 3]:
             df[f'pyrano1_lag_{lag}'] = df['pyrano1'].shift(lag)
-        
+      
         # Rolling statistics
         df['pyrano1_rolling_mean_12'] = df['pyrano1'].rolling(12).mean()
-        
+      
         return df
-    
+  
     def get_feature_columns(self) -> list:
         return [
             'pyrano1', 'pyrano2', 'pyrano_avg',
@@ -1211,14 +1219,14 @@ class SolarFeatureEngineer:
 
 ### Model Accuracy Requirements
 
-| Model | Metric | Target | Validation |
-|-------|--------|--------|------------|
-| **RE Forecast (Solar)** | MAPE | < 10% | Time-series CV |
-| | RMSE | < 100 kW | |
-| | R² | > 0.95 | |
-| **Voltage Prediction** | MAE | < 2V | Time-series CV |
-| | RMSE | < 3V | |
-| | R² | > 0.90 | |
+| Model                         | Metric | Target   | Validation     |
+| ----------------------------- | ------ | -------- | -------------- |
+| **RE Forecast (Solar)** | MAPE   | < 10%    | Time-series CV |
+|                               | RMSE   | < 100 kW |                |
+|                               | R²    | > 0.95   |                |
+| **Voltage Prediction**  | MAE    | < 2V     | Time-series CV |
+|                               | RMSE   | < 3V     |                |
+|                               | R²    | > 0.90   |                |
 
 ---
 
@@ -1291,15 +1299,15 @@ class SolarFeatureEngineer:
 
 ### Prosumer Configuration
 
-| ID | Phase | Position | PV | EV | Description |
-|----|-------|----------|----|----|-------------|
-| prosumer1 | A | 3 (far) | ✓ | ✓ | End of Phase A feeder |
-| prosumer2 | A | 2 (mid) | ✓ | ✗ | Middle of Phase A |
-| prosumer3 | A | 1 (near) | ✓ | ✗ | Near transformer |
-| prosumer4 | B | 2 (mid) | ✓ | ✗ | Middle of Phase B |
-| prosumer5 | B | 3 (far) | ✓ | ✓ | End of Phase B feeder |
-| prosumer6 | B | 1 (near) | ✓ | ✗ | Near transformer |
-| prosumer7 | C | 1 (near) | ✓ | ✓ | Phase C prosumer |
+| ID        | Phase | Position | PV | EV | Description           |
+| --------- | ----- | -------- | -- | -- | --------------------- |
+| prosumer1 | A     | 3 (far)  | ✓ | ✓ | End of Phase A feeder |
+| prosumer2 | A     | 2 (mid)  | ✓ | ✗ | Middle of Phase A     |
+| prosumer3 | A     | 1 (near) | ✓ | ✗ | Near transformer      |
+| prosumer4 | B     | 2 (mid)  | ✓ | ✗ | Middle of Phase B     |
+| prosumer5 | B     | 3 (far)  | ✓ | ✓ | End of Phase B feeder |
+| prosumer6 | B     | 1 (near) | ✓ | ✗ | Near transformer      |
+| prosumer7 | C     | 1 (near) | ✓ | ✓ | Phase C prosumer      |
 
 ---
 
@@ -1307,24 +1315,24 @@ class SolarFeatureEngineer:
 
 ### Solar Measurements (RE Forecast)
 
-| Column | Unit | Description | Range |
-|--------|------|-------------|-------|
-| `pvtemp1` | °C | PV panel temperature 1 | -10 to 100 |
-| `pvtemp2` | °C | PV panel temperature 2 | -10 to 100 |
-| `ambtemp` | °C | Ambient temperature | -10 to 60 |
-| `pyrano1` | W/m² | Irradiance sensor 1 | 0 to 1500 |
-| `pyrano2` | W/m² | Irradiance sensor 2 | 0 to 1500 |
-| `windspeed` | m/s | Wind speed | 0 to 50 |
-| `power_kw` | kW | Power output (target) | 0 to 5000 |
+| Column        | Unit  | Description            | Range      |
+| ------------- | ----- | ---------------------- | ---------- |
+| `pvtemp1`   | °C   | PV panel temperature 1 | -10 to 100 |
+| `pvtemp2`   | °C   | PV panel temperature 2 | -10 to 100 |
+| `ambtemp`   | °C   | Ambient temperature    | -10 to 60  |
+| `pyrano1`   | W/m² | Irradiance sensor 1    | 0 to 1500  |
+| `pyrano2`   | W/m² | Irradiance sensor 2    | 0 to 1500  |
+| `windspeed` | m/s   | Wind speed             | 0 to 50    |
+| `power_kw`  | kW    | Power output (target)  | 0 to 5000  |
 
 ### Single-Phase Meters (Voltage Prediction)
 
-| Column | Unit | Description |
-|--------|------|-------------|
-| `active_power` | kW | Active power |
-| `reactive_power` | kVAR | Reactive power |
-| `energy_meter_voltage` | V | Voltage (target) |
-| `energy_meter_current` | A | Current |
+| Column                   | Unit | Description      |
+| ------------------------ | ---- | ---------------- |
+| `active_power`         | kW   | Active power     |
+| `reactive_power`       | kVAR | Reactive power   |
+| `energy_meter_voltage` | V    | Voltage (target) |
+| `energy_meter_current` | A    | Current          |
 
 ---
 
@@ -1436,6 +1444,7 @@ helm upgrade --install pea-re-forecast ./infrastructure/helm/pea-re-forecast
 ## Implementation Checklist
 
 ### Phase 1: Foundation (Weeks 1-4)
+
 - [ ] Initialize GitLab repository
 - [ ] Setup Docker Compose
 - [ ] Configure TimescaleDB schema
@@ -1444,6 +1453,7 @@ helm upgrade --install pea-re-forecast ./infrastructure/helm/pea-re-forecast
 - [ ] Configure GitLab CI/CD + ArgoCD
 
 ### Phase 2: ML Development (Weeks 5-8)
+
 - [ ] Load POC data (POC_Data.xlsx)
 - [ ] Feature engineering pipeline
 - [ ] Train RE Forecast model (MAPE < 10%)
@@ -1451,12 +1461,14 @@ helm upgrade --install pea-re-forecast ./infrastructure/helm/pea-re-forecast
 - [ ] Setup MLflow tracking
 
 ### Phase 3: Application (Weeks 9-12)
+
 - [ ] Implement forecast APIs
 - [ ] Build React dashboard
 - [ ] WebSocket real-time updates
 - [ ] Alert management system
 
 ### Phase 4: Deployment (Weeks 13-16)
+
 - [ ] Unit tests (80% coverage)
 - [ ] Load testing (300,000 users)
 - [ ] Security scanning (Trivy, SonarQube)
@@ -1495,6 +1507,6 @@ kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group pea-forecast 
 
 ---
 
-*Document Version: 2.0.0*  
-*TOR Compliant: Section 7.1.1 - 7.1.7*  
-*Last Updated: December 2024*
+*Document Version: 2.0.0*
+*TOR Compliant: Section 7.1.1 - 7.1.7*
+*Last Updated: December 2025*

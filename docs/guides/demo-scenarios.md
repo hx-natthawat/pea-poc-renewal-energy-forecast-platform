@@ -71,7 +71,7 @@ This document outlines demonstration scenarios for the PEA RE Forecast Platform 
    curl -X POST http://localhost:8000/api/v1/forecast/solar \
      -H "Content-Type: application/json" \
      -d '{
-       "timestamp": "2024-06-01T12:00:00",
+       "timestamp": "2025-06-01T12:00:00",
        "features": {
          "pyrano1": 900,
          "pyrano2": 895,
@@ -123,7 +123,7 @@ This document outlines demonstration scenarios for the PEA RE Forecast Platform 
    curl -X POST http://localhost:8000/api/v1/forecast/voltage \
      -H "Content-Type: application/json" \
      -d '{
-       "timestamp": "2024-06-01T14:00:00",
+       "timestamp": "2025-06-01T14:00:00",
        "prosumer_ids": ["prosumer1", "prosumer2"]
      }'
    ```

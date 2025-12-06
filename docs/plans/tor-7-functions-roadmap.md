@@ -1,7 +1,7 @@
 # TOR 7 Functions Implementation Roadmap
 
 > **Document**: Gap Analysis & Implementation Plan
-> **Created**: December 6, 2024
+> **Created**: December 6, 2025
 > **Status**: Phase 1 (POC) Complete, Phase 2a COMPLETE
 
 ---
@@ -36,7 +36,7 @@ The TOR specifies 7 core forecasting functions. The current POC implementation c
 | DOE | P2 | High | Voltage Prediction, Network model | ⏳ Blocked |
 | Hosting Capacity | P3 | High | All forecasts + Network model | ⏳ Future |
 
-**Phase 2a API Endpoints (December 2024):**
+**Phase 2a API Endpoints (December 2025):**
 
 - `POST /api/v1/load-forecast/predict` - Load forecast predictions
 - `POST /api/v1/demand-forecast/predict` - Actual demand forecast
@@ -160,8 +160,8 @@ Imbalance = Actual Demand - Scheduled Generation - Actual RE Generation
 ```json
 {
   "connection_point": "TR001_P1",
-  "timestamp": "2024-03-15T10:00:00",
-  "valid_until": "2024-03-15T10:15:00",
+  "timestamp": "2025-03-15T10:00:00",
+  "valid_until": "2025-03-15T10:15:00",
   "export_limit_kw": 8.5,
   "import_limit_kw": 15.0,
   "limiting_factor": "voltage_rise",
@@ -255,4 +255,4 @@ Functions 2-4, 6-7 are demonstrated conceptually and planned for Phase 2 develop
 ---
 
 *Document Version: 1.0*
-*Last Updated: December 6, 2024*
+*Last Updated: December 6, 2025*

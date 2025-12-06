@@ -25,8 +25,7 @@ from sqlalchemy import create_engine, text
 
 # Configuration
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:postgres@localhost:5433/pea_forecast"
+    "DATABASE_URL", "postgresql://postgres:postgres@localhost:5433/pea_forecast"
 )
 
 POC_DATA_PATH = Path(__file__).parent.parent.parent / "requirements" / "POC Data.xlsx"
@@ -48,22 +47,46 @@ def load_poc_solar_data(engine) -> int:
     print("\n📊 Loading POC Solar Data...")
 
     df = pd.read_excel(POC_DATA_PATH, sheet_name="Solar", header=2, usecols="B:I")
-    df.columns = ["timestamp", "pvtemp1", "pvtemp2", "ambtemp", "pyrano1", "pyrano2", "windspeed", "power_kw"]
+    df.columns = [
+        "timestamp",
+        "pvtemp1",
+        "pvtemp2",
+        "ambtemp",
+        "pyrano1",
+        "pyrano2",
+        "windspeed",
+        "power_kw",
+    ]
     df = df.dropna(how="all")
 
     # Add date (use a reference date since POC only has time)
-    base_date = datetime(2024, 6, 15)  # Mid-year date for Thailand
+    base_date = datetime(2025, 6, 15)  # Mid-year date for Thailand
     df["time"] = df["timestamp"].apply(
-        lambda t: base_date + timedelta(hours=t.hour, minutes=t.minute, seconds=t.second) if pd.notna(t) else None
+        lambda t: base_date
+        + timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
+        if pd.notna(t)
+        else None
     )
     df["station_id"] = "POC_STATION_1"
 
     # Select columns for DB
-    db_cols = ["time", "station_id", "pvtemp1", "pvtemp2", "ambtemp", "pyrano1", "pyrano2", "windspeed", "power_kw"]
+    db_cols = [
+        "time",
+        "station_id",
+        "pvtemp1",
+        "pvtemp2",
+        "ambtemp",
+        "pyrano1",
+        "pyrano2",
+        "windspeed",
+        "power_kw",
+    ]
     df_db = df[db_cols].dropna(subset=["time"])
 
     # Insert to DB
-    df_db.to_sql("solar_measurements", engine, if_exists="append", index=False, method="multi")
+    df_db.to_sql(
+        "solar_measurements", engine, if_exists="append", index=False, method="multi"
+    )
 
     print(f"   ✅ Loaded {len(df_db)} solar records")
     return len(df_db)
@@ -75,28 +98,43 @@ def load_poc_1phase_data(engine) -> int:
 
     df = pd.read_excel(POC_DATA_PATH, sheet_name="1 Phase", header=2, usecols="B:H")
     df.columns = [
-        "timestamp", "active_power", "energy_meter_active_power", "energy_meter_current",
-        "energy_meter_reactive_power", "energy_meter_voltage", "reactive_power"
+        "timestamp",
+        "active_power",
+        "energy_meter_active_power",
+        "energy_meter_current",
+        "energy_meter_reactive_power",
+        "energy_meter_voltage",
+        "reactive_power",
     ]
     df = df.dropna(how="all")
 
     # Add date and prosumer_id (POC data is for prosumer1)
-    base_date = datetime(2024, 6, 15)
+    base_date = datetime(2025, 6, 15)
     df["time"] = df["timestamp"].apply(
-        lambda t: base_date + timedelta(hours=t.hour, minutes=t.minute, seconds=t.second) if pd.notna(t) else None
+        lambda t: base_date
+        + timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
+        if pd.notna(t)
+        else None
     )
     df["prosumer_id"] = "prosumer1"
 
     # Select columns for DB
     db_cols = [
-        "time", "prosumer_id", "active_power", "reactive_power",
-        "energy_meter_active_power", "energy_meter_current",
-        "energy_meter_voltage", "energy_meter_reactive_power"
+        "time",
+        "prosumer_id",
+        "active_power",
+        "reactive_power",
+        "energy_meter_active_power",
+        "energy_meter_current",
+        "energy_meter_voltage",
+        "energy_meter_reactive_power",
     ]
     df_db = df[db_cols].dropna(subset=["time"])
 
     # Insert to DB
-    df_db.to_sql("single_phase_meters", engine, if_exists="append", index=False, method="multi")
+    df_db.to_sql(
+        "single_phase_meters", engine, if_exists="append", index=False, method="multi"
+    )
 
     print(f"   ✅ Loaded {len(df_db)} 1-phase records")
     return len(df_db)
@@ -108,28 +146,57 @@ def load_poc_3phase_data(engine) -> int:
 
     df = pd.read_excel(POC_DATA_PATH, sheet_name="3 Phase", header=2, usecols="A:N")
     df.columns = [
-        "timestamp", "p1_amp", "p1_volt", "p1_w", "p2_amp", "p2_volt", "p2_w",
-        "p3_amp", "p3_volt", "p3_w", "q1_var", "q2_var", "q3_var", "total_w"
+        "timestamp",
+        "p1_amp",
+        "p1_volt",
+        "p1_w",
+        "p2_amp",
+        "p2_volt",
+        "p2_w",
+        "p3_amp",
+        "p3_volt",
+        "p3_w",
+        "q1_var",
+        "q2_var",
+        "q3_var",
+        "total_w",
     ]
     df = df.dropna(how="all")
 
     # Add date and meter_id
-    base_date = datetime(2024, 6, 15)
+    base_date = datetime(2025, 6, 15)
     df["time"] = df["timestamp"].apply(
-        lambda t: base_date + timedelta(hours=t.hour, minutes=t.minute, seconds=t.second) if pd.notna(t) else None
+        lambda t: base_date
+        + timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
+        if pd.notna(t)
+        else None
     )
     df["meter_id"] = "TX_METER_01"
 
     # Select columns for DB
     db_cols = [
-        "time", "meter_id", "p1_amp", "p1_volt", "p1_w",
-        "p2_amp", "p2_volt", "p2_w", "p3_amp", "p3_volt", "p3_w",
-        "q1_var", "q2_var", "q3_var", "total_w"
+        "time",
+        "meter_id",
+        "p1_amp",
+        "p1_volt",
+        "p1_w",
+        "p2_amp",
+        "p2_volt",
+        "p2_w",
+        "p3_amp",
+        "p3_volt",
+        "p3_w",
+        "q1_var",
+        "q2_var",
+        "q3_var",
+        "total_w",
     ]
     df_db = df[db_cols].dropna(subset=["time"])
 
     # Insert to DB
-    df_db.to_sql("three_phase_meters", engine, if_exists="append", index=False, method="multi")
+    df_db.to_sql(
+        "three_phase_meters", engine, if_exists="append", index=False, method="multi"
+    )
 
     print(f"   ✅ Loaded {len(df_db)} 3-phase records")
     return len(df_db)
@@ -148,8 +215,8 @@ def generate_solar_simulation(engine, days: int = 365) -> int:
     print(f"\n🌞 Generating {days} days of solar simulation data...")
 
     np.random.seed(42)
-    # Align with POC data date (June 15, 2024) - go back 'days' from that date
-    poc_date = datetime(2024, 6, 15)
+    # Align with POC data date (June 15, 2025) - go back 'days' from that date
+    poc_date = datetime(2025, 6, 15)
     start_date = poc_date - timedelta(days=days - 1)
     records = []
 
@@ -184,7 +251,9 @@ def generate_solar_simulation(engine, days: int = 365) -> int:
 
             # Temperature model
             # Ambient temp: 25-35°C with daily cycle
-            ambtemp = 30 + 5 * np.sin(2 * np.pi * (hour - 6) / 24) + np.random.normal(0, 1)
+            ambtemp = (
+                30 + 5 * np.sin(2 * np.pi * (hour - 6) / 24) + np.random.normal(0, 1)
+            )
 
             # PV panel temp: higher than ambient when sun is up
             pvtemp_delta = 0.03 * irradiance + np.random.normal(0, 2)
@@ -204,17 +273,19 @@ def generate_solar_simulation(engine, days: int = 365) -> int:
             else:
                 power_kw = 0
 
-            records.append({
-                "time": timestamp,
-                "station_id": "POC_STATION_1",
-                "pvtemp1": round(pvtemp1, 2),
-                "pvtemp2": round(pvtemp2, 2),
-                "ambtemp": round(ambtemp, 2),
-                "pyrano1": round(irradiance, 2),
-                "pyrano2": round(irradiance + np.random.normal(0, 10), 2),
-                "windspeed": round(windspeed, 2),
-                "power_kw": round(power_kw, 2),
-            })
+            records.append(
+                {
+                    "time": timestamp,
+                    "station_id": "POC_STATION_1",
+                    "pvtemp1": round(pvtemp1, 2),
+                    "pvtemp2": round(pvtemp2, 2),
+                    "ambtemp": round(ambtemp, 2),
+                    "pyrano1": round(irradiance, 2),
+                    "pyrano2": round(irradiance + np.random.normal(0, 10), 2),
+                    "windspeed": round(windspeed, 2),
+                    "power_kw": round(power_kw, 2),
+                }
+            )
 
     # Convert to DataFrame and insert
     df = pd.DataFrame(records)
@@ -222,9 +293,15 @@ def generate_solar_simulation(engine, days: int = 365) -> int:
     # Insert in chunks to avoid memory issues
     chunk_size = 10000
     for i in range(0, len(df), chunk_size):
-        chunk = df.iloc[i:i+chunk_size]
-        chunk.to_sql("solar_measurements", engine, if_exists="append", index=False, method="multi")
-        print(f"   Inserted {min(i+chunk_size, len(df))}/{len(df)} records...")
+        chunk = df.iloc[i : i + chunk_size]
+        chunk.to_sql(
+            "solar_measurements",
+            engine,
+            if_exists="append",
+            index=False,
+            method="multi",
+        )
+        print(f"   Inserted {min(i + chunk_size, len(df))}/{len(df)} records...")
 
     print(f"   ✅ Generated {len(df)} solar simulation records")
     return len(df)
@@ -246,8 +323,8 @@ def generate_voltage_simulation(engine, days: int = 365) -> int:
     print(f"\n⚡ Generating {days} days of voltage simulation data...")
 
     np.random.seed(43)
-    # Align with POC data date (June 15, 2024) - go back 'days' from that date
-    poc_date = datetime(2024, 6, 15)
+    # Align with POC data date (June 15, 2025) - go back 'days' from that date
+    poc_date = datetime(2025, 6, 15)
     start_date = poc_date - timedelta(days=days - 1)
     records = []
 
@@ -322,16 +399,18 @@ def generate_voltage_simulation(engine, days: int = 365) -> int:
                 active_power = voltage * current / 1000  # kW
                 reactive_power = active_power * 0.1 * np.random.uniform(0.8, 1.2)
 
-                records.append({
-                    "time": timestamp,
-                    "prosumer_id": prosumer_id,
-                    "active_power": round(active_power, 2),
-                    "reactive_power": round(reactive_power, 2),
-                    "energy_meter_active_power": round(active_power, 2),
-                    "energy_meter_current": round(current, 2),
-                    "energy_meter_voltage": round(voltage, 2),
-                    "energy_meter_reactive_power": round(reactive_power, 2),
-                })
+                records.append(
+                    {
+                        "time": timestamp,
+                        "prosumer_id": prosumer_id,
+                        "active_power": round(active_power, 2),
+                        "reactive_power": round(reactive_power, 2),
+                        "energy_meter_active_power": round(active_power, 2),
+                        "energy_meter_current": round(current, 2),
+                        "energy_meter_voltage": round(voltage, 2),
+                        "energy_meter_reactive_power": round(reactive_power, 2),
+                    }
+                )
 
     # Convert to DataFrame and insert
     df = pd.DataFrame(records)
@@ -339,9 +418,15 @@ def generate_voltage_simulation(engine, days: int = 365) -> int:
     # Insert in chunks
     chunk_size = 50000
     for i in range(0, len(df), chunk_size):
-        chunk = df.iloc[i:i+chunk_size]
-        chunk.to_sql("single_phase_meters", engine, if_exists="append", index=False, method="multi")
-        print(f"   Inserted {min(i+chunk_size, len(df))}/{len(df)} records...")
+        chunk = df.iloc[i : i + chunk_size]
+        chunk.to_sql(
+            "single_phase_meters",
+            engine,
+            if_exists="append",
+            index=False,
+            method="multi",
+        )
+        print(f"   Inserted {min(i + chunk_size, len(df))}/{len(df)} records...")
 
     print(f"   ✅ Generated {len(df)} voltage simulation records")
     return len(df)
@@ -381,23 +466,23 @@ def verify_data(engine):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Load POC data and generate simulations")
+    parser = argparse.ArgumentParser(
+        description="Load POC data and generate simulations"
+    )
     parser.add_argument(
         "--mode",
         choices=["poc", "simulate", "all"],
         default="all",
-        help="Loading mode: poc (POC data only), simulate (simulation only), all (both)"
+        help="Loading mode: poc (POC data only), simulate (simulation only), all (both)",
     )
     parser.add_argument(
         "--days",
         type=int,
         default=365,
-        help="Number of days to simulate (default: 365)"
+        help="Number of days to simulate (default: 365)",
     )
     parser.add_argument(
-        "--clear",
-        action="store_true",
-        help="Clear existing data before loading"
+        "--clear", action="store_true", help="Clear existing data before loading"
     )
 
     args = parser.parse_args()

@@ -56,7 +56,7 @@ ws://localhost:8000/api/v1/ws/realtime
 {
   type: "solar_update" | "voltage_update" | "alert",
   data: { ... },
-  timestamp: "2024-01-15T10:00:00Z"
+  timestamp: "2025-01-15T10:00:00Z"
 }
 ```
 

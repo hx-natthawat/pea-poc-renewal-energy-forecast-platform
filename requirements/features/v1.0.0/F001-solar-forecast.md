@@ -40,7 +40,7 @@ Predict solar PV power output from environmental parameters using machine learni
 **Request:**
 ```json
 {
-  "timestamp": "2024-01-15T10:00:00+07:00",
+  "timestamp": "2025-01-15T10:00:00+07:00",
   "horizon_minutes": 60,
   "features": {
     "pyrano1": 850.5,

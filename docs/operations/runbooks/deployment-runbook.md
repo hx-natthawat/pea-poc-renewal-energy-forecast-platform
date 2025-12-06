@@ -1,7 +1,7 @@
 # PEA RE Forecast Platform - Deployment Runbook
 
 **Version**: 1.0.0
-**Last Updated**: December 6, 2024
+**Last Updated**: December 6, 2025
 **Owner**: PEA Development Team
 **TOR Compliance**: Sections 7.1.4, 7.1.5, 7.1.6
 
@@ -284,7 +284,7 @@ curl http://localhost:8000/api/v1/health
 curl -X POST http://localhost:8000/api/v1/forecast/solar \
   -H "Content-Type: application/json" \
   -d '{
-    "timestamp": "2024-12-06T12:00:00+07:00",
+    "timestamp": "2025-12-06T12:00:00+07:00",
     "horizon_minutes": 60,
     "features": {
       "pyrano1": 850.5,
@@ -311,7 +311,7 @@ curl -X POST http://localhost:8000/api/v1/forecast/solar \
 curl -X POST http://localhost:8000/api/v1/forecast/voltage \
   -H "Content-Type: application/json" \
   -d '{
-    "timestamp": "2024-12-06T12:00:00+07:00",
+    "timestamp": "2025-12-06T12:00:00+07:00",
     "prosumer_ids": ["prosumer1", "prosumer2"]
   }'
 
@@ -565,7 +565,7 @@ curl -X POST http://localhost:8000/api/v1/forecast/solar \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
-    "timestamp": "2024-12-06T14:00:00+07:00",
+    "timestamp": "2025-12-06T14:00:00+07:00",
     "horizon_minutes": 60,
     "features": {
       "pyrano1": 920.0,
@@ -586,7 +586,7 @@ curl -X POST http://localhost:8000/api/v1/forecast/voltage \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
-    "timestamp": "2024-12-06T14:00:00+07:00",
+    "timestamp": "2025-12-06T14:00:00+07:00",
     "prosumer_ids": ["prosumer1", "prosumer5", "prosumer7"]
   }'
 
@@ -625,8 +625,8 @@ kubectl exec -n pea-forecast-prod timescaledb-0 -- \
 # Expected:
 #  model_type | count | max
 # ------------+-------+------------------------
-#  solar      | XXXXX | 2024-12-06 14:00:00+07
-#  voltage    | XXXXX | 2024-12-06 14:00:00+07
+#  solar      | XXXXX | 2025-12-06 14:00:00+07
+#  voltage    | XXXXX | 2025-12-06 14:00:00+07
 ```
 
 #### Redis Cache Verification
@@ -815,8 +815,8 @@ helm history pea-re-forecast -n pea-forecast-prod
 
 # Example output:
 # REVISION  UPDATED                   STATUS      CHART                 DESCRIPTION
-# 1         Mon Dec 4 02:00:00 2024   superseded  pea-re-forecast-0.1.0 Install complete
-# 2         Wed Dec 6 02:15:00 2024   deployed    pea-re-forecast-0.1.0 Upgrade complete
+# 1         Mon Dec 4 02:00:00 2025   superseded  pea-re-forecast-0.1.0 Install complete
+# 2         Wed Dec 6 02:15:00 2025   deployed    pea-re-forecast-0.1.0 Upgrade complete
 
 # Rollback to previous revision
 helm rollback pea-re-forecast 1 -n pea-forecast-prod --wait
@@ -1436,7 +1436,7 @@ ROLLBACK (if needed)
 
 | Version | Date | Changes | Deployed By |
 |---------|------|---------|-------------|
-| v1.0.0 | 2024-12-06 | Initial production release | [Name] |
+| v1.0.0 | 2025-12-06 | Initial production release | [Name] |
 | | | | |
 
 ### C. References
@@ -1453,7 +1453,7 @@ ROLLBACK (if needed)
 
 - **Document ID**: OPS-RUNBOOK-001
 - **Version**: 1.0.0
-- **Last Reviewed**: December 6, 2024
+- **Last Reviewed**: December 6, 2025
 - **Next Review**: January 6, 2025
 - **Owner**: PEA Development Team
 - **Approver**: PEA IT Director

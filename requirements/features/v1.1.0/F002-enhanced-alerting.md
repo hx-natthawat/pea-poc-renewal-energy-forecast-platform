@@ -65,7 +65,7 @@ Multi-channel notification system with email (SMTP) and LINE Notify integration 
     "prosumer_id": "prosumer1",
     "voltage": 245.5,
     "threshold": 242.0,
-    "timestamp": "2024-01-15 10:00:00"
+    "timestamp": "2025-01-15 10:00:00"
   },
   "priority": "high"
 }
@@ -79,7 +79,7 @@ Multi-channel notification system with email (SMTP) and LINE Notify integration 
     "alert_id": "alert-001",
     "channels_sent": ["email", "line", "dashboard"],
     "channels_failed": [],
-    "sent_at": "2024-01-15T10:00:00Z"
+    "sent_at": "2025-01-15T10:00:00Z"
   }
 }
 ```
@@ -213,5 +213,5 @@ LineConfig(
 ---
 
 *Feature Version: 1.0*
-*Created: December 2024*
-*Updated: December 2024 - Core implementation completed*
+*Created: December 2025*
+*Updated: December 2025 - Core implementation completed*

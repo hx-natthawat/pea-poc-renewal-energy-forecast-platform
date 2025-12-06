@@ -33,8 +33,7 @@ from sqlalchemy import create_engine, text
 
 # Configuration
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:postgres@localhost:5433/pea_forecast"
+    "DATABASE_URL", "postgresql://postgres:postgres@localhost:5433/pea_forecast"
 )
 
 DATA_DIR = Path(__file__).parent.parent.parent / "requirements" / "sample"
@@ -78,8 +77,16 @@ class DataValidator:
     """Validates incoming data against expected schema and ranges."""
 
     SOLAR_SCHEMA = {
-        "required_columns": ["timestamp", "pvtemp1", "pvtemp2", "ambtemp",
-                            "pyrano1", "pyrano2", "windspeed", "power_kw"],
+        "required_columns": [
+            "timestamp",
+            "pvtemp1",
+            "pvtemp2",
+            "ambtemp",
+            "pyrano1",
+            "pyrano2",
+            "windspeed",
+            "power_kw",
+        ],
         "ranges": {
             "pvtemp1": (-10, 100),
             "pvtemp2": (-10, 100),
@@ -88,7 +95,7 @@ class DataValidator:
             "pyrano2": (0, 1500),
             "windspeed": (0, 50),
             "power_kw": (0, 10000),
-        }
+        },
     }
 
     VOLTAGE_1PHASE_SCHEMA = {
@@ -97,7 +104,7 @@ class DataValidator:
             "energy_meter_voltage": (180, 260),
             "active_power": (-100, 100),
             "energy_meter_current": (0, 100),
-        }
+        },
     }
 
     VOLTAGE_3PHASE_SCHEMA = {
@@ -109,7 +116,7 @@ class DataValidator:
             "p1_amp": (0, 200),
             "p2_amp": (0, 200),
             "p3_amp": (0, 200),
-        }
+        },
     }
 
     def validate_solar(self, df: pd.DataFrame) -> ValidationResult:
@@ -141,7 +148,7 @@ class DataValidator:
             is_valid=len(errors) == 0,
             errors=errors,
             warnings=warnings,
-            row_count=len(df)
+            row_count=len(df),
         )
 
     def validate_voltage(self, df: pd.DataFrame) -> ValidationResult:
@@ -157,8 +164,7 @@ class DataValidator:
         # Check voltage range
         if "energy_meter_voltage" in df.columns:
             out_of_range = df[
-                (df["energy_meter_voltage"] < 180) |
-                (df["energy_meter_voltage"] > 260)
+                (df["energy_meter_voltage"] < 180) | (df["energy_meter_voltage"] > 260)
             ]
             if len(out_of_range) > 0:
                 warnings.append(
@@ -167,8 +173,8 @@ class DataValidator:
 
             # Check for critical violations
             critical = df[
-                (df["energy_meter_voltage"] < 207) |  # -10%
-                (df["energy_meter_voltage"] > 253)    # +10%
+                (df["energy_meter_voltage"] < 207)  # -10%
+                | (df["energy_meter_voltage"] > 253)  # +10%
             ]
             if len(critical) > 0:
                 warnings.append(
@@ -179,7 +185,7 @@ class DataValidator:
             is_valid=len(errors) == 0,
             errors=errors,
             warnings=warnings,
-            row_count=len(df)
+            row_count=len(df),
         )
 
     def validate_voltage_3phase(self, df: pd.DataFrame) -> ValidationResult:
@@ -195,9 +201,7 @@ class DataValidator:
         # Check voltage ranges for each phase
         for phase_col in ["p1_volt", "p2_volt", "p3_volt"]:
             if phase_col in df.columns:
-                out_of_range = df[
-                    (df[phase_col] < 380) | (df[phase_col] > 420)
-                ]
+                out_of_range = df[(df[phase_col] < 380) | (df[phase_col] > 420)]
                 if len(out_of_range) > 0:
                     warnings.append(
                         f"{phase_col}: {len(out_of_range)} values out of range [380V, 420V]"
@@ -207,7 +211,7 @@ class DataValidator:
             is_valid=len(errors) == 0,
             errors=errors,
             warnings=warnings,
-            row_count=len(df)
+            row_count=len(df),
         )
 
 
@@ -229,7 +233,7 @@ class DataIngestionPipeline:
             with self.engine.connect() as conn:
                 result = conn.execute(
                     text("SELECT id FROM data_ingestion_log WHERE file_hash = :hash"),
-                    {"hash": file_hash}
+                    {"hash": file_hash},
                 )
                 return result.fetchone() is not None
         except Exception:
@@ -259,7 +263,7 @@ class DataIngestionPipeline:
                         "records_skipped": result.records_skipped,
                         "errors": ";".join(result.errors) if result.errors else None,
                         "duration_seconds": result.duration_seconds,
-                    }
+                    },
                 )
                 conn.commit()
         except Exception as e:
@@ -272,27 +276,57 @@ class DataIngestionPipeline:
         xl = pd.ExcelFile(file_path)
         for sheet_name in xl.sheet_names:
             if "solar" in sheet_name.lower():
-                df = pd.read_excel(file_path, sheet_name=sheet_name, header=2, usecols="B:I")
-                df.columns = ["timestamp", "pvtemp1", "pvtemp2", "ambtemp",
-                             "pyrano1", "pyrano2", "windspeed", "power_kw"]
+                df = pd.read_excel(
+                    file_path, sheet_name=sheet_name, header=2, usecols="B:I"
+                )
+                df.columns = [
+                    "timestamp",
+                    "pvtemp1",
+                    "pvtemp2",
+                    "ambtemp",
+                    "pyrano1",
+                    "pyrano2",
+                    "windspeed",
+                    "power_kw",
+                ]
                 df = df.dropna(how="all")
                 result["solar"] = df
 
             elif "1 phase" in sheet_name.lower():
-                df = pd.read_excel(file_path, sheet_name=sheet_name, header=2, usecols="B:H")
+                df = pd.read_excel(
+                    file_path, sheet_name=sheet_name, header=2, usecols="B:H"
+                )
                 df.columns = [
-                    "timestamp", "active_power", "energy_meter_active_power",
-                    "energy_meter_current", "energy_meter_reactive_power",
-                    "energy_meter_voltage", "reactive_power"
+                    "timestamp",
+                    "active_power",
+                    "energy_meter_active_power",
+                    "energy_meter_current",
+                    "energy_meter_reactive_power",
+                    "energy_meter_voltage",
+                    "reactive_power",
                 ]
                 df = df.dropna(how="all")
                 result["voltage_1phase"] = df
 
             elif "3 phase" in sheet_name.lower():
-                df = pd.read_excel(file_path, sheet_name=sheet_name, header=2, usecols="A:N")
+                df = pd.read_excel(
+                    file_path, sheet_name=sheet_name, header=2, usecols="A:N"
+                )
                 df.columns = [
-                    "timestamp", "p1_amp", "p1_volt", "p1_w", "p2_amp", "p2_volt", "p2_w",
-                    "p3_amp", "p3_volt", "p3_w", "q1_var", "q2_var", "q3_var", "total_w"
+                    "timestamp",
+                    "p1_amp",
+                    "p1_volt",
+                    "p1_w",
+                    "p2_amp",
+                    "p2_volt",
+                    "p2_w",
+                    "p3_amp",
+                    "p3_volt",
+                    "p3_w",
+                    "q1_var",
+                    "q2_var",
+                    "q3_var",
+                    "total_w",
                 ]
                 df = df.dropna(how="all")
                 result["voltage_3phase"] = df
@@ -302,6 +336,7 @@ class DataIngestionPipeline:
     def _extract_date_from_filename(self, filename: str) -> Optional[datetime]:
         """Try to extract date from filename like 'POC Data 2-12-25.xlsx'."""
         import re
+
         # Try pattern: day-month-year
         match = re.search(r"(\d{1,2})-(\d{1,2})-(\d{2,4})", filename)
         if match:
@@ -335,19 +370,16 @@ class DataIngestionPipeline:
         return df
 
     def ingest_file(
-        self,
-        file_path: Path,
-        force: bool = False,
-        validate_only: bool = False
+        self, file_path: Path, force: bool = False, validate_only: bool = False
     ) -> IngestionResult:
         """Ingest a single file into the database."""
         start_time = datetime.now()
         file_hash = self._compute_file_hash(file_path)
 
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print(f"📁 Ingesting: {file_path.name}")
         print(f"   Hash: {file_hash[:16]}...")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
 
         # Check if already ingested
         if not force and self._check_already_ingested(file_hash):
@@ -361,7 +393,7 @@ class DataIngestionPipeline:
                 records_updated=0,
                 records_skipped=0,
                 errors=[],
-                duration_seconds=0
+                duration_seconds=0,
             )
 
         # Parse file
@@ -377,7 +409,7 @@ class DataIngestionPipeline:
                 records_updated=0,
                 records_skipped=0,
                 errors=[f"Parse error: {str(e)}"],
-                duration_seconds=(datetime.now() - start_time).total_seconds()
+                duration_seconds=(datetime.now() - start_time).total_seconds(),
             )
 
         # Extract date from filename or use default
@@ -385,7 +417,7 @@ class DataIngestionPipeline:
         if base_date:
             print(f"   📅 Extracted date from filename: {base_date.date()}")
         else:
-            base_date = datetime(2024, 6, 15)
+            base_date = datetime(2025, 6, 15)
             print(f"   📅 Using default date: {base_date.date()}")
 
         # Validate each data type
@@ -430,12 +462,24 @@ class DataIngestionPipeline:
             try:
                 if data_type == "solar":
                     df["station_id"] = "POC_STATION_1"
-                    db_cols = ["time", "station_id", "pvtemp1", "pvtemp2", "ambtemp",
-                              "pyrano1", "pyrano2", "windspeed", "power_kw"]
+                    db_cols = [
+                        "time",
+                        "station_id",
+                        "pvtemp1",
+                        "pvtemp2",
+                        "ambtemp",
+                        "pyrano1",
+                        "pyrano2",
+                        "windspeed",
+                        "power_kw",
+                    ]
                     df_db = df[db_cols].dropna(subset=["time"])
                     df_db.to_sql(
-                        "solar_measurements", self.engine,
-                        if_exists="append", index=False, method="multi"
+                        "solar_measurements",
+                        self.engine,
+                        if_exists="append",
+                        index=False,
+                        method="multi",
                     )
                     inserted += len(df_db)
                     print(f"      ✅ Inserted {len(df_db)} records")
@@ -443,14 +487,22 @@ class DataIngestionPipeline:
                 elif data_type == "voltage_1phase":
                     df["prosumer_id"] = "prosumer1"
                     db_cols = [
-                        "time", "prosumer_id", "active_power", "reactive_power",
-                        "energy_meter_active_power", "energy_meter_current",
-                        "energy_meter_voltage", "energy_meter_reactive_power"
+                        "time",
+                        "prosumer_id",
+                        "active_power",
+                        "reactive_power",
+                        "energy_meter_active_power",
+                        "energy_meter_current",
+                        "energy_meter_voltage",
+                        "energy_meter_reactive_power",
                     ]
                     df_db = df[db_cols].dropna(subset=["time"])
                     df_db.to_sql(
-                        "single_phase_meters", self.engine,
-                        if_exists="append", index=False, method="multi"
+                        "single_phase_meters",
+                        self.engine,
+                        if_exists="append",
+                        index=False,
+                        method="multi",
                     )
                     inserted += len(df_db)
                     print(f"      ✅ Inserted {len(df_db)} records")
@@ -458,14 +510,29 @@ class DataIngestionPipeline:
                 elif data_type == "voltage_3phase":
                     df["meter_id"] = "TX_METER_01"
                     db_cols = [
-                        "time", "meter_id", "p1_amp", "p1_volt", "p1_w",
-                        "p2_amp", "p2_volt", "p2_w", "p3_amp", "p3_volt", "p3_w",
-                        "q1_var", "q2_var", "q3_var", "total_w"
+                        "time",
+                        "meter_id",
+                        "p1_amp",
+                        "p1_volt",
+                        "p1_w",
+                        "p2_amp",
+                        "p2_volt",
+                        "p2_w",
+                        "p3_amp",
+                        "p3_volt",
+                        "p3_w",
+                        "q1_var",
+                        "q2_var",
+                        "q3_var",
+                        "total_w",
                     ]
                     df_db = df[db_cols].dropna(subset=["time"])
                     df_db.to_sql(
-                        "three_phase_meters", self.engine,
-                        if_exists="append", index=False, method="multi"
+                        "three_phase_meters",
+                        self.engine,
+                        if_exists="append",
+                        index=False,
+                        method="multi",
                     )
                     inserted += len(df_db)
                     print(f"      ✅ Inserted {len(df_db)} records")
@@ -482,7 +549,11 @@ class DataIngestionPipeline:
         if all_errors:
             status = IngestionStatus.PARTIAL if inserted > 0 else IngestionStatus.FAILED
         else:
-            status = IngestionStatus.SUCCESS if not validate_only else IngestionStatus.SKIPPED
+            status = (
+                IngestionStatus.SUCCESS
+                if not validate_only
+                else IngestionStatus.SKIPPED
+            )
 
         result = IngestionResult(
             status=status,
@@ -493,18 +564,18 @@ class DataIngestionPipeline:
             records_updated=0,
             records_skipped=total_records - inserted,
             errors=all_errors,
-            duration_seconds=duration
+            duration_seconds=duration,
         )
 
         # Log result
         if not validate_only:
             self._log_ingestion(result)
 
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print(f"✅ Ingestion complete: {status.value}")
         print(f"   Records: {inserted}/{total_records} inserted")
         print(f"   Duration: {duration:.2f}s")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
 
         return result
 
@@ -529,11 +600,12 @@ def trigger_retrain(engine):
     if solar_count >= 1000:
         print("   📈 Running solar model training...")
         import subprocess
+
         result = subprocess.run(
             [sys.executable, "train_solar.py"],
             cwd=Path(__file__).parent,
             capture_output=True,
-            text=True
+            text=True,
         )
         if result.returncode == 0:
             print("   ✅ Solar model trained successfully")
@@ -543,11 +615,12 @@ def trigger_retrain(engine):
     if voltage_count >= 1000:
         print("   📈 Running voltage model training...")
         import subprocess
+
         result = subprocess.run(
             [sys.executable, "train_voltage.py"],
             cwd=Path(__file__).parent,
             capture_output=True,
-            text=True
+            text=True,
         )
         if result.returncode == 0:
             print("   ✅ Voltage model trained successfully")
@@ -560,34 +633,35 @@ def main():
         description="Ingest POC data files into TimescaleDB"
     )
     parser.add_argument(
-        "--file", "-f",
+        "--file",
+        "-f",
         type=str,
-        help="Path to Excel file to ingest (relative to sample dir or absolute)"
+        help="Path to Excel file to ingest (relative to sample dir or absolute)",
     )
     parser.add_argument(
-        "--all", "-a",
+        "--all",
+        "-a",
         action="store_true",
-        help="Ingest all Excel files in sample directory"
+        help="Ingest all Excel files in sample directory",
     )
     parser.add_argument(
-        "--validate-only", "-v",
+        "--validate-only",
+        "-v",
         action="store_true",
-        help="Only validate, don't insert data"
+        help="Only validate, don't insert data",
     )
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Force re-ingestion of already processed files"
+        help="Force re-ingestion of already processed files",
     )
     parser.add_argument(
         "--retrain",
         action="store_true",
-        help="Trigger model retraining after ingestion"
+        help="Trigger model retraining after ingestion",
     )
     parser.add_argument(
-        "--list",
-        action="store_true",
-        help="List available files in sample directory"
+        "--list", action="store_true", help="List available files in sample directory"
     )
 
     args = parser.parse_args()
@@ -631,9 +705,7 @@ def main():
     results = []
     for file_path in files_to_process:
         result = pipeline.ingest_file(
-            file_path,
-            force=args.force,
-            validate_only=args.validate_only
+            file_path, force=args.force, validate_only=args.validate_only
         )
         results.append(result)
 
@@ -648,7 +720,9 @@ def main():
             IngestionStatus.FAILED: "❌",
             IngestionStatus.SKIPPED: "⏭️",
         }[r.status]
-        print(f"{status_icon} {r.file_name}: {r.records_inserted} inserted ({r.status.value})")
+        print(
+            f"{status_icon} {r.file_name}: {r.records_inserted} inserted ({r.status.value})"
+        )
 
     # Trigger retraining if requested
     if args.retrain and any(r.status == IngestionStatus.SUCCESS for r in results):

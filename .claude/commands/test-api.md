@@ -44,7 +44,7 @@ Comprehensively test all API endpoints before deployment.
 
    # Using httpie for manual testing
    http POST localhost:8000/api/v1/forecast/solar \
-     timestamp="2024-01-15T10:00:00+07:00" \
+     timestamp="2025-01-15T10:00:00+07:00" \
      pyrano1:=850.5 pyrano2:=842.3 \
      pvtemp1:=45.2 pvtemp2:=44.8 \
      ambtemp:=32.5 windspeed:=2.3

@@ -60,7 +60,7 @@ Comprehensive extreme weather handling system for the PEA RE Forecast Platform, 
     "alerts": [
       {
         "id": "alert-001",
-        "timestamp": "2024-01-15T10:00:00Z",
+        "timestamp": "2025-01-15T10:00:00Z",
         "condition": "storm",
         "severity": "critical",
         "region": "Central Thailand",
@@ -87,7 +87,7 @@ Comprehensive extreme weather handling system for the PEA RE Forecast Platform, 
     "direction": "down",
     "variability_index": 0.12,
     "last_event": {
-      "timestamp": "2024-01-15T09:45:00Z",
+      "timestamp": "2025-01-15T09:45:00Z",
       "rate_percent": -32.5,
       "direction": "down"
     }
@@ -169,4 +169,4 @@ class RampRateConfig:
 
 *Consolidated from: plan.md, spec.md, implementation.md*
 *Feature Version: 1.0*
-*Created: December 2024*
+*Created: December 2025*

@@ -4,7 +4,7 @@ Unit tests for historical analysis API endpoints.
 Tests the date range queries, aggregations, and export functionality.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -22,7 +22,6 @@ from app.api.v1.endpoints.history import (
     router,
 )
 from app.core.security import CurrentUser
-
 
 # =============================================================================
 # Test Fixtures
@@ -170,17 +169,17 @@ class TestHistoricalDataPoint:
 
     def test_create_with_all_fields(self):
         point = HistoricalDataPoint(
-            time="2024-01-15T10:00:00",
+            time="2025-01-15T10:00:00",
             value=123.45,
             metadata={"source": "sensor1"},
         )
-        assert point.time == "2024-01-15T10:00:00"
+        assert point.time == "2025-01-15T10:00:00"
         assert point.value == 123.45
         assert point.metadata == {"source": "sensor1"}
 
     def test_create_with_required_only(self):
-        point = HistoricalDataPoint(time="2024-01-15T10:00:00", value=50.0)
-        assert point.time == "2024-01-15T10:00:00"
+        point = HistoricalDataPoint(time="2025-01-15T10:00:00", value=50.0)
+        assert point.time == "2025-01-15T10:00:00"
         assert point.value == 50.0
         assert point.metadata is None
 
@@ -212,8 +211,8 @@ class TestGetSolarHistory:
 
         # Mock database response
         mock_row = MagicMock()
-        mock_row.__getitem__ = lambda self, i: [
-            datetime(2024, 1, 15, 10, 0, 0),
+        mock_row.__getitem__ = lambda _, i: [
+            datetime(2025, 1, 15, 10, 0, 0),
             1500.0,
             800.0,
             795.0,
@@ -229,10 +228,12 @@ class TestGetSolarHistory:
 
         mock_db.execute = AsyncMock(return_value=mock_result)
 
-        with patch("app.api.v1.endpoints.history.get_current_user", return_value=mock_user):
+        with patch(
+            "app.api.v1.endpoints.history.get_current_user", return_value=mock_user
+        ):
             result = await get_solar_history(
-                start_date=datetime(2024, 1, 1),
-                end_date=datetime(2024, 1, 31),
+                start_date=datetime(2025, 1, 1),
+                end_date=datetime(2025, 1, 31),
                 station_id="POC_STATION_1",
                 interval=AggregationInterval.raw,
                 limit=1000,
@@ -251,8 +252,8 @@ class TestGetSolarHistory:
         from app.api.v1.endpoints.history import get_solar_history
 
         mock_row = MagicMock()
-        mock_row.__getitem__ = lambda self, i: [
-            datetime(2024, 1, 15, 10, 0, 0),
+        mock_row.__getitem__ = lambda _, i: [
+            datetime(2025, 1, 15, 10, 0, 0),
             1400.0,
             1200.0,
             1600.0,
@@ -268,8 +269,8 @@ class TestGetSolarHistory:
         mock_db.execute = AsyncMock(return_value=mock_result)
 
         result = await get_solar_history(
-            start_date=datetime(2024, 1, 1),
-            end_date=datetime(2024, 1, 31),
+            start_date=datetime(2025, 1, 1),
+            end_date=datetime(2025, 1, 31),
             station_id="POC_STATION_1",
             interval=AggregationInterval.hour,
             limit=1000,
@@ -292,15 +293,29 @@ class TestGetSolarSummary:
 
         # Mock stats result
         stats_row = MagicMock()
-        stats_row.__getitem__ = lambda self, i: [100, 1500.0, 0.0, 3000.0, 500.0, 12000.0, 750.0, 32.0][i]
+        stats_row.__getitem__ = lambda _, i: [
+            100,
+            1500.0,
+            0.0,
+            3000.0,
+            500.0,
+            12000.0,
+            750.0,
+            32.0,
+        ][i]
 
         # Mock hourly result
         hourly_row = MagicMock()
-        hourly_row.__getitem__ = lambda self, i: [10.0, 1200.0, 20][i]
+        hourly_row.__getitem__ = lambda _, i: [10.0, 1200.0, 20][i]
 
         # Mock daily result
         daily_row = MagicMock()
-        daily_row.__getitem__ = lambda self, i: [datetime(2024, 1, 15).date(), 1400.0, 2800.0, 8400.0][i]
+        daily_row.__getitem__ = lambda _, i: [
+            datetime(2025, 1, 15).date(),
+            1400.0,
+            2800.0,
+            8400.0,
+        ][i]
 
         stats_result = MagicMock()
         stats_result.fetchone.return_value = stats_row
@@ -311,11 +326,13 @@ class TestGetSolarSummary:
         daily_result = MagicMock()
         daily_result.fetchall.return_value = [daily_row]
 
-        mock_db.execute = AsyncMock(side_effect=[stats_result, hourly_result, daily_result])
+        mock_db.execute = AsyncMock(
+            side_effect=[stats_result, hourly_result, daily_result]
+        )
 
         result = await get_solar_summary(
-            start_date=datetime(2024, 1, 1),
-            end_date=datetime(2024, 1, 31),
+            start_date=datetime(2025, 1, 1),
+            end_date=datetime(2025, 1, 31),
             station_id="POC_STATION_1",
             db=mock_db,
             current_user=mock_user,
@@ -341,8 +358,8 @@ class TestGetVoltageHistory:
         from app.api.v1.endpoints.history import get_voltage_history
 
         mock_row = MagicMock()
-        mock_row.__getitem__ = lambda self, i: [
-            datetime(2024, 1, 15, 10, 0, 0),
+        mock_row.__getitem__ = lambda _, i: [
+            datetime(2025, 1, 15, 10, 0, 0),
             "prosumer1",
             "A",
             230.5,
@@ -357,8 +374,8 @@ class TestGetVoltageHistory:
         mock_db.execute = AsyncMock(return_value=mock_result)
 
         result = await get_voltage_history(
-            start_date=datetime(2024, 1, 1),
-            end_date=datetime(2024, 1, 31),
+            start_date=datetime(2025, 1, 1),
+            end_date=datetime(2025, 1, 31),
             prosumer_id="prosumer1",
             phase="A",
             interval=AggregationInterval.raw,
@@ -378,8 +395,8 @@ class TestGetVoltageHistory:
         from app.api.v1.endpoints.history import get_voltage_history
 
         mock_row = MagicMock()
-        mock_row.__getitem__ = lambda self, i: [
-            datetime(2024, 1, 15, 10, 0, 0),
+        mock_row.__getitem__ = lambda _, i: [
+            datetime(2025, 1, 15, 10, 0, 0),
             "prosumer1",
             "A",
             230.0,
@@ -396,8 +413,8 @@ class TestGetVoltageHistory:
         mock_db.execute = AsyncMock(return_value=mock_result)
 
         result = await get_voltage_history(
-            start_date=datetime(2024, 1, 1),
-            end_date=datetime(2024, 1, 31),
+            start_date=datetime(2025, 1, 1),
+            end_date=datetime(2025, 1, 31),
             prosumer_id=None,
             phase=None,
             interval=AggregationInterval.hour,
@@ -421,17 +438,25 @@ class TestGetVoltageSummary:
 
         # Mock prosumer result
         prosumer_row = MagicMock()
-        prosumer_row.__getitem__ = lambda self, i: [
-            "prosumer1", "A", "Prosumer 1", 100, 230.0, 225.0, 235.0, 2.5, 2
+        prosumer_row.__getitem__ = lambda _, i: [
+            "prosumer1",
+            "A",
+            "Prosumer 1",
+            100,
+            230.0,
+            225.0,
+            235.0,
+            2.5,
+            2,
         ][i]
 
         # Mock phase result
         phase_row = MagicMock()
-        phase_row.__getitem__ = lambda self, i: ["A", 300, 229.5, 220.0, 240.0, 5][i]
+        phase_row.__getitem__ = lambda _, i: ["A", 300, 229.5, 220.0, 240.0, 5][i]
 
         # Mock overall result
         overall_row = MagicMock()
-        overall_row.__getitem__ = lambda self, i: [1000, 230.0, 215.0, 245.0, 10][i]
+        overall_row.__getitem__ = lambda _, i: [1000, 230.0, 215.0, 245.0, 10][i]
 
         prosumer_result = MagicMock()
         prosumer_result.fetchall.return_value = [prosumer_row]
@@ -442,11 +467,13 @@ class TestGetVoltageSummary:
         overall_result = MagicMock()
         overall_result.fetchone.return_value = overall_row
 
-        mock_db.execute = AsyncMock(side_effect=[prosumer_result, phase_result, overall_result])
+        mock_db.execute = AsyncMock(
+            side_effect=[prosumer_result, phase_result, overall_result]
+        )
 
         result = await get_voltage_summary(
-            start_date=datetime(2024, 1, 1),
-            end_date=datetime(2024, 1, 31),
+            start_date=datetime(2025, 1, 1),
+            end_date=datetime(2025, 1, 31),
             db=mock_db,
             current_user=mock_user,
         )
@@ -471,8 +498,8 @@ class TestExportHistoricalData:
         from app.api.v1.endpoints.history import export_historical_data
 
         mock_row = MagicMock()
-        mock_row.__getitem__ = lambda self, i: [
-            datetime(2024, 1, 15, 10, 0, 0),
+        mock_row.__getitem__ = lambda _, i: [
+            datetime(2025, 1, 15, 10, 0, 0),
             "POC_STATION_1",
             1500.0,
             800.0,
@@ -490,8 +517,8 @@ class TestExportHistoricalData:
 
         result = await export_historical_data(
             data_type=DataType.solar,
-            start_date=datetime(2024, 1, 1),
-            end_date=datetime(2024, 1, 31),
+            start_date=datetime(2025, 1, 1),
+            end_date=datetime(2025, 1, 31),
             format=ExportFormat.csv,
             station_id="POC_STATION_1",
             prosumer_id=None,
@@ -508,8 +535,8 @@ class TestExportHistoricalData:
         from app.api.v1.endpoints.history import export_historical_data
 
         mock_row = MagicMock()
-        mock_row.__getitem__ = lambda self, i: [
-            datetime(2024, 1, 15, 10, 0, 0),
+        mock_row.__getitem__ = lambda _, i: [
+            datetime(2025, 1, 15, 10, 0, 0),
             "POC_STATION_1",
             1500.0,
             800.0,
@@ -527,8 +554,8 @@ class TestExportHistoricalData:
 
         result = await export_historical_data(
             data_type=DataType.solar,
-            start_date=datetime(2024, 1, 1),
-            end_date=datetime(2024, 1, 31),
+            start_date=datetime(2025, 1, 1),
+            end_date=datetime(2025, 1, 31),
             format=ExportFormat.json,
             station_id="POC_STATION_1",
             prosumer_id=None,
@@ -544,8 +571,8 @@ class TestExportHistoricalData:
         from app.api.v1.endpoints.history import export_historical_data
 
         mock_row = MagicMock()
-        mock_row.__getitem__ = lambda self, i: [
-            datetime(2024, 1, 15, 10, 0, 0),
+        mock_row.__getitem__ = lambda _, i: [
+            datetime(2025, 1, 15, 10, 0, 0),
             "prosumer1",
             230.5,
             2.5,
@@ -560,8 +587,8 @@ class TestExportHistoricalData:
 
         result = await export_historical_data(
             data_type=DataType.voltage,
-            start_date=datetime(2024, 1, 1),
-            end_date=datetime(2024, 1, 31),
+            start_date=datetime(2025, 1, 1),
+            end_date=datetime(2025, 1, 31),
             format=ExportFormat.csv,
             station_id="POC_STATION_1",
             prosumer_id="prosumer1",

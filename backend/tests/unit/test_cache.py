@@ -6,12 +6,11 @@ Tests caching for solar and voltage predictions.
 
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from app.core.cache import CacheConfig, RedisCache, get_cache
-
 
 # =============================================================================
 # Test CacheConfig
@@ -120,8 +119,8 @@ class TestRedisCacheKeyGeneration:
         """Test that same data generates same key."""
         cache = RedisCache(url="redis://localhost:6379")
 
-        data1 = {"timestamp": "2024-01-15T10:00:00", "pyrano1": 800.0}
-        data2 = {"timestamp": "2024-01-15T10:00:00", "pyrano1": 800.0}
+        data1 = {"timestamp": "2025-01-15T10:00:00", "pyrano1": 800.0}
+        data2 = {"timestamp": "2025-01-15T10:00:00", "pyrano1": 800.0}
 
         key1 = cache._generate_key("solar", data1)
         key2 = cache._generate_key("solar", data2)
@@ -132,8 +131,8 @@ class TestRedisCacheKeyGeneration:
         """Test that different data generates different keys."""
         cache = RedisCache(url="redis://localhost:6379")
 
-        data1 = {"timestamp": "2024-01-15T10:00:00", "pyrano1": 800.0}
-        data2 = {"timestamp": "2024-01-15T10:00:00", "pyrano1": 900.0}
+        data1 = {"timestamp": "2025-01-15T10:00:00", "pyrano1": 800.0}
+        data2 = {"timestamp": "2025-01-15T10:00:00", "pyrano1": 900.0}
 
         key1 = cache._generate_key("solar", data1)
         key2 = cache._generate_key("solar", data2)
@@ -178,7 +177,7 @@ class TestRedisCacheSolarPrediction:
             await cache.connect()
 
             result = await cache.get_solar_prediction(
-                timestamp=datetime(2024, 1, 15, 10, 0, 0),
+                timestamp=datetime(2025, 1, 15, 10, 0, 0),
                 features={"pyrano1": 800.0},
             )
 
@@ -199,7 +198,7 @@ class TestRedisCacheSolarPrediction:
             await cache.connect()
 
             result = await cache.get_solar_prediction(
-                timestamp=datetime(2024, 1, 15, 10, 0, 0),
+                timestamp=datetime(2025, 1, 15, 10, 0, 0),
                 features={"pyrano1": 800.0},
             )
 
@@ -219,7 +218,7 @@ class TestRedisCacheSolarPrediction:
             await cache.connect()
 
             result = await cache.set_solar_prediction(
-                timestamp=datetime(2024, 1, 15, 10, 0, 0),
+                timestamp=datetime(2025, 1, 15, 10, 0, 0),
                 features={"pyrano1": 800.0},
                 prediction={"power_kw": 1500.0},
             )
@@ -234,7 +233,7 @@ class TestRedisCacheSolarPrediction:
         cache.config.enabled = False
 
         result = await cache.get_solar_prediction(
-            timestamp=datetime(2024, 1, 15, 10, 0, 0),
+            timestamp=datetime(2025, 1, 15, 10, 0, 0),
             features={"pyrano1": 800.0},
         )
 
@@ -246,7 +245,7 @@ class TestRedisCacheSolarPrediction:
         cache = RedisCache(url="redis://localhost:6379")
 
         result = await cache.get_solar_prediction(
-            timestamp=datetime(2024, 1, 15, 10, 0, 0),
+            timestamp=datetime(2025, 1, 15, 10, 0, 0),
             features={"pyrano1": 800.0},
         )
 
@@ -270,7 +269,7 @@ class TestRedisCacheVoltagePrediction:
             await cache.connect()
 
             result = await cache.get_voltage_prediction(
-                timestamp=datetime(2024, 1, 15, 10, 0, 0),
+                timestamp=datetime(2025, 1, 15, 10, 0, 0),
                 prosumer_id="prosumer1",
             )
 
@@ -291,7 +290,7 @@ class TestRedisCacheVoltagePrediction:
             await cache.connect()
 
             result = await cache.set_voltage_prediction(
-                timestamp=datetime(2024, 1, 15, 10, 0, 0),
+                timestamp=datetime(2025, 1, 15, 10, 0, 0),
                 prosumer_id="prosumer1",
                 prediction={"voltage": 230.5},
             )
@@ -310,7 +309,9 @@ class TestRedisCacheOperations:
         with patch("app.core.cache.redis") as mock_redis:
             mock_client = AsyncMock()
             mock_client.ping = AsyncMock(return_value=True)
-            mock_client.keys = AsyncMock(return_value=["pea:solar:123", "pea:voltage:456"])
+            mock_client.keys = AsyncMock(
+                return_value=["pea:solar:123", "pea:voltage:456"]
+            )
             mock_client.delete = AsyncMock(return_value=2)
             mock_redis.from_url.return_value = mock_client
 
@@ -345,7 +346,9 @@ class TestRedisCacheOperations:
         with patch("app.core.cache.redis") as mock_redis:
             mock_client = AsyncMock()
             mock_client.ping = AsyncMock(return_value=True)
-            mock_client.info = AsyncMock(return_value={"keyspace_hits": 100, "keyspace_misses": 20})
+            mock_client.info = AsyncMock(
+                return_value={"keyspace_hits": 100, "keyspace_misses": 20}
+            )
             mock_client.keys = AsyncMock(return_value=["pea:solar:123"])
             mock_redis.from_url.return_value = mock_client
 
@@ -379,7 +382,7 @@ class TestGetCacheFunction:
             mock_cache.is_connected = False
             mock_cache.connect = AsyncMock(return_value=True)
 
-            result = await get_cache()
+            await get_cache()
 
             mock_cache.connect.assert_called_once()
 

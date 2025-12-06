@@ -45,7 +45,7 @@ Query and analyze historical solar and voltage data with export capabilities.
   "data": {
     "measurements": [
       {
-        "timestamp": "2024-01-15T10:00:00Z",
+        "timestamp": "2025-01-15T10:00:00Z",
         "power_kw": 3542.5,
         "irradiance": 850.2,
         "temperature": 32.5

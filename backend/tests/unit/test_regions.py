@@ -42,8 +42,8 @@ def sample_region():
         power_plants_count=150,
         prosumers_count=45000,
         is_active=True,
-        created_at=datetime(2024, 1, 1),
-        updated_at=datetime(2024, 6, 1),
+        created_at=datetime(2025, 1, 1),
+        updated_at=datetime(2025, 6, 1),
     )
 
 
@@ -61,8 +61,8 @@ def sample_child_region():
         power_plants_count=50,
         prosumers_count=15000,
         is_active=True,
-        created_at=datetime(2024, 1, 1),
-        updated_at=datetime(2024, 6, 1),
+        created_at=datetime(2025, 1, 1),
+        updated_at=datetime(2025, 6, 1),
     )
 
 
@@ -131,7 +131,7 @@ class TestUserRegionAccess:
             region_id="zone-north",
             access_level=AccessLevel.READ,
             granted_by="admin-user",
-            granted_at=datetime(2024, 1, 1),
+            granted_at=datetime(2025, 1, 1),
         )
         assert access.user_id == "user-123"
         assert access.region_id == "zone-north"
@@ -143,7 +143,7 @@ class TestUserRegionAccess:
             region_id="zone-north",
             access_level=AccessLevel.WRITE,
             granted_by="admin-user",
-            granted_at=datetime(2024, 1, 1),
+            granted_at=datetime(2025, 1, 1),
             expires_at=datetime(2025, 1, 1),
         )
         assert access.expires_at == datetime(2025, 1, 1)
@@ -453,7 +453,9 @@ class TestCreateRegion:
         with pytest.raises(HTTPException) as exc_info:
             await create_region(
                 request=request,
-                current_user=CurrentUser(id="admin-1", username="admin", roles=["admin"]),
+                current_user=CurrentUser(
+                    id="admin-1", username="admin", roles=["admin"]
+                ),
                 region_service=mock_service,
             )
 
@@ -500,7 +502,9 @@ class TestUpdateRegion:
             await update_region(
                 region_id="non-existent",
                 request=request,
-                current_user=CurrentUser(id="admin-1", username="admin", roles=["admin"]),
+                current_user=CurrentUser(
+                    id="admin-1", username="admin", roles=["admin"]
+                ),
                 region_service=mock_service,
             )
 
@@ -538,7 +542,9 @@ class TestDeleteRegion:
         with pytest.raises(HTTPException) as exc_info:
             await delete_region(
                 region_id="non-existent",
-                current_user=CurrentUser(id="admin-1", username="admin", roles=["admin"]),
+                current_user=CurrentUser(
+                    id="admin-1", username="admin", roles=["admin"]
+                ),
                 region_service=mock_service,
             )
 
@@ -559,7 +565,7 @@ class TestGrantRegionAccess:
             region_id="zone-north",
             access_level=AccessLevel.READ,
             granted_by="admin-user",
-            granted_at=datetime(2024, 1, 1),
+            granted_at=datetime(2025, 1, 1),
         )
 
         mock_service = MagicMock()
@@ -599,7 +605,9 @@ class TestGrantRegionAccess:
             await grant_region_access(
                 region_id="zone-north",
                 request=request,
-                current_user=CurrentUser(id="admin-1", username="admin", roles=["admin"]),
+                current_user=CurrentUser(
+                    id="admin-1", username="admin", roles=["admin"]
+                ),
                 region_service=mock_service,
             )
 
@@ -639,7 +647,9 @@ class TestRevokeRegionAccess:
             await revoke_region_access(
                 region_id="zone-north",
                 user_id="user-456",
-                current_user=CurrentUser(id="admin-1", username="admin", roles=["admin"]),
+                current_user=CurrentUser(
+                    id="admin-1", username="admin", roles=["admin"]
+                ),
                 region_service=mock_service,
             )
 

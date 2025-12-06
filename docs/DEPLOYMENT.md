@@ -363,4 +363,4 @@ kubectl logs -f pea-timescaledb-0 -n pea-forecast
 ---
 
 **Version**: 1.0.0
-**Last Updated**: December 2024
+**Last Updated**: December 2025
