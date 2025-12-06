@@ -136,3 +136,7 @@ monitoring:
   enabled: true
   prometheus:
     scrape: true
+
+# Network Policies - Enable zero-trust networking in production
+networkPolicy:
+  enabled: true

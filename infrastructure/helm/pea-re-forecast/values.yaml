@@ -203,3 +203,8 @@ monitoring:
     scrape: true
     port: 8000
     path: /metrics
+
+# Network Policies (Cilium CNI - TOR 7.1.3)
+# Enable in production for zero-trust networking
+networkPolicy:
+  enabled: false  # Enable in production

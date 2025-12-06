@@ -1,0 +1,104 @@
+# =============================================================================
+# PEA RE Forecast Platform - Pod Disruption Budgets
+# Ensures minimum availability during voluntary disruptions (upgrades, scaling)
+# TOR Reference: Section 7.1.4 - High Availability Requirements
+# =============================================================================
+
+{{- if .Values.backend.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: backend-pdb
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: backend
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  {{- if ge (int .Values.backend.replicaCount) 3 }}
+  minAvailable: 2
+  {{- else }}
+  maxUnavailable: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      app: backend
+{{- end }}
+
+{{- if .Values.frontend.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend-pdb
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: frontend
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  {{- if ge (int .Values.frontend.replicaCount) 3 }}
+  minAvailable: 2
+  {{- else }}
+  maxUnavailable: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      app: frontend
+{{- end }}
+
+{{- if .Values.mlService.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ml-service-pdb
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: ml-service
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  {{- if ge (int .Values.mlService.replicaCount) 2 }}
+  minAvailable: 1
+  {{- else }}
+  maxUnavailable: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      app: ml-service
+{{- end }}
+
+{{- if .Values.timescaledb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: timescaledb-pdb
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: timescaledb
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  # Database should never have more than 1 pod unavailable
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: timescaledb
+{{- end }}
+
+{{- if .Values.redis.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: redis-pdb
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: redis
+    {{- include "pea-re-forecast.labels" . | nindent 4 }}
+spec:
+  # Redis should never have more than 1 pod unavailable
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: redis
+{{- end }}
