@@ -6,6 +6,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     alerts,
+    audit,
     comparison,
     data,
     dayahead,
@@ -110,6 +111,13 @@ api_router.include_router(
 api_router.include_router(
     weather.router,
     tags=["weather"],
+)
+
+# Audit log endpoints (TOR 7.1.6)
+api_router.include_router(
+    audit.router,
+    prefix="/audit",
+    tags=["audit"],
 )
 
 # WebSocket endpoints for real-time updates

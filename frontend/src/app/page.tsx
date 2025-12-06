@@ -8,6 +8,7 @@ import {
   Calendar,
   Menu,
   Settings,
+  Shield,
   Sun,
   X,
   Zap,
@@ -154,6 +155,13 @@ export default function Home() {
               ) : (
                 <span className="text-gray-300 text-xs sm:text-sm">...</span>
               )}
+              <a
+                href="/audit"
+                className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors hidden sm:block"
+                title="Audit Logs"
+              >
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
+              </a>
               <button
                 type="button"
                 className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors hidden sm:block"

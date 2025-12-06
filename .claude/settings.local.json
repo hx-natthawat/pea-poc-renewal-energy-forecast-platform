@@ -107,7 +107,8 @@
       "Bash(sh:*)",
       "Bash(git restore:*)",
       "Bash(pnpm run test:run:*)",
-      "Bash(PYTHONPATH=. DATABASE_URL=\"postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast\" ./venv/bin/pytest:*)"
+      "Bash(PYTHONPATH=. DATABASE_URL=\"postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast\" ./venv/bin/pytest:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
