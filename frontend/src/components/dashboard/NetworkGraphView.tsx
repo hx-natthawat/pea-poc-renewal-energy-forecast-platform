@@ -21,8 +21,10 @@ import {
   AlertTriangle,
   Battery,
   Car,
+  Grid3X3,
   Home,
   Info,
+  LayoutGrid,
   List,
   Map as MapIcon,
   Maximize,
@@ -587,6 +589,7 @@ interface ViewOptions {
   showLegend: boolean;
   showMinimap: boolean;
   showStats: boolean;
+  snapToGrid: boolean;
 }
 
 function FlowContent({
@@ -633,6 +636,16 @@ function FlowContent({
   const handleFitView = useCallback(() => {
     fitView({ padding: 0.2, duration: 300 });
   }, [fitView]);
+
+  // Auto-layout handler - reset nodes to default positions
+  const handleAutoLayout = useCallback(() => {
+    if (topology) {
+      const { nodes: newNodes, edges: newEdges } = createNodesAndEdges(topology, layout);
+      setNodes(newNodes);
+      setEdges(newEdges);
+      setTimeout(() => fitView({ padding: 0.2, duration: 300 }), 50);
+    }
+  }, [topology, layout, setNodes, setEdges, fitView]);
 
   // Custom minimap node color
   const nodeColor = useCallback((node: Node) => {
@@ -702,12 +715,32 @@ function FlowContent({
     []
   );
 
+  // Snap all nodes to grid
+  const snapNodesToGrid = useCallback(() => {
+    const gridSize = 20;
+    setNodes((nds) =>
+      nds.map((node) => ({
+        ...node,
+        position: {
+          x: Math.round(node.position.x / gridSize) * gridSize,
+          y: Math.round(node.position.y / gridSize) * gridSize,
+        },
+      }))
+    );
+  }, [setNodes]);
+
   // Toggle handler for view options
   const toggleOption = useCallback(
     (option: keyof ViewOptions) => {
-      setViewOptions({ ...viewOptions, [option]: !viewOptions[option] });
+      const newValue = !viewOptions[option];
+      setViewOptions({ ...viewOptions, [option]: newValue });
+
+      // When enabling snap-to-grid, snap all existing nodes to grid
+      if (option === "snapToGrid" && newValue) {
+        snapNodesToGrid();
+      }
     },
-    [viewOptions, setViewOptions]
+    [viewOptions, setViewOptions, snapNodesToGrid]
   );
 
   // Toggle layout direction
@@ -729,6 +762,8 @@ function FlowContent({
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.2 }}
+        snapToGrid={viewOptions.snapToGrid}
+        snapGrid={[20, 20]}
         defaultEdgeOptions={{
           type: "smoothstep",
           style: { strokeWidth: 1.5 },
@@ -763,6 +798,17 @@ function FlowContent({
               Fit
             </button>
 
+            {/* Auto Layout Button */}
+            <button
+              type="button"
+              onClick={handleAutoLayout}
+              className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
+              title="Reset to auto-layout (reorganize nodes)"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Auto
+            </button>
+
             {/* Layout Toggle - Single Button */}
             <button
               type="button"
@@ -772,6 +818,23 @@ function FlowContent({
             >
               <RotateCcw className="w-3.5 h-3.5" />
               {layout === "horizontal" ? "H" : "V"}
+            </button>
+
+            {/* Divider */}
+            <div className="w-px h-5 bg-gray-300" />
+
+            {/* Snap to Grid Toggle */}
+            <button
+              type="button"
+              onClick={() => toggleOption("snapToGrid")}
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                viewOptions.snapToGrid
+                  ? "bg-[#74045F] text-white"
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+              }`}
+              title={viewOptions.snapToGrid ? "Disable snap to grid" : "Enable snap to grid"}
+            >
+              <Grid3X3 className="w-4 h-4" />
             </button>
 
             {/* Divider */}
@@ -861,13 +924,52 @@ function FlowContent({
 // Main Component
 // ============================================================================
 
+// Storage key for persistent preferences
+const STORAGE_KEY = "pea-network-graph-preferences";
+
+interface StoredPreferences {
+  layout: LayoutDirection;
+  viewOptions: ViewOptions;
+}
+
+function loadPreferences(): StoredPreferences {
+  if (typeof window === "undefined") {
+    return {
+      layout: "horizontal",
+      viewOptions: { showLegend: true, showMinimap: true, showStats: true, snapToGrid: false },
+    };
+  }
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return {
+    layout: "horizontal",
+    viewOptions: { showLegend: true, showMinimap: true, showStats: true, snapToGrid: false },
+  };
+}
+
+function savePreferences(prefs: StoredPreferences): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export default function NetworkGraphView({ topology, onNodeSelect }: NetworkGraphViewProps) {
-  const [layout, setLayout] = useState<LayoutDirection>("horizontal");
-  const [viewOptions, setViewOptions] = useState<ViewOptions>({
-    showLegend: true,
-    showMinimap: true,
-    showStats: true,
-  });
+  const [layout, setLayout] = useState<LayoutDirection>(() => loadPreferences().layout);
+  const [viewOptions, setViewOptions] = useState<ViewOptions>(() => loadPreferences().viewOptions);
+
+  // Persist preferences when they change
+  useEffect(() => {
+    savePreferences({ layout, viewOptions });
+  }, [layout, viewOptions]);
 
   // Show loading state if no topology
   if (!topology) {
