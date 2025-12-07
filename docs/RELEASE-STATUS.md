@@ -14,7 +14,7 @@
 | Frontend           | ✅ Running        | http://localhost:3000                                  |
 | Database           | ✅ Connected      | 26K solar + 181K voltage records                       |
 | Prometheus Metrics | ✅ Exposed        | /metrics endpoint                                      |
-| Unit Tests         | ✅ 100% pass rate | 660 passed, 4 skipped (backend) + 30 passed (frontend) |
+| Unit Tests         | ✅ 100% pass rate | 660 passed, 4 skipped (backend) + 52 passed (frontend) |
 
 ---
 
@@ -201,7 +201,7 @@ cd backend && ./venv/bin/pytest tests/ -v
 | Backend Linting (Ruff)   | ✅ PASS | All checks passed                 |
 | Frontend Linting (Biome) | ✅ PASS | 29 files checked, no issues       |
 | Backend Tests            | ✅ PASS | 660 passed, 4 skipped             |
-| Frontend Tests           | ✅ PASS | 30 passed                         |
+| Frontend Tests           | ✅ PASS | 52 passed                         |
 | Security Audit           | ✅ PASS | All critical/high issues resolved |
 
 ### Security Hardening (December 6, 2025)
@@ -218,7 +218,7 @@ cd backend && ./venv/bin/pytest tests/ -v
 The platform is **ready for staging deployment**:
 
 1. ✅ All TOR requirements met
-2. ✅ All tests passing (694 total)
+2. ✅ All tests passing (716 total)
 3. ✅ Helm charts validated
 4. ✅ Linting passes (Ruff + Biome)
 5. ✅ v1.1.0 features complete

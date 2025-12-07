@@ -45,6 +45,7 @@
 | Priority 1: Vault strategy doc   | 2025-12-06 | secrets-management-strategy.md   |
 | Priority 2: PodDisruptionBudgets | 2025-12-06 | templates/pdb.yaml               |
 | Priority 2: NetworkPolicies      | 2025-12-06 | templates/networkpolicy.yaml     |
+| Help Tooltip & Sidebar System    | 2025-12-07 | 17+ sections, bilingual (EN/TH)  |
 
 ---
 
@@ -87,7 +88,7 @@
 
 | Metric          | Target     | Actual             |
 | --------------- | ---------- | ------------------ |
-| Test Pass Rate  | 100%       | 100% (557/557)     |
+| Test Pass Rate  | 100%       | 100% (716/716)     |
 | Code Coverage   | 80%        | 80%+               |
 | Security Issues | 0 Critical | 0                  |
 | Blockers        | 0          | 0                  |
@@ -114,4 +115,4 @@ None currently.
 
 ---
 
-_Updated: December 6, 2025_
+_Updated: December 7, 2025_
