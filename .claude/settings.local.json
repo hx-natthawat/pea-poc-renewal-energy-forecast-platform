@@ -158,7 +158,8 @@
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff backend/tests/unit/test_notifications.py backend/tests/unit/test_regions.py backend/tests/unit/test_websocket_manager.py)",
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform add backend/tests/)",
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff frontend/src/app/page.tsx)",
-      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform show 1681c97 --name-only)"
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform show 1681c97 --name-only)",
+      "SlashCommand(/orchestrate)"
     ],
     "deny": [],
     "ask": []

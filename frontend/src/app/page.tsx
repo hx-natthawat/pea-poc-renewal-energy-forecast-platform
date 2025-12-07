@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+
+import { HelpSidebar, HelpTrigger } from "@/components/help";
 import { getApiBaseUrl } from "@/lib/api";
 
 // Lazy load heavy chart components (recharts ~480KB)
@@ -188,6 +190,12 @@ export default function Home() {
               >
                 <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
+              <HelpTrigger
+                sectionId="overview-summary"
+                className="text-white/70 hover:text-white hover:bg-white/10 hidden sm:flex"
+                size="md"
+                label="Open help"
+              />
               <button
                 type="button"
                 className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors hidden sm:block"
@@ -296,7 +304,12 @@ export default function Home() {
           <>
             {/* Summary Cards - 2x2 on mobile, 4 on desktop */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
-              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-[#C7911B]">
+              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-[#C7911B] relative group">
+                <HelpTrigger
+                  sectionId="solar-output-card"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  size="sm"
+                />
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <p className="text-gray-500 text-xs sm:text-sm truncate">Solar Output</p>
@@ -307,7 +320,12 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-[#74045F]">
+              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-[#74045F] relative group">
+                <HelpTrigger
+                  sectionId="voltage-card"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  size="sm"
+                />
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <p className="text-gray-500 text-xs sm:text-sm truncate">Avg Voltage</p>
@@ -318,7 +336,12 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-red-500">
+              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-red-500 relative group">
+                <HelpTrigger
+                  sectionId="alerts-card"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  size="sm"
+                />
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <p className="text-gray-500 text-xs sm:text-sm truncate">Active Alerts</p>
@@ -329,7 +352,12 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-green-500">
+              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-green-500 relative group">
+                <HelpTrigger
+                  sectionId="system-status-card"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  size="sm"
+                />
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <p className="text-gray-500 text-xs sm:text-sm truncate">System Status</p>
@@ -349,12 +377,31 @@ export default function Home() {
 
             {/* Charts Grid - Stack on mobile */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <SolarForecastChart height={240} />
-              <VoltageMonitorChart height={240} />
+              <div className="relative">
+                <HelpTrigger
+                  sectionId="solar-forecast"
+                  className="absolute top-3 right-3 z-10"
+                  size="sm"
+                />
+                <SolarForecastChart height={240} />
+              </div>
+              <div className="relative">
+                <HelpTrigger
+                  sectionId="voltage-monitor"
+                  className="absolute top-3 right-3 z-10"
+                  size="sm"
+                />
+                <VoltageMonitorChart height={240} />
+              </div>
             </div>
 
             {/* Model Performance */}
-            <div className="mt-4 sm:mt-6">
+            <div className="mt-4 sm:mt-6 relative">
+              <HelpTrigger
+                sectionId="model-performance"
+                className="absolute top-3 right-3 z-10"
+                size="sm"
+              />
               <ModelPerformance height={220} />
             </div>
           </>
@@ -363,16 +410,44 @@ export default function Home() {
         {/* Solar Tab */}
         {activeTab === "solar" && (
           <div className="space-y-4 sm:space-y-6">
-            <SolarForecastChart height={280} />
-            <ForecastComparison modelType="solar" height={240} />
+            <div className="relative">
+              <HelpTrigger
+                sectionId="solar-forecast"
+                className="absolute top-3 right-3 z-10"
+                size="sm"
+              />
+              <SolarForecastChart height={280} />
+            </div>
+            <div className="relative">
+              <HelpTrigger
+                sectionId="forecast-comparison"
+                className="absolute top-3 right-3 z-10"
+                size="sm"
+              />
+              <ForecastComparison modelType="solar" height={240} />
+            </div>
           </div>
         )}
 
         {/* Voltage Tab */}
         {activeTab === "voltage" && (
           <div className="space-y-4 sm:space-y-6">
-            <VoltageMonitorChart height={280} />
-            <NetworkTopology />
+            <div className="relative">
+              <HelpTrigger
+                sectionId="voltage-monitor"
+                className="absolute top-3 right-3 z-10"
+                size="sm"
+              />
+              <VoltageMonitorChart height={280} />
+            </div>
+            <div className="relative">
+              <HelpTrigger
+                sectionId="network-topology"
+                className="absolute top-3 right-3 z-10"
+                size="sm"
+              />
+              <NetworkTopology />
+            </div>
           </div>
         )}
 
@@ -391,21 +466,54 @@ export default function Home() {
 
             {/* Load and Demand Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <LoadForecastChart height={260} level="system" />
-              <DemandForecastChart height={260} />
+              <div className="relative">
+                <HelpTrigger
+                  sectionId="load-forecast"
+                  className="absolute top-3 right-3 z-10"
+                  size="sm"
+                />
+                <LoadForecastChart height={260} level="system" />
+              </div>
+              <div className="relative">
+                <HelpTrigger
+                  sectionId="demand-forecast"
+                  className="absolute top-3 right-3 z-10"
+                  size="sm"
+                />
+                <DemandForecastChart height={260} />
+              </div>
             </div>
 
             {/* Imbalance Monitor */}
-            <ImbalanceMonitor height={280} area="system" />
+            <div className="relative">
+              <HelpTrigger
+                sectionId="imbalance-monitor"
+                className="absolute top-3 right-3 z-10"
+                size="sm"
+              />
+              <ImbalanceMonitor height={280} area="system" />
+            </div>
           </div>
         )}
 
         {/* Alerts Tab */}
         {activeTab === "alerts" && (
           <div className="space-y-4 sm:space-y-6">
-            <AlertDashboard height={260} />
+            <div className="relative">
+              <HelpTrigger
+                sectionId="alert-dashboard"
+                className="absolute top-3 right-3 z-10"
+                size="sm"
+              />
+              <AlertDashboard height={260} />
+            </div>
 
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6 relative">
+              <HelpTrigger
+                sectionId="alert-configuration"
+                className="absolute top-3 right-3"
+                size="sm"
+              />
               <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
                 Alert Configuration
               </h3>
@@ -434,8 +542,22 @@ export default function Home() {
         {/* History Tab */}
         {activeTab === "history" && (
           <div className="space-y-4 sm:space-y-6">
-            <DayAheadReport height={240} />
-            <HistoricalAnalysis height={240} />
+            <div className="relative">
+              <HelpTrigger
+                sectionId="day-ahead-report"
+                className="absolute top-3 right-3 z-10"
+                size="sm"
+              />
+              <DayAheadReport height={240} />
+            </div>
+            <div className="relative">
+              <HelpTrigger
+                sectionId="historical-analysis"
+                className="absolute top-3 right-3 z-10"
+                size="sm"
+              />
+              <HistoricalAnalysis height={240} />
+            </div>
           </div>
         )}
       </div>
@@ -448,6 +570,9 @@ export default function Home() {
           <p className="mt-2 text-gray-300">Version 0.1.0 (POC) | TOR Compliant</p>
         </div>
       </footer>
+
+      {/* Help Sidebar */}
+      <HelpSidebar />
     </main>
   );
 }
