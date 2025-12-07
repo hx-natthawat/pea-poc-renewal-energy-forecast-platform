@@ -77,4 +77,33 @@ describe("HelpTrigger", () => {
     rerender(<HelpTrigger sectionId="test-section" size="lg" />);
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
+
+  it("renders with card variant for always-visible help icons", () => {
+    render(<HelpTrigger sectionId="test-section" variant="card" />);
+    const button = screen.getByRole("button");
+    expect(button).toBeInTheDocument();
+    // Card variant should have background for visibility
+    expect(button).toHaveClass("bg-gray-100/50");
+  });
+
+  it("renders with subtle variant", () => {
+    render(<HelpTrigger sectionId="test-section" variant="subtle" />);
+    const button = screen.getByRole("button");
+    expect(button).toBeInTheDocument();
+  });
+
+  it("stops event propagation on click", () => {
+    // Verify that stopPropagation is called when clicking the help trigger
+    // This prevents clicks from bubbling up to parent containers
+    render(<HelpTrigger sectionId="test-section" />);
+    const button = screen.getByRole("button");
+
+    // Create a mock event to verify stopPropagation behavior
+    const clickEvent = new MouseEvent("click", { bubbles: true });
+    const stopPropagationSpy = vi.spyOn(clickEvent, "stopPropagation");
+
+    fireEvent(button, clickEvent);
+    expect(mockToggleHelp).toHaveBeenCalledWith("test-section");
+    expect(stopPropagationSpy).toHaveBeenCalled();
+  });
 });

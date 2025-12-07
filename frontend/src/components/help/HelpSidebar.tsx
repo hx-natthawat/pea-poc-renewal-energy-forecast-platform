@@ -43,10 +43,12 @@ export function HelpSidebar() {
 
   return (
     <>
-      {/* Backdrop (mobile only) */}
+      {/* Backdrop - visible on mobile and tablet */}
       <div
         className={cn(
-          "fixed inset-0 bg-black/30 z-40 lg:hidden transition-opacity duration-300",
+          "fixed inset-0 bg-black/30 z-40 transition-opacity duration-300",
+          // Hide backdrop on large screens (desktop)
+          "xl:hidden",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         onClick={closeHelp}
@@ -57,23 +59,31 @@ export function HelpSidebar() {
       <aside
         className={cn(
           "fixed z-50 bg-white shadow-xl transition-transform duration-300 ease-in-out",
-          // Desktop: right sidebar
-          "lg:right-0 lg:top-0 lg:h-full lg:w-80 lg:border-l lg:border-gray-200",
-          // Mobile: bottom sheet
-          "bottom-0 left-0 right-0 lg:bottom-auto lg:left-auto",
-          "max-h-[70vh] lg:max-h-full rounded-t-2xl lg:rounded-none",
-          // Transform
-          isOpen
-            ? "translate-y-0 lg:translate-x-0"
-            : "translate-y-full lg:translate-y-0 lg:translate-x-full"
+          // Mobile: bottom sheet (up to md)
+          "bottom-0 left-0 right-0",
+          "max-h-[80vh] rounded-t-2xl",
+          // Tablet (md-lg): right sidebar, narrower
+          "md:bottom-auto md:left-auto md:right-0 md:top-0",
+          "md:h-full md:w-80 md:max-h-full md:rounded-none",
+          "md:border-l md:border-gray-200",
+          // Desktop (lg+): wider sidebar
+          "lg:w-96",
+          // XL: even wider for large screens
+          "xl:w-[420px]",
+          // Transform animations
+          // Mobile: slide up from bottom
+          isOpen ? "translate-y-0" : "translate-y-full",
+          // Tablet/Desktop: slide in from right
+          "md:translate-y-0",
+          isOpen ? "md:translate-x-0" : "md:translate-x-full"
         )}
         aria-label="Help sidebar"
         aria-hidden={!isOpen}
       >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-          {/* Mobile drag handle */}
-          <div className="flex justify-center py-2 lg:hidden">
+          {/* Mobile drag handle - only show on mobile (bottom sheet mode) */}
+          <div className="flex justify-center py-2 md:hidden">
             <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
           </div>
 
@@ -122,7 +132,7 @@ export function HelpSidebar() {
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto h-[calc(100%-4rem)] lg:h-[calc(100%-5rem)] p-4 space-y-6">
+        <div className="overflow-y-auto h-[calc(100%-4rem)] md:h-[calc(100%-3.5rem)] p-4 md:p-5 lg:p-6 space-y-6">
           {section ? (
             <HelpContent section={section} language={language} onNavigate={openHelp} />
           ) : (
