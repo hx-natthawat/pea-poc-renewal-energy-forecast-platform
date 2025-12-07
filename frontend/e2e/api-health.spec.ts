@@ -82,7 +82,8 @@ test.describe("Data Loading States", () => {
     await page.goto("/");
 
     // Check for loading skeletons (animate-pulse class)
-    const skeletons = page.locator('[class*="animate-pulse"]');
+    // Note: Locator defined for future assertion expansion
+    const _skeletons = page.locator('[class*="animate-pulse"]');
     // Skeletons should be visible while loading
   });
 });
