@@ -320,6 +320,74 @@ async def predict_demand(
     )
 
 
+@router.get("/predict", response_model=DemandForecastResponse)
+async def get_demand_forecast(
+    trading_point: str = Query(default="system", description="Trading point ID"),
+    trading_point_type: TradingPointType = Query(
+        default=TradingPointType.SUBSTATION, description="Trading point type"
+    ),
+    horizon_hours: int = Query(
+        default=24, ge=1, le=168, description="Forecast horizon in hours"
+    ),
+    include_components: bool = Query(
+        default=True, description="Include demand components"
+    ),
+) -> DemandForecastResponse:
+    """
+    Get demand forecast predictions (GET endpoint for frontend).
+
+    **Phase 2 Feature** - TOR Function 2
+
+    No authentication required for demo/POC mode.
+    """
+    logger.info(
+        f"Demand forecast GET: trading_point={trading_point} horizon={horizon_hours}h"
+    )
+    start_time = time.time()
+
+    # Generate predictions
+    predictions = simulate_demand_forecast(
+        timestamp=datetime.now(),
+        trading_point_id=trading_point,
+        trading_point_type=trading_point_type,
+        horizon_hours=horizon_hours,
+        include_components=include_components,
+    )
+
+    prediction_time_ms = int((time.time() - start_time) * 1000)
+
+    # Calculate summary statistics
+    net_demands = [p.net_demand_mw for p in predictions]
+    peak_demand = max(net_demands)
+    min_demand = min(net_demands)
+    avg_demand = sum(net_demands) / len(net_demands)
+
+    return DemandForecastResponse(
+        status="success",
+        data={
+            "timestamp": datetime.now().isoformat(),
+            "trading_point_id": trading_point,
+            "trading_point_type": trading_point_type.value,
+            "horizon_hours": horizon_hours,
+            "predictions": [p.model_dump() for p in predictions],
+            "summary": {
+                "peak_demand_mw": round(peak_demand, 4),
+                "min_demand_mw": round(min_demand, 4),
+                "avg_demand_mw": round(avg_demand, 4),
+                "total_intervals": len(predictions),
+            },
+            "model_version": "demand-forecast-v2.0.0-simulation",
+            "is_ml_prediction": False,
+        },
+        meta={
+            "prediction_time_ms": prediction_time_ms,
+            "accuracy_target_mape": DEMAND_MAPE_TARGET,
+            "phase": "Phase 2 - Simulation",
+            "includes_components": include_components,
+        },
+    )
+
+
 @router.get("/trading-points", response_model=dict[str, Any])
 async def get_trading_points(
     type_filter: TradingPointType | None = Query(

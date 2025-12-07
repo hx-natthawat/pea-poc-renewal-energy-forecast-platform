@@ -386,17 +386,96 @@ async def predict_imbalance(
     )
 
 
+@router.get("/predict", response_model=ImbalanceForecastResponse)
+async def get_imbalance_forecast(
+    balancing_area: BalancingArea = Query(
+        default=BalancingArea.SYSTEM, description="Balancing area"
+    ),
+    horizon_hours: int = Query(
+        default=24, ge=1, le=168, description="Forecast horizon in hours"
+    ),
+    include_components: bool = Query(
+        default=True, description="Include imbalance components"
+    ),
+) -> ImbalanceForecastResponse:
+    """
+    Get imbalance forecast predictions (GET endpoint for frontend).
+
+    **Phase 2 Feature** - TOR Function 4
+
+    No authentication required for demo/POC mode.
+    """
+    logger.info(
+        f"Imbalance forecast GET: area={balancing_area} horizon={horizon_hours}h"
+    )
+    start_time = time.time()
+
+    # Generate predictions
+    predictions = simulate_imbalance_forecast(
+        timestamp=datetime.now(),
+        balancing_area=balancing_area,
+        horizon_hours=horizon_hours,
+        include_components=include_components,
+    )
+
+    prediction_time_ms = int((time.time() - start_time) * 1000)
+
+    # Calculate summary statistics
+    imbalances = [p.imbalance_mw for p in predictions]
+    max_deficit = max(imbalances)
+    max_surplus = min(imbalances)
+    avg_abs_imbalance = sum(abs(i) for i in imbalances) / len(imbalances)
+
+    # Count severity distribution
+    severity_counts = {
+        ImbalanceLevel.NORMAL: sum(
+            1 for p in predictions if p.severity == ImbalanceLevel.NORMAL
+        ),
+        ImbalanceLevel.WARNING: sum(
+            1 for p in predictions if p.severity == ImbalanceLevel.WARNING
+        ),
+        ImbalanceLevel.CRITICAL: sum(
+            1 for p in predictions if p.severity == ImbalanceLevel.CRITICAL
+        ),
+    }
+
+    return ImbalanceForecastResponse(
+        status="success",
+        data={
+            "timestamp": datetime.now().isoformat(),
+            "balancing_area": balancing_area.value,
+            "horizon_hours": horizon_hours,
+            "predictions": [p.model_dump() for p in predictions],
+            "summary": {
+                "max_deficit_mw": round(max_deficit, 4),
+                "max_surplus_mw": round(max_surplus, 4),
+                "avg_abs_imbalance_mw": round(avg_abs_imbalance, 4),
+                "total_intervals": len(predictions),
+                "severity_distribution": {
+                    k.value: v for k, v in severity_counts.items()
+                },
+            },
+            "model_version": "imbalance-forecast-v2.0.0-simulation",
+            "is_ml_prediction": False,
+        },
+        meta={
+            "prediction_time_ms": prediction_time_ms,
+            "accuracy_target_mae_pct": IMBALANCE_MAE_TARGET_PCT,
+            "phase": "Phase 2 - Simulation",
+            "includes_components": include_components,
+        },
+    )
+
+
 @router.get("/status/{area}")
 async def get_balancing_status(
     area: BalancingArea,
-    current_user: CurrentUser = Depends(
-        require_roles(["admin", "operator", "analyst"])
-    ),
 ) -> dict[str, Any]:
     """
     Get current balancing status for a specific area.
 
     Returns real-time imbalance and recommended actions.
+    No authentication required for demo/POC mode.
     """
     status = get_current_balancing_status(area)
 

@@ -296,6 +296,67 @@ async def predict_load(
     )
 
 
+@router.get("/predict", response_model=LoadForecastResponse)
+async def get_load_forecast(
+    level: ForecastLevel = Query(
+        default=ForecastLevel.SYSTEM, description="Forecast level"
+    ),
+    area_id: str | None = Query(
+        default=None, description="Area ID for regional/provincial"
+    ),
+    horizon_hours: int = Query(
+        default=24, ge=1, le=168, description="Forecast horizon in hours"
+    ),
+) -> LoadForecastResponse:
+    """
+    Get load forecast predictions (GET endpoint for frontend).
+
+    **Phase 2 Feature** - TOR Function 3
+
+    No authentication required for demo/POC mode.
+    """
+    logger.info(f"Load forecast GET: level={level} horizon_hours={horizon_hours}")
+    start_time = time.time()
+
+    # Map horizon_hours to ForecastHorizon
+    if horizon_hours <= 6:
+        horizon = ForecastHorizon.INTRADAY
+    elif horizon_hours <= 48:
+        horizon = ForecastHorizon.DAY_AHEAD
+    else:
+        horizon = ForecastHorizon.WEEK_AHEAD
+
+    # Generate predictions
+    predictions = simulate_load_forecast(
+        timestamp=datetime.now(),
+        level=level,
+        area_id=area_id,
+        horizon=horizon,
+    )
+
+    prediction_time_ms = int((time.time() - start_time) * 1000)
+    accuracy_target = ACCURACY_TARGETS.get(level, {"mape": 10.0})
+
+    return LoadForecastResponse(
+        status="success",
+        data={
+            "timestamp": datetime.now().isoformat(),
+            "level": level.value,
+            "area_id": area_id,
+            "horizon": horizon.value,
+            "predictions": [p.model_dump() for p in predictions],
+            "total_intervals": len(predictions),
+            "model_version": "load-forecast-v2.0.0-simulation",
+            "is_ml_prediction": False,
+        },
+        meta={
+            "prediction_time_ms": prediction_time_ms,
+            "accuracy_target_mape": accuracy_target["mape"],
+            "phase": "Phase 2 - Simulation",
+        },
+    )
+
+
 @router.get("/regions", response_model=dict[str, Any])
 async def get_regions(
     current_user: CurrentUser = Depends(
