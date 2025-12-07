@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { HelpTrigger } from "@/components/help/HelpTrigger";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface DemandDataPoint {
@@ -116,6 +117,7 @@ export default function DemandForecastChart({
         <div className="flex items-center flex-wrap gap-1">
           <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 mr-1 sm:mr-2" />
           <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Actual Demand Forecast</h3>
+          <HelpTrigger sectionId="demand-forecast" size="sm" variant="subtle" />
           <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
             TOR 7.5.1.2
           </span>

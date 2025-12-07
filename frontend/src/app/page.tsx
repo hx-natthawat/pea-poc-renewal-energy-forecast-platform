@@ -192,8 +192,8 @@ export default function Home() {
               </a>
               <HelpTrigger
                 sectionId="overview-summary"
-                className="text-white/70 hover:text-white hover:bg-white/10 hidden sm:flex"
-                size="md"
+                className="text-white/70 hover:text-white hover:bg-white/10"
+                size="sm"
                 label="Open help"
               />
               <button
@@ -304,16 +304,13 @@ export default function Home() {
           <>
             {/* Summary Cards - 2x2 on mobile, 4 on desktop */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
-              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-[#C7911B] relative">
-                <HelpTrigger
-                  sectionId="solar-output-card"
-                  className="absolute top-1 right-1 sm:top-2 sm:right-2"
-                  size="sm"
-                  variant="card"
-                />
+              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-[#C7911B]">
                 <div className="flex items-center justify-between">
-                  <div className="min-w-0 flex-1 pr-6">
-                    <p className="text-gray-500 text-xs sm:text-sm truncate">Solar Output</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-gray-500 text-xs sm:text-sm truncate flex items-center gap-1">
+                      Solar Output
+                      <HelpTrigger sectionId="solar-output-card" size="sm" variant="subtle" />
+                    </p>
                     <p className="text-lg sm:text-2xl font-bold text-gray-800">3,542 kW</p>
                     <p className="text-[10px] sm:text-xs text-green-600">+12% from avg</p>
                   </div>
@@ -321,16 +318,13 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-[#74045F] relative">
-                <HelpTrigger
-                  sectionId="voltage-card"
-                  className="absolute top-1 right-1 sm:top-2 sm:right-2"
-                  size="sm"
-                  variant="card"
-                />
+              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-[#74045F]">
                 <div className="flex items-center justify-between">
-                  <div className="min-w-0 flex-1 pr-6">
-                    <p className="text-gray-500 text-xs sm:text-sm truncate">Avg Voltage</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-gray-500 text-xs sm:text-sm truncate flex items-center gap-1">
+                      Avg Voltage
+                      <HelpTrigger sectionId="voltage-card" size="sm" variant="subtle" />
+                    </p>
                     <p className="text-lg sm:text-2xl font-bold text-gray-800">228.5 V</p>
                     <p className="text-[10px] sm:text-xs text-gray-500">7 prosumers</p>
                   </div>
@@ -338,16 +332,13 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-red-500 relative">
-                <HelpTrigger
-                  sectionId="alerts-card"
-                  className="absolute top-1 right-1 sm:top-2 sm:right-2"
-                  size="sm"
-                  variant="card"
-                />
+              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-red-500">
                 <div className="flex items-center justify-between">
-                  <div className="min-w-0 flex-1 pr-6">
-                    <p className="text-gray-500 text-xs sm:text-sm truncate">Active Alerts</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-gray-500 text-xs sm:text-sm truncate flex items-center gap-1">
+                      Active Alerts
+                      <HelpTrigger sectionId="alerts-card" size="sm" variant="subtle" />
+                    </p>
                     <p className="text-lg sm:text-2xl font-bold text-gray-800">0</p>
                     <p className="text-[10px] sm:text-xs text-green-600">All normal</p>
                   </div>
@@ -355,16 +346,13 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-green-500 relative">
-                <HelpTrigger
-                  sectionId="system-status-card"
-                  className="absolute top-1 right-1 sm:top-2 sm:right-2"
-                  size="sm"
-                  variant="card"
-                />
+              <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-green-500">
                 <div className="flex items-center justify-between">
-                  <div className="min-w-0 flex-1 pr-6">
-                    <p className="text-gray-500 text-xs sm:text-sm truncate">System Status</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-gray-500 text-xs sm:text-sm truncate flex items-center gap-1">
+                      System Status
+                      <HelpTrigger sectionId="system-status-card" size="sm" variant="subtle" />
+                    </p>
                     <p className="text-lg sm:text-2xl font-bold text-gray-800">
                       {health ? "Online" : "Offline"}
                     </p>
@@ -381,34 +369,12 @@ export default function Home() {
 
             {/* Charts Grid - Stack on mobile */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <div className="relative">
-                <HelpTrigger
-                  sectionId="solar-forecast"
-                  className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                  size="sm"
-                  variant="card"
-                />
-                <SolarForecastChart height={240} />
-              </div>
-              <div className="relative">
-                <HelpTrigger
-                  sectionId="voltage-monitor"
-                  className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                  size="sm"
-                  variant="card"
-                />
-                <VoltageMonitorChart height={240} />
-              </div>
+              <SolarForecastChart height={240} />
+              <VoltageMonitorChart height={240} />
             </div>
 
             {/* Model Performance */}
-            <div className="mt-4 sm:mt-6 relative">
-              <HelpTrigger
-                sectionId="model-performance"
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                size="sm"
-                variant="card"
-              />
+            <div className="mt-4 sm:mt-6">
               <ModelPerformance height={220} />
             </div>
           </>
@@ -417,48 +383,16 @@ export default function Home() {
         {/* Solar Tab */}
         {activeTab === "solar" && (
           <div className="space-y-4 sm:space-y-6">
-            <div className="relative">
-              <HelpTrigger
-                sectionId="solar-forecast"
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                size="sm"
-                variant="card"
-              />
-              <SolarForecastChart height={280} />
-            </div>
-            <div className="relative">
-              <HelpTrigger
-                sectionId="forecast-comparison"
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                size="sm"
-                variant="card"
-              />
-              <ForecastComparison modelType="solar" height={240} />
-            </div>
+            <SolarForecastChart height={280} />
+            <ForecastComparison modelType="solar" height={240} />
           </div>
         )}
 
         {/* Voltage Tab */}
         {activeTab === "voltage" && (
           <div className="space-y-4 sm:space-y-6">
-            <div className="relative">
-              <HelpTrigger
-                sectionId="voltage-monitor"
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                size="sm"
-                variant="card"
-              />
-              <VoltageMonitorChart height={280} />
-            </div>
-            <div className="relative">
-              <HelpTrigger
-                sectionId="network-topology"
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                size="sm"
-                variant="card"
-              />
-              <NetworkTopology />
-            </div>
+            <VoltageMonitorChart height={280} />
+            <NetworkTopology />
           </div>
         )}
 
@@ -477,60 +411,22 @@ export default function Home() {
 
             {/* Load and Demand Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <div className="relative">
-                <HelpTrigger
-                  sectionId="load-forecast"
-                  className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                  size="sm"
-                  variant="card"
-                />
-                <LoadForecastChart height={260} level="system" />
-              </div>
-              <div className="relative">
-                <HelpTrigger
-                  sectionId="demand-forecast"
-                  className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                  size="sm"
-                  variant="card"
-                />
-                <DemandForecastChart height={260} />
-              </div>
+              <LoadForecastChart height={260} level="system" />
+              <DemandForecastChart height={260} />
             </div>
 
             {/* Imbalance Monitor */}
-            <div className="relative">
-              <HelpTrigger
-                sectionId="imbalance-monitor"
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                size="sm"
-                variant="card"
-              />
-              <ImbalanceMonitor height={280} area="system" />
-            </div>
+            <ImbalanceMonitor height={280} area="system" />
           </div>
         )}
 
         {/* Alerts Tab */}
         {activeTab === "alerts" && (
           <div className="space-y-4 sm:space-y-6">
-            <div className="relative">
-              <HelpTrigger
-                sectionId="alert-dashboard"
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                size="sm"
-                variant="card"
-              />
-              <AlertDashboard height={260} />
-            </div>
+            <AlertDashboard height={260} />
 
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6 relative">
-              <HelpTrigger
-                sectionId="alert-configuration"
-                className="absolute top-2 right-2 sm:top-3 sm:right-3"
-                size="sm"
-                variant="card"
-              />
-              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-1">
                 Alert Configuration
               </h3>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -558,24 +454,8 @@ export default function Home() {
         {/* History Tab */}
         {activeTab === "history" && (
           <div className="space-y-4 sm:space-y-6">
-            <div className="relative">
-              <HelpTrigger
-                sectionId="day-ahead-report"
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                size="sm"
-                variant="card"
-              />
-              <DayAheadReport height={240} />
-            </div>
-            <div className="relative">
-              <HelpTrigger
-                sectionId="historical-analysis"
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
-                size="sm"
-                variant="card"
-              />
-              <HistoricalAnalysis height={240} />
-            </div>
+            <DayAheadReport height={240} />
+            <HistoricalAnalysis height={240} />
           </div>
         )}
       </div>

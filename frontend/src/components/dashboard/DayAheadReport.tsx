@@ -26,6 +26,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { HelpTrigger } from "@/components/help/HelpTrigger";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface HourlyForecast {
@@ -189,11 +190,12 @@ export default function DayAheadReport({ height = 280 }: DayAheadReportProps) {
     <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 border-[#C7911B]">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <div className="flex items-center min-w-0">
+        <div className="flex items-center min-w-0 gap-1">
           <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-[#C7911B] mr-1 sm:mr-2 flex-shrink-0" />
           <h3 className="text-sm sm:text-lg font-semibold text-gray-800 truncate">
             Day-Ahead Forecast
           </h3>
+          <HelpTrigger sectionId="day-ahead" size="sm" variant="subtle" />
         </div>
         <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
           <button

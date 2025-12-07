@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { HelpTrigger } from "@/components/help/HelpTrigger";
 import { useAlertsWebSocket } from "@/hooks";
 import { getApiBaseUrl } from "@/lib/api";
 
@@ -225,6 +226,7 @@ export default function AlertDashboard({
         <div className="flex items-center flex-wrap gap-1">
           <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mr-1 sm:mr-2" />
           <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Alert Dashboard</h3>
+          <HelpTrigger sectionId="alerts" size="sm" variant="subtle" />
           {enableRealtime && (
             <span
               className={`flex items-center text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${

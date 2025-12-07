@@ -1,6 +1,13 @@
 "use client";
 
-import { ChevronRight, ExternalLink, Globe, Lightbulb, X } from "lucide-react";
+import {
+  ChevronRight,
+  ExternalLink,
+  Globe,
+  Lightbulb,
+  PanelRightClose,
+  PanelRightOpen,
+} from "lucide-react";
 import { useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useHelpStore } from "@/stores/helpStore";
@@ -11,6 +18,15 @@ export function HelpSidebar() {
   const { isOpen, activeSection, language, closeHelp, openHelp, setLanguage } = useHelpStore();
 
   const section = activeSection ? getHelpSection(activeSection) : null;
+
+  // Toggle sidebar open/closed
+  const handleToggle = () => {
+    if (isOpen) {
+      closeHelp();
+    } else if (activeSection) {
+      openHelp(activeSection);
+    }
+  };
 
   // Handle ESC key to close
   const handleKeyDown = useCallback(
@@ -43,102 +59,93 @@ export function HelpSidebar() {
 
   return (
     <>
-      {/* Backdrop - visible on mobile and tablet */}
-      <div
-        className={cn(
-          "fixed inset-0 bg-black/30 z-40 transition-opacity duration-300",
-          // Hide backdrop on large screens (desktop)
-          "xl:hidden",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        )}
-        onClick={closeHelp}
-        aria-hidden="true"
-      />
+      {/* Backdrop - click to close */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/20 z-40" onClick={closeHelp} aria-hidden="true" />
+      )}
 
-      {/* Sidebar */}
+      {/* Sidebar - fixed right side panel, full height */}
       <aside
         className={cn(
-          "fixed z-50 bg-white shadow-xl transition-transform duration-300 ease-in-out",
-          // Mobile: bottom sheet (up to md)
-          "bottom-0 left-0 right-0",
-          "max-h-[80vh] rounded-t-2xl",
-          // Tablet (md-lg): right sidebar, narrower
-          "md:bottom-auto md:left-auto md:right-0 md:top-0",
-          "md:h-full md:w-80 md:max-h-full md:rounded-none",
-          "md:border-l md:border-gray-200",
-          // Desktop (lg+): wider sidebar
-          "lg:w-96",
-          // XL: even wider for large screens
-          "xl:w-[420px]",
-          // Transform animations
-          // Mobile: slide up from bottom
-          isOpen ? "translate-y-0" : "translate-y-full",
-          // Tablet/Desktop: slide in from right
-          "md:translate-y-0",
-          isOpen ? "md:translate-x-0" : "md:translate-x-full"
+          "fixed z-50 top-0 right-0 h-screen",
+          "bg-white shadow-xl border-l border-gray-200",
+          "transition-all duration-300 ease-in-out",
+          "overflow-visible", // Allow button to be visible outside
+          isOpen ? "w-80 max-w-[85vw]" : "w-0"
         )}
         aria-label="Help sidebar"
         aria-hidden={!isOpen}
       >
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-          {/* Mobile drag handle - only show on mobile (bottom sheet mode) */}
-          <div className="flex justify-center py-2 md:hidden">
-            <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
-          </div>
+        {/* Collapse/Expand toggle on left edge - only show if there's a section to display */}
+        {activeSection && (
+          <button
+            type="button"
+            onClick={handleToggle}
+            className={cn(
+              "absolute -left-10 top-1/2 -translate-y-1/2 z-50",
+              "w-10 h-14 flex items-center justify-center",
+              "bg-pea-purple text-white rounded-l-lg shadow-lg",
+              "hover:bg-pea-purple/90 transition-colors"
+            )}
+            aria-label={isOpen ? "Collapse help panel" : "Expand help panel"}
+          >
+            {isOpen ? (
+              <PanelRightClose className="h-5 w-5" />
+            ) : (
+              <PanelRightOpen className="h-5 w-5" />
+            )}
+          </button>
+        )}
 
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-3">
-              {section && (
-                <>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pea-purple/10 text-pea-purple">
-                    <section.icon className="h-5 w-5" />
+        {/* Content wrapper - clips content when collapsed */}
+        <div className="h-full overflow-hidden">
+          {isOpen && (
+            <>
+              {/* Header */}
+              <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
+                <div className="flex items-center justify-between px-4 py-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {section && (
+                      <>
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-pea-purple/10 text-pea-purple flex-shrink-0">
+                          <section.icon className="h-4 w-4" />
+                        </div>
+                        <h2 className="font-semibold text-gray-900 text-sm truncate">
+                          {getLocalizedText(section.title, section.titleTh)}
+                        </h2>
+                      </>
+                    )}
+                    {!section && (
+                      <h2 className="font-semibold text-gray-900 text-sm">
+                        {getLocalizedText("Help", "ช่วยเหลือ")}
+                      </h2>
+                    )}
                   </div>
-                  <h2 className="font-semibold text-gray-900">
-                    {getLocalizedText(section.title, section.titleTh)}
-                  </h2>
-                </>
-              )}
-              {!section && (
-                <h2 className="font-semibold text-gray-900">
-                  {getLocalizedText("Help", "ช่วยเหลือ")}
-                </h2>
-              )}
-            </div>
 
-            <div className="flex items-center gap-2">
-              {/* Language toggle */}
-              <button
-                type="button"
-                onClick={() => setLanguage(language === "th" ? "en" : "th")}
-                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-500 hover:text-gray-700 rounded border border-gray-200 hover:border-gray-300 transition-colors"
-                aria-label={`Switch to ${language === "th" ? "English" : "Thai"}`}
-              >
-                <Globe className="h-3.5 w-3.5" />
-                {language === "th" ? "EN" : "TH"}
-              </button>
+                  {/* Language toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setLanguage(language === "th" ? "en" : "th")}
+                    className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-500 hover:text-gray-700 rounded border border-gray-200 hover:border-gray-300 transition-colors flex-shrink-0"
+                    aria-label={`Switch to ${language === "th" ? "English" : "Thai"}`}
+                  >
+                    <Globe className="h-3 w-3" />
+                    {language === "th" ? "EN" : "TH"}
+                  </button>
+                </div>
+              </div>
 
-              {/* Close button */}
-              <button
-                type="button"
-                onClick={closeHelp}
-                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Close help sidebar"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="overflow-y-auto h-[calc(100%-4rem)] md:h-[calc(100%-3.5rem)] p-4 md:p-5 lg:p-6 space-y-6">
-          {section ? (
-            <HelpContent section={section} language={language} onNavigate={openHelp} />
-          ) : (
-            <div className="text-center text-gray-500 py-8">
-              {getLocalizedText("Select a help topic", "เลือกหัวข้อช่วยเหลือ")}
-            </div>
+              {/* Content */}
+              <div className="overflow-y-auto h-[calc(100%-3rem)] p-4 space-y-4">
+                {section ? (
+                  <HelpContent section={section} language={language} onNavigate={openHelp} />
+                ) : (
+                  <div className="text-center text-gray-500 py-8 text-sm">
+                    {getLocalizedText("Select a help topic", "เลือกหัวข้อช่วยเหลือ")}
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
       </aside>

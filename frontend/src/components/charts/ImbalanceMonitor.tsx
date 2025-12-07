@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { HelpTrigger } from "@/components/help/HelpTrigger";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface ImbalanceDataPoint {
@@ -158,6 +159,7 @@ export default function ImbalanceMonitor({ height = 300, area = "system" }: Imba
         <div className="flex items-center flex-wrap gap-1">
           <Scale className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 mr-1 sm:mr-2" />
           <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Imbalance Monitor</h3>
+          <HelpTrigger sectionId="imbalance-monitor" size="sm" variant="subtle" />
           <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
             TOR 7.5.1.4
           </span>

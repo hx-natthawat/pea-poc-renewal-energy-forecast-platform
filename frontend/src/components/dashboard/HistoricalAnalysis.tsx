@@ -22,6 +22,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { HelpTrigger } from "@/components/help/HelpTrigger";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface SolarSummary {
@@ -193,9 +194,10 @@ export default function HistoricalAnalysis({ height = 280 }: HistoricalAnalysisP
     <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 border-[#74045F]">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
           <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-[#74045F] mr-1 sm:mr-2" />
           <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Historical Analysis</h3>
+          <HelpTrigger sectionId="historical-analysis" size="sm" variant="subtle" />
         </div>
         <button
           type="button"

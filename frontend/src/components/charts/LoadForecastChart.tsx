@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { HelpTrigger } from "@/components/help/HelpTrigger";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface LoadDataPoint {
@@ -121,6 +122,7 @@ export default function LoadForecastChart({
           <h3 className="text-sm sm:text-lg font-semibold text-gray-800">
             Load Forecast ({levelLabels[level]})
           </h3>
+          <HelpTrigger sectionId="load-forecast" size="sm" variant="subtle" />
           <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
             TOR 7.5.1.3
           </span>

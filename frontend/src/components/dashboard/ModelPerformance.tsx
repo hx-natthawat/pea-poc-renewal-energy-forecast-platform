@@ -26,6 +26,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { HelpTrigger } from "@/components/help/HelpTrigger";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface ModelHealthData {
@@ -178,11 +179,12 @@ export default function ModelPerformance({ height = 250 }: ModelPerformanceProps
     <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 border-[#74045F]">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <div className="flex items-center min-w-0">
+        <div className="flex items-center min-w-0 gap-1">
           <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#74045F] mr-1 sm:mr-2 flex-shrink-0" />
           <h3 className="text-sm sm:text-lg font-semibold text-gray-800 truncate">
             Model Performance
           </h3>
+          <HelpTrigger sectionId="model-performance" size="sm" variant="subtle" />
         </div>
         <button
           type="button"

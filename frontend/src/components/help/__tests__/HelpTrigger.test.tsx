@@ -82,8 +82,8 @@ describe("HelpTrigger", () => {
     render(<HelpTrigger sectionId="test-section" variant="card" />);
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
-    // Card variant should have background for visibility
-    expect(button).toHaveClass("bg-gray-100/50");
+    // Card variant should have brand-colored background for visibility
+    expect(button).toHaveClass("bg-pea-purple/5");
   });
 
   it("renders with subtle variant", () => {

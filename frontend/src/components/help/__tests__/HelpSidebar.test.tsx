@@ -95,7 +95,7 @@ describe("HelpSidebar", () => {
     expect(screen.getByText("คำอธิบายทดสอบ")).toBeInTheDocument();
   });
 
-  it("calls closeHelp when close button is clicked", () => {
+  it("calls closeHelp when collapse button is clicked", () => {
     (useHelpStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       isOpen: true,
       activeSection: "test-section",
@@ -106,8 +106,8 @@ describe("HelpSidebar", () => {
     });
 
     render(<HelpSidebar />);
-    const closeButton = screen.getByLabelText("Close help sidebar");
-    fireEvent.click(closeButton);
+    const collapseButton = screen.getByLabelText("Collapse help panel");
+    fireEvent.click(collapseButton);
     expect(mockCloseHelp).toHaveBeenCalled();
   });
 
