@@ -1,4 +1,5 @@
 # PEA RE Forecast Platform
+
 ## POC Demonstration
 
 ---
@@ -17,6 +18,7 @@
 ---
 
 # Executive Summary
+
 ## ภาพรวมโครงการ
 
 ---
@@ -28,12 +30,12 @@
 
 ### Key Objectives / วัตถุประสงค์หลัก
 
-| Objective | Description |
-|-----------|-------------|
-| **RE Forecast** | พยากรณ์กำลังผลิตไฟฟ้าพลังงานหมุนเวียน (Solar PV) |
-| **Voltage Prediction** | พยากรณ์แรงดันไฟฟ้าในระบบจำหน่าย |
-| **Grid Stability** | สนับสนุนการตัดสินใจของผู้ปฏิบัติงาน |
-| **Scalability** | รองรับ ≥ 2,000 โรงไฟฟ้า และ ≥ 300,000 ผู้ใช้ไฟฟ้า |
+| Objective              | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| **RE Forecast**        | พยากรณ์กำลังผลิตไฟฟ้าพลังงานหมุนเวียน (Solar PV)    |
+| **Voltage Prediction** | พยากรณ์แรงดันไฟฟ้าในระบบจำหน่าย                  |
+| **Grid Stability**     | สนับสนุนการตัดสินใจของผู้ปฏิบัติงาน                  |
+| **Scalability**        | รองรับ ≥ 2,000 โรงไฟฟ้า และ ≥ 300,000 ผู้ใช้ไฟฟ้า |
 
 ---
 
@@ -58,20 +60,21 @@
 ---
 
 # TOR Compliance
+
 ## ผลการดำเนินงานตาม TOR
 
 ---
 
 ## TOR 7.1: System Requirements
 
-| Requirement | TOR Reference | Status | Notes |
-|-------------|---------------|--------|-------|
-| Hardware Resources | 7.1.1 | ✅ PASS | Web/AI/DB servers configured |
-| Software Stack | 7.1.3 | ✅ PASS | All TOR-specified tools used |
-| CI/CD Deployment | 7.1.4 | ✅ PASS | GitLab CI + ArgoCD |
-| Legal Licensing | 7.1.5 | ✅ PASS | 100% Open Source |
-| Audit Trail | 7.1.6 | ✅ PASS | Full logging + UI viewer |
-| Scalability | 7.1.7 | ✅ PASS | 300K users load tested |
+| Requirement        | TOR Reference | Status | Notes                        |
+| ------------------ | ------------- | ------ | ---------------------------- |
+| Hardware Resources | 7.1.1         | ✅ PASS | Web/AI/DB servers configured |
+| Software Stack     | 7.1.3         | ✅ PASS | All TOR-specified tools used |
+| CI/CD Deployment   | 7.1.4         | ✅ PASS | GitLab CI + ArgoCD           |
+| Legal Licensing    | 7.1.5         | ✅ PASS | 100% Open Source             |
+| Audit Trail        | 7.1.6         | ✅ PASS | Full logging + UI viewer     |
+| Scalability        | 7.1.7         | ✅ PASS | 300K users load tested       |
 
 ---
 
@@ -79,19 +82,19 @@
 
 ### RE Forecast (Solar Power) - TOR POC 1 & 2
 
-| Metric | Target | Achieved | Margin |
-|--------|--------|----------|--------|
-| **MAPE** | < 10% | **9.74%** | ✅ 0.26% better |
-| **RMSE** | < 100 kW | **< 100 kW** | ✅ PASS |
-| **R²** | > 0.95 | **> 0.95** | ✅ PASS |
+| Metric   | Target   | Achieved     | Margin         |
+| -------- | -------- | ------------ | -------------- |
+| **MAPE** | < 10%    | **9.74%**    | ✅ 0.26% better |
+| **RMSE** | < 100 kW | **< 100 kW** | ✅ PASS         |
+| **R²**   | > 0.95   | **> 0.95**   | ✅ PASS         |
 
 ### Voltage Prediction - TOR POC 3 & 4
 
-| Metric | Target | Achieved | Margin |
-|--------|--------|----------|--------|
-| **MAE** | < 2V | **0.036V** | ✅ 98% better |
-| **RMSE** | < 3V | **< 0.1V** | ✅ PASS |
-| **R²** | > 0.90 | **> 0.99** | ✅ PASS |
+| Metric   | Target | Achieved   | Margin       |
+| -------- | ------ | ---------- | ------------ |
+| **MAE**  | < 2V   | **0.036V** | ✅ 98% better |
+| **RMSE** | < 3V   | **< 0.1V** | ✅ PASS       |
+| **R²**   | > 0.90 | **> 0.99** | ✅ PASS       |
 
 ---
 
@@ -118,37 +121,38 @@
 
 ## Software Stack (TOR 7.1.3)
 
-| Category | TOR Requirement | Implementation |
-|----------|-----------------|----------------|
-| **Database** | PostgreSQL, Redis | TimescaleDB + Redis 7 |
-| **Container** | Kubernetes, Containerd | K8s 1.28 + Containerd |
-| **CI/CD** | GitLab, Argo | GitLab CI + ArgoCD |
-| **API Gateway** | Kong | Kong 3.5 |
-| **Security** | Keycloak, Vault, Trivy | All integrated |
-| **Monitoring** | Prometheus, Grafana | Full observability |
-| **Network** | Cilium | eBPF networking |
-| **Storage** | Longhorn | K8s-native storage |
+| Category        | TOR Requirement        | Implementation        |
+| --------------- | ---------------------- | --------------------- |
+| **Database**    | PostgreSQL, Redis      | TimescaleDB + Redis 7 |
+| **Container**   | Kubernetes, Containerd | K8s 1.28 + Containerd |
+| **CI/CD**       | GitLab, Argo           | GitLab CI + ArgoCD    |
+| **API Gateway** | Kong                   | Kong 3.5              |
+| **Security**    | Keycloak, Vault, Trivy | All integrated        |
+| **Monitoring**  | Prometheus, Grafana    | Full observability    |
+| **Network**     | Cilium                 | eBPF networking       |
+| **Storage**     | Longhorn               | K8s-native storage    |
 
 ---
 
 # Platform Features
+
 ## คุณสมบัติของแพลตฟอร์ม
 
 ---
 
 ## Feature Overview
 
-| Feature | TOR Ref | Status | Description |
-|---------|---------|--------|-------------|
-| **Solar Forecast** | POC 1-2 | ✅ Complete | Day-ahead + real-time |
+| Feature                | TOR Ref | Status     | Description           |
+| ---------------------- | ------- | ---------- | --------------------- |
+| **Solar Forecast**     | POC 1-2 | ✅ Complete | Day-ahead + real-time |
 | **Voltage Prediction** | POC 3-4 | ✅ Complete | 7 prosumers, 3 phases |
-| **Load Forecast** | 7.5.1.3 | ✅ Phase 2a | 4-level hierarchy |
-| **Demand Forecast** | 7.5.1.2 | ✅ Phase 2a | Net/Gross/RE |
-| **Imbalance Monitor** | 7.5.1.4 | ✅ Phase 2a | Severity indicators |
-| **Alert System** | - | ✅ Complete | Email + LINE Notify |
-| **Audit Trail** | 7.1.6 | ✅ Complete | Full compliance |
-| **DOE** | 7.5.1.6 | ⏳ Phase 2b | Awaiting GIS data |
-| **Hosting Capacity** | 7.5.1.7 | ⏳ Phase 3 | Depends on DOE |
+| **Load Forecast**      | 7.5.1.3 | ✅ Phase 2a | 4-level hierarchy     |
+| **Demand Forecast**    | 7.5.1.2 | ✅ Phase 2a | Net/Gross/RE          |
+| **Imbalance Monitor**  | 7.5.1.4 | ✅ Phase 2a | Severity indicators   |
+| **Alert System**       | -       | ✅ Complete | Email + LINE Notify   |
+| **Audit Trail**        | 7.1.6   | ✅ Complete | Full compliance       |
+| **DOE**                | 7.5.1.6 | ⏳ Phase 2b | Awaiting GIS data     |
+| **Hosting Capacity**   | 7.5.1.7 | ⏳ Phase 3  | Depends on DOE        |
 
 ---
 
@@ -206,12 +210,12 @@
 
 ## Alert & Notification System
 
-| Channel | Status | Use Case |
-|---------|--------|----------|
-| **Dashboard** | ✅ Active | Real-time alerts |
-| **Email** | ✅ Configured | SMTP notifications |
-| **LINE Notify** | ✅ Configured | Mobile alerts |
-| **WebSocket** | ✅ Active | Live updates |
+| Channel         | Status       | Use Case           |
+| --------------- | ------------ | ------------------ |
+| **Dashboard**   | ✅ Active     | Real-time alerts   |
+| **Email**       | ✅ Configured | SMTP notifications |
+| **LINE Notify** | ✅ Configured | Mobile alerts      |
+| **WebSocket**   | ✅ Active     | Live updates       |
 
 ### Alert Types
 
@@ -223,6 +227,7 @@
 ---
 
 # Live Demo
+
 ## สาธิตการใช้งานจริง
 
 ---
@@ -230,18 +235,21 @@
 ## Demo Scenarios
 
 ### Scenario 1: Solar Power Forecasting
+
 1. View current solar generation
 2. Check day-ahead forecast
 3. Compare actual vs predicted
 4. Export report (PDF/Excel)
 
 ### Scenario 2: Voltage Monitoring
+
 1. View network topology
 2. Check voltage levels by phase
 3. Simulate voltage violation
 4. Review alert notification
 
 ### Scenario 3: Grid Operations
+
 1. Load forecast by hierarchy level
 2. Demand forecast (Net/Gross/RE)
 3. Imbalance monitoring with severity
@@ -281,24 +289,25 @@
 
 ## Demo URLs
 
-| Environment | URL | Purpose |
-|-------------|-----|---------|
-| **Frontend** | http://localhost:3000 | Dashboard |
-| **Backend API** | http://localhost:8000 | REST API |
-| **API Docs** | http://localhost:8000/docs | Swagger UI |
-| **Health Check** | http://localhost:8000/api/v1/health | Status |
+| Environment      | URL                                   | Purpose    |
+| ---------------- | ------------------------------------- | ---------- |
+| **Frontend**     | <http://localhost:3000>               | Dashboard  |
+| **Backend API**  | <http://localhost:8000>               | REST API   |
+| **API Docs**     | <http://localhost:8000/docs>          | Swagger UI |
+| **Health Check** | <http://localhost:8000/api/v1/health> | Status     |
 
 ### Demo Credentials
 
-| Role | Username | Access |
-|------|----------|--------|
-| Admin | demo-admin | Full access |
+| Role     | Username      | Access        |
+| -------- | ------------- | ------------- |
+| Admin    | demo-admin    | Full access   |
 | Operator | demo-operator | Read + alerts |
-| Viewer | demo-viewer | Read only |
+| Viewer   | demo-viewer   | Read only     |
 
 ---
 
 # Technical Architecture
+
 ## สถาปัตยกรรมระบบ
 
 ---
@@ -335,18 +344,18 @@
 
 ## Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Frontend** | React 18 + TypeScript | User interface |
-| **Backend** | FastAPI + Python 3.11 | REST API |
-| **ML** | XGBoost | Forecasting models |
-| **Database** | TimescaleDB | Time-series storage |
-| **Cache** | Redis 7 | Prediction caching |
-| **Auth** | Keycloak | SSO + RBAC |
-| **Gateway** | Kong | API management |
-| **Orchestration** | Kubernetes 1.28 | Container orchestration |
-| **CI/CD** | GitLab + ArgoCD | Continuous deployment |
-| **Monitoring** | Prometheus + Grafana | Observability |
+| Layer             | Technology            | Purpose                 |
+| ----------------- | --------------------- | ----------------------- |
+| **Frontend**      | React 18 + TypeScript | User interface          |
+| **Backend**       | FastAPI + Python 3.11 | REST API                |
+| **ML**            | XGBoost               | Forecasting models      |
+| **Database**      | TimescaleDB           | Time-series storage     |
+| **Cache**         | Redis 7               | Prediction caching      |
+| **Auth**          | Keycloak              | SSO + RBAC              |
+| **Gateway**       | Kong                  | API management          |
+| **Orchestration** | Kubernetes 1.28       | Container orchestration |
+| **CI/CD**         | GitLab + ArgoCD       | Continuous deployment   |
+| **Monitoring**    | Prometheus + Grafana  | Observability           |
 
 ---
 
@@ -384,42 +393,43 @@
 ---
 
 # Quality Assurance
+
 ## การทดสอบและความปลอดภัย
 
 ---
 
 ## Test Results
 
-| Test Type | Count | Pass Rate | Tool |
-|-----------|-------|-----------|------|
-| **Backend Unit** | 660 | 100% | pytest |
-| **Frontend Unit** | 55 | 100% | vitest |
-| **E2E Tests** | 28 | 100% | Playwright |
-| **Load Testing** | - | 300K users | Locust |
+| Test Type         | Count | Pass Rate  | Tool       |
+| ----------------- | ----- | ---------- | ---------- |
+| **Backend Unit**  | 660   | 100%       | pytest     |
+| **Frontend Unit** | 55    | 100%       | vitest     |
+| **E2E Tests**     | 28    | 100%       | Playwright |
+| **Load Testing**  | -     | 300K users | Locust     |
 
 ### Code Quality
 
-| Metric | Target | Achieved |
-|--------|--------|----------|
-| Test Coverage | > 80% | ✅ 80%+ |
-| Linting (Ruff) | 0 errors | ✅ PASS |
-| Linting (Biome) | 0 errors | ✅ PASS |
-| Security (Trivy) | 0 critical | ✅ PASS |
+| Metric           | Target     | Achieved |
+| ---------------- | ---------- | -------- |
+| Test Coverage    | > 80%      | ✅ 80%+   |
+| Linting (Ruff)   | 0 errors   | ✅ PASS   |
+| Linting (Biome)  | 0 errors   | ✅ PASS   |
+| Security (Trivy) | 0 critical | ✅ PASS   |
 
 ---
 
 ## Security Compliance
 
-| Security Measure | Status | Implementation |
-|------------------|--------|----------------|
-| **Authentication** | ✅ | Keycloak SSO |
-| **Authorization** | ✅ | JWT + RBAC |
-| **HTTPS/TLS** | ✅ | TLS 1.3 |
-| **OWASP Headers** | ✅ | Security middleware |
-| **CORS** | ✅ | Explicit allow list |
-| **Audit Trail** | ✅ | Full logging (TOR 7.1.6) |
-| **Vulnerability Scan** | ✅ | Trivy + SonarQube |
-| **Secret Management** | ✅ | Vault integration |
+| Security Measure       | Status | Implementation           |
+| ---------------------- | ------ | ------------------------ |
+| **Authentication**     | ✅      | Keycloak SSO             |
+| **Authorization**      | ✅      | JWT + RBAC               |
+| **HTTPS/TLS**          | ✅      | TLS 1.3                  |
+| **OWASP Headers**      | ✅      | Security middleware      |
+| **CORS**               | ✅      | Explicit allow list      |
+| **Audit Trail**        | ✅      | Full logging (TOR 7.1.6) |
+| **Vulnerability Scan** | ✅      | Trivy + SonarQube        |
+| **Secret Management**  | ✅      | Vault integration        |
 
 ---
 
@@ -447,6 +457,7 @@
 ---
 
 # Roadmap
+
 ## แผนการพัฒนาต่อไป
 
 ---
@@ -474,55 +485,56 @@
 
 ### Immediate (Current Sprint)
 
-| Task | Priority | Status |
-|------|----------|--------|
-| Deploy to staging | P0 | Ready |
-| Schedule UAT | P0 | Pending |
-| Production deployment | P0 | After UAT |
+| Task                  | Priority | Status    |
+| --------------------- | -------- | --------- |
+| Deploy to staging     | P0       | Ready     |
+| Schedule UAT          | P0       | Pending   |
+| Production deployment | P0       | After UAT |
 
 ### Short-term (After UAT)
 
-| Task | Priority | Blocker |
-|------|----------|---------|
-| Request GIS data | P1 | กฟภ. IT |
-| SCADA integration | P1 | กฟภ. Operations |
-| DOE implementation | P2 | GIS data |
+| Task               | Priority | Blocker         |
+| ------------------ | -------- | --------------- |
+| Request GIS data   | P1       | กฟภ. IT         |
+| SCADA integration  | P1       | กฟภ. Operations |
+| DOE implementation | P2       | GIS data        |
 
 ### Medium-term (Phase 2b-3)
 
-| Task | Duration | Dependency |
-|------|----------|------------|
-| DOE (Function 6) | 17 weeks | GIS network model |
-| Hosting Capacity (Function 7) | 12 weeks | DOE completion |
+| Task                          | Duration | Dependency        |
+| ----------------------------- | -------- | ----------------- |
+| DOE (Function 6)              | 17 weeks | GIS network model |
+| Hosting Capacity (Function 7) | 12 weeks | DOE completion    |
 
 ---
 
-## Dependencies on กฟภ.
+## Dependencies on กฟภ
 
-| Item | Required From | Impact |
-|------|---------------|--------|
-| **GIS Network Model** | กฟภ. IT | Blocks DOE & HC |
-| **SCADA Access** | กฟภ. Operations | Real-time data |
-| **AMI/Smart Meter** | กฟภ. IT | Consumer analytics |
-| **UAT Scheduling** | Stakeholders | Production deployment |
+| Item                  | Required From   | Impact                |
+| --------------------- | --------------- | --------------------- |
+| **GIS Network Model** | กฟภ. IT         | Blocks DOE & HC       |
+| **SCADA Access**      | กฟภ. Operations | Real-time data        |
+| **AMI/Smart Meter**   | กฟภ. IT         | Consumer analytics    |
+| **UAT Scheduling**    | Stakeholders    | Production deployment |
 
 ---
 
 # Summary
+
 ## สรุป
 
 ---
 
 ## Key Achievements
 
-| Achievement | Details |
-|-------------|---------|
-| ✅ **TOR Compliance** | All Section 7.1 requirements met |
+| Achievement          | Details                                  |
+| -------------------- | ---------------------------------------- |
+| ✅ **TOR Compliance** | All Section 7.1 requirements met         |
 | ✅ **Model Accuracy** | MAPE 9.74% (Solar), MAE 0.036V (Voltage) |
-| ✅ **Scalability** | 300,000 users load tested |
-| ✅ **Security** | Full audit trail, OWASP compliant |
-| ✅ **Quality** | 715 tests, 80%+ coverage |
-| ✅ **Infrastructure** | K8s, CI/CD, GitOps ready |
+| ✅ **Scalability**    | 300,000 users load tested                |
+| ✅ **Security**       | Full audit trail, OWASP compliant        |
+| ✅ **Quality**        | 715 tests, 80%+ coverage                 |
+| ✅ **Infrastructure** | K8s, CI/CD, GitOps ready                 |
 
 ---
 
@@ -567,31 +579,33 @@
 ---
 
 # Q&A
+
 ## ถาม-ตอบ
 
 ---
 
 ## Contact & Resources
 
-| Resource | Location |
-|----------|----------|
-| **Source Code** | GitLab: `pea-re-forecast-platform` |
-| **Documentation** | `docs/` directory |
-| **API Docs** | http://localhost:8000/docs |
-| **Runbooks** | `docs/operations/runbooks/` |
+| Resource          | Location                           |
+| ----------------- | ---------------------------------- |
+| **Source Code**   | GitLab: `pea-re-forecast-platform` |
+| **Documentation** | `docs/` directory                  |
+| **API Docs**      | <http://localhost:8000/docs>       |
+| **Runbooks**      | `docs/operations/runbooks/`        |
 
 ### Technical Contacts
 
-| Role | Responsibility |
-|------|----------------|
-| Project Lead | Overall coordination |
-| ML Engineer | Model accuracy |
-| Backend Developer | API & infrastructure |
-| Frontend Developer | Dashboard & UX |
+| Role               | Responsibility       |
+| ------------------ | -------------------- |
+| Project Lead       | Overall coordination |
+| ML Engineer        | Model accuracy       |
+| Backend Developer  | API & infrastructure |
+| Frontend Developer | Dashboard & UX       |
 
 ---
 
 # Thank You
+
 ## ขอบคุณครับ/ค่ะ
 
 **PEA RE Forecast Platform**
@@ -605,16 +619,16 @@
 
 ## A1: API Endpoints Summary
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/forecast/solar/predict` | POST | Solar prediction |
-| `/api/v1/forecast/voltage/predict` | POST | Voltage prediction |
-| `/api/v1/load-forecast/predict` | GET | Load forecast |
-| `/api/v1/demand-forecast/predict` | GET | Demand forecast |
-| `/api/v1/imbalance-forecast/predict` | GET | Imbalance forecast |
-| `/api/v1/alerts` | GET/POST | Alert management |
-| `/api/v1/audit` | GET | Audit log viewer |
-| `/api/v1/health` | GET | Health check |
+| Endpoint                             | Method   | Description        |
+| ------------------------------------ | -------- | ------------------ |
+| `/api/v1/forecast/solar/predict`     | POST     | Solar prediction   |
+| `/api/v1/forecast/voltage/predict`   | POST     | Voltage prediction |
+| `/api/v1/load-forecast/predict`      | GET      | Load forecast      |
+| `/api/v1/demand-forecast/predict`    | GET      | Demand forecast    |
+| `/api/v1/imbalance-forecast/predict` | GET      | Imbalance forecast |
+| `/api/v1/alerts`                     | GET/POST | Alert management   |
+| `/api/v1/audit`                      | GET      | Audit log viewer   |
+| `/api/v1/health`                     | GET      | Health check       |
 
 ---
 
@@ -646,23 +660,23 @@
 
 ### Solar Forecast Model
 
-| Parameter | Value |
-|-----------|-------|
-| Algorithm | XGBoost |
-| Features | 16 (temporal + environmental) |
-| Training Data | 26,000+ records |
-| Validation | Time-series CV (5-fold) |
-| MAPE | 9.74% |
+| Parameter     | Value                         |
+| ------------- | ----------------------------- |
+| Algorithm     | XGBoost                       |
+| Features      | 16 (temporal + environmental) |
+| Training Data | 26,000+ records               |
+| Validation    | Time-series CV (5-fold)       |
+| MAPE          | 9.74%                         |
 
 ### Voltage Prediction Model
 
-| Parameter | Value |
-|-----------|-------|
-| Algorithm | XGBoost |
-| Features | 12 (power + network) |
-| Training Data | 181,000+ records |
-| Validation | Time-series CV (5-fold) |
-| MAE | 0.036V |
+| Parameter     | Value                   |
+| ------------- | ----------------------- |
+| Algorithm     | XGBoost                 |
+| Features      | 12 (power + network)    |
+| Training Data | 181,000+ records        |
+| Validation    | Time-series CV (5-fold) |
+| MAE           | 0.036V                  |
 
 ---
 
