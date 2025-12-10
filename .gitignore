@@ -160,3 +160,4 @@ playwright-report/
 # =========================
 *.tar.gz
 *.zip
+*.tsbuildinfo
