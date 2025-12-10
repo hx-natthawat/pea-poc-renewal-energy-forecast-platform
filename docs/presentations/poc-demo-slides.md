@@ -50,7 +50,7 @@
 │   ✅ Voltage Prediction MAE 0.036V    (Target: < 2V)           │
 │   ✅ API Latency        P95 = 38ms    (Target: < 500ms)        │
 │   ✅ Load Testing       300,000 users  (Target: ≥ 300,000)     │
-│   ✅ Unit Tests         715 passed     (Backend + Frontend)    │
+│   ✅ Unit Tests         734 passed     (679 backend + 55 FE)   │
 │                                                                 │
 │   Overall Status: ✅ ALL TOR REQUIREMENTS MET                  │
 │                                                                 │
@@ -402,9 +402,9 @@
 
 | Test Type         | Count | Pass Rate  | Tool       |
 | ----------------- | ----- | ---------- | ---------- |
-| **Backend Unit**  | 660   | 100%       | pytest     |
+| **Backend Unit**  | 679   | 100%       | pytest     |
 | **Frontend Unit** | 55    | 100%       | vitest     |
-| **E2E Tests**     | 28    | 100%       | Playwright |
+| **E2E Tests**     | 10    | 100%       | Playwright |
 | **Load Testing**  | -     | 300K users | Locust     |
 
 ### Code Quality
@@ -533,7 +533,7 @@
 | ✅ **Model Accuracy** | MAPE 9.74% (Solar), MAE 0.036V (Voltage) |
 | ✅ **Scalability**    | 300,000 users load tested                |
 | ✅ **Security**       | Full audit trail, OWASP compliant        |
-| ✅ **Quality**        | 715 tests, 80%+ coverage                 |
+| ✅ **Quality**        | 734 tests, 80%+ coverage                 |
 | ✅ **Infrastructure** | K8s, CI/CD, GitOps ready                 |
 
 ---
@@ -609,7 +609,7 @@
 ## ขอบคุณครับ/ค่ะ
 
 **PEA RE Forecast Platform**
-*แพลตฟอร์มสำหรับศูนย์ข้อมูลพยากรณ์พลังงานหมุนเวียนของ กฟภ.*
+_แพลตฟอร์มสำหรับศูนย์ข้อมูลพยากรณ์พลังงานหมุนเวียนของ กฟภ._
 
 ---
 
@@ -680,6 +680,7 @@
 
 ---
 
-*Document Version: 1.0*
-*Created: December 7, 2025*
-*Project: PEA RE Forecast Platform POC Demo*
+_Document Version: 1.1_
+_Created: December 7, 2025_
+_Updated: December 10, 2025_
+_Project: PEA RE Forecast Platform POC Demo_

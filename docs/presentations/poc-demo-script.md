@@ -61,7 +61,7 @@ open http://localhost:3000                  # Dashboard should load
 - Solar MAPE: 9.74% (target < 10%) - **เกินเป้าหมาย 0.26%**
 - Voltage MAE: 0.036V (target < 2V) - **ดีกว่าเป้าหมาย 98%**
 - All TOR 7.1 requirements met
-- 715 tests passing, 300K users load tested
+- 734 tests passing (679 backend + 55 frontend), 300K users load tested
 
 **Transition:**
 > "ต่อไปจะอธิบายรายละเอียดแต่ละส่วน..."
@@ -320,5 +320,5 @@ cd ml
 
 ---
 
-*Demo Script Version: 1.0*
-*Last Updated: December 7, 2025*
+*Demo Script Version: 1.1*
+*Last Updated: December 10, 2025*

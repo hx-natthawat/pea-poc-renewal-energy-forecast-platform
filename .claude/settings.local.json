@@ -184,7 +184,12 @@
       "Bash(pnpm install:*)",
       "Bash(DATABASE_URL=\"postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast\":*)",
       "Bash(./venv/bin/uvicorn:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform status --short infrastructure/kubernetes/observability/)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform log --oneline -6)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform log --oneline -8)",
+      "Bash(/dev/null echo echo '4. Active Alerts:' curl -s http://localhost:9090/api/v1/query?query=ALERTS{alertstate=\"\"firing\"\"})",
+      "Bash('http://localhost:3001/api/dashboards/db')"
     ],
     "deny": [],
     "ask": []
