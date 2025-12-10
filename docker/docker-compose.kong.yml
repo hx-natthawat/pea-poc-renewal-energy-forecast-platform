@@ -1,14 +1,28 @@
-# Kong API Gateway - Docker Compose
+# Kong API Gateway - Docker Compose Override
 # TOR 7.1.3 Compliant API Gateway
 #
-# Usage:
-#   docker-compose -f docker/docker-compose.kong.yml up -d
+# Usage (Kong standalone - assumes main services already running):
+#   docker compose -f docker/docker-compose.kong.yml up -d kong
+#
+# Usage (Full stack with Kong):
+#   docker compose -f docker/docker-compose.yml -f docker/docker-compose.kong.yml up -d
 #
 # Access:
-#   - Kong Proxy: http://localhost:8080 (routes to services)
-#   - Kong Admin: http://localhost:8001 (management API)
+#   - Kong Proxy: http://localhost:8888 (unified entry point)
+#   - Kong Admin: http://localhost:8881 (management API)
+#
+# Routes:
+#   - /api/*  → backend:8000
+#   - /ml/*   → ml-service:8001
+#   - /*      → frontend:3000
 
 services:
+  # Override frontend to use Kong API URL (for full stack mode)
+  frontend:
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8888/api
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8888/api
+
   kong:
     image: kong:3.8
     container_name: pea-kong
@@ -45,7 +59,7 @@ services:
       retries: 5
     restart: unless-stopped
 
-    # Allow access to host services
+    # Allow access to host services (for standalone mode)
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

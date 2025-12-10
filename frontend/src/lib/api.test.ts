@@ -29,17 +29,32 @@ describe("getApiBaseUrl", () => {
     expect(getApiBaseUrl()).toBe("http://api.example.com");
   });
 
-  it("returns localhost:8000 for localhost hostname when no env var", () => {
+  it("returns localhost:8000 for localhost hostname on port 3000", () => {
     Object.defineProperty(window, "location", {
       value: {
         hostname: "localhost",
         protocol: "http:",
         host: "localhost:3000",
+        port: "3000",
       },
       writable: true,
     });
 
     expect(getApiBaseUrl()).toBe("http://localhost:8000");
+  });
+
+  it("returns same origin for Kong gateway on port 8888", () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        hostname: "localhost",
+        protocol: "http:",
+        host: "localhost:8888",
+        port: "8888",
+      },
+      writable: true,
+    });
+
+    expect(getApiBaseUrl()).toBe("http://localhost:8888");
   });
 
   it("returns same host for production", () => {
