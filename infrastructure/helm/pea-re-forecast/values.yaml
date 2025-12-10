@@ -121,18 +121,28 @@ redis:
     maxmemoryPolicy: "allkeys-lru"
 
 # Ingress Configuration
+# Single endpoint with path-based routing to different services
 ingress:
-  enabled: false
+  enabled: true
   className: nginx
-  annotations: {}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
   hosts:
     - host: pea-forecast.local
       paths:
-        - path: /api
-          pathType: Prefix
+        # API Backend: pea-forecast.local/api/* → backend:8000
+        - path: /api/(.*)
+          pathType: ImplementationSpecific
           backend: backend
-        - path: /
-          pathType: Prefix
+        # ML Service: pea-forecast.local/ml/* → ml:8001
+        - path: /ml/(.*)
+          pathType: ImplementationSpecific
+          backend: mlService
+        # Frontend: pea-forecast.local/* → frontend:3000
+        - path: /(.*)
+          pathType: ImplementationSpecific
           backend: frontend
   tls: []
 

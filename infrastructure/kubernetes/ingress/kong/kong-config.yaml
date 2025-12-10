@@ -1,0 +1,198 @@
+# Kong API Gateway Configuration
+# TOR 7.1.3 Compliant - API Gateway: Kong
+# Single endpoint with path-based routing to different services
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kong
+  labels:
+    app.kubernetes.io/name: kong
+    app.kubernetes.io/component: api-gateway
+---
+# Kong Gateway Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+  namespace: kong
+  labels:
+    app: kong
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+        - name: kong
+          image: kong:3.8  # Latest stable version
+          ports:
+            - name: proxy
+              containerPort: 8000
+            - name: proxy-ssl
+              containerPort: 8443
+            - name: admin
+              containerPort: 8001
+          env:
+            - name: KONG_DATABASE
+              value: "off"  # DB-less mode for declarative config
+            - name: KONG_DECLARATIVE_CONFIG
+              value: "/kong/declarative/kong.yml"
+            - name: KONG_PROXY_ACCESS_LOG
+              value: "/dev/stdout"
+            - name: KONG_ADMIN_ACCESS_LOG
+              value: "/dev/stdout"
+            - name: KONG_PROXY_ERROR_LOG
+              value: "/dev/stderr"
+            - name: KONG_ADMIN_ERROR_LOG
+              value: "/dev/stderr"
+            - name: KONG_ADMIN_LISTEN
+              value: "0.0.0.0:8001"
+            - name: KONG_PROXY_LISTEN
+              value: "0.0.0.0:8000, 0.0.0.0:8443 ssl"
+          volumeMounts:
+            - name: kong-config
+              mountPath: /kong/declarative
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 8001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: kong-config
+          configMap:
+            name: kong-declarative-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-proxy
+  namespace: kong
+spec:
+  type: LoadBalancer
+  selector:
+    app: kong
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+    - name: https
+      port: 443
+      targetPort: 8443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-admin
+  namespace: kong
+spec:
+  type: ClusterIP
+  selector:
+    app: kong
+  ports:
+    - name: admin
+      port: 8001
+      targetPort: 8001
+---
+# Kong Declarative Configuration
+# Path-based routing: Single endpoint → Multiple services
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-declarative-config
+  namespace: kong
+data:
+  kong.yml: |
+    _format_version: "3.0"
+    _transform: true
+
+    # Services
+    services:
+      # Backend API Service
+      - name: backend-service
+        url: http://backend.pea-forecast.svc.cluster.local:8000
+        routes:
+          - name: backend-api-route
+            paths:
+              - /api
+            strip_path: false
+            preserve_host: true
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 1000
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - OPTIONS
+              headers:
+                - Authorization
+                - Content-Type
+              exposed_headers:
+                - X-Request-Id
+              credentials: true
+              max_age: 3600
+
+      # ML Service
+      - name: ml-service
+        url: http://ml.pea-forecast.svc.cluster.local:8001
+        routes:
+          - name: ml-api-route
+            paths:
+              - /ml
+            strip_path: true
+            preserve_host: true
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 500
+              policy: local
+
+      # Frontend Service
+      - name: frontend-service
+        url: http://frontend.pea-forecast.svc.cluster.local:3000
+        routes:
+          - name: frontend-route
+            paths:
+              - /
+            strip_path: false
+            preserve_host: true
+
+    # Global Plugins
+    plugins:
+      - name: correlation-id
+        config:
+          header_name: X-Request-Id
+          generator: uuid
+          echo_downstream: true
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Gateway: kong"
