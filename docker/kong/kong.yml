@@ -107,6 +107,19 @@ services:
         strip_path: false
         preserve_host: true
 
+  # ---------------------------------------------------------------------------
+  # Next.js Internal Resources (fonts, etc.)
+  # Route: /__nextjs_font/* → frontend:3000 (pass-through)
+  # ---------------------------------------------------------------------------
+  - name: nextjs-internals
+    url: http://host.docker.internal:3000
+    routes:
+      - name: nextjs-font-route
+        paths:
+          - /__nextjs_font
+        strip_path: false
+        preserve_host: true
+
 # =============================================================================
 # Global Plugins
 # =============================================================================
