@@ -19,6 +19,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 import { HelpSidebar, HelpTrigger } from "@/components/help";
+import { ErrorBanner, ErrorBoundary } from "@/components/ui";
 import { getApiBaseUrl } from "@/lib/api";
 
 // Lazy load heavy chart components (recharts ~480KB)
@@ -324,21 +325,26 @@ export default function Home() {
         )}
 
         {/* Mobile Bottom Navigation */}
-        <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
-          <nav className="flex justify-around" suppressHydrationWarning>
+        <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 pb-safe">
+          <nav
+            className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+            suppressHydrationWarning
+          >
             {tabs.map((tab) => (
               <button
                 type="button"
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`flex flex-col items-center py-2 px-3 flex-1 ${
+                className={`flex flex-col items-center py-2 px-2 min-w-[52px] snap-center ${
                   activeTab === tab.id ? "text-[#74045F]" : "text-gray-500"
                 }`}
               >
                 <tab.icon
                   className={`w-5 h-5 ${activeTab === tab.id ? "text-[#74045F]" : "text-gray-400"}`}
                 />
-                <span className="text-[10px] mt-0.5 font-medium">{tab.shortLabel}</span>
+                <span className="text-[9px] mt-0.5 font-medium whitespace-nowrap">
+                  {tab.shortLabel}
+                </span>
               </button>
             ))}
           </nav>
@@ -349,25 +355,24 @@ export default function Home() {
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 sm:pb-6">
         {/* Status Banner */}
         {error && (
-          <div className="bg-amber-50 border border-amber-200 text-amber-800 px-3 sm:px-4 py-2 sm:py-3 rounded-lg mb-4 sm:mb-6">
-            <div className="flex items-center">
-              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" />
-              <span className="font-medium text-sm sm:text-base">{error}</span>
-            </div>
-            <p className="text-xs sm:text-sm mt-1 text-amber-600 overflow-x-auto">
-              Run: <code className="bg-amber-100 px-1 rounded text-xs">docker compose up -d</code>
-            </p>
-          </div>
+          <ErrorBanner
+            message={error}
+            severity="error"
+            details="Run: docker compose up -d"
+            className="mb-4 sm:mb-6"
+          />
         )}
 
         {/* TOR Functions Tab */}
         {activeTab === "tor" && (
-          <TORPortal onNavigate={(tab) => setActiveTab(tab as typeof activeTab)} />
+          <ErrorBoundary>
+            <TORPortal onNavigate={(tab) => setActiveTab(tab as typeof activeTab)} />
+          </ErrorBoundary>
         )}
 
         {/* Overview Tab */}
         {activeTab === "overview" && (
-          <>
+          <ErrorBoundary>
             {/* Summary Cards - 2x2 on mobile, 4 on desktop */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
               <div className="bg-white rounded-lg shadow p-3 sm:p-4 border-l-4 border-[#C7911B]">
@@ -443,86 +448,96 @@ export default function Home() {
             <div className="mt-4 sm:mt-6">
               <ModelPerformance height={220} />
             </div>
-          </>
+          </ErrorBoundary>
         )}
 
         {/* Solar Tab */}
         {activeTab === "solar" && (
-          <div className="space-y-4 sm:space-y-6">
-            <SolarForecastChart height={280} />
-            <ForecastComparison modelType="solar" height={240} />
-          </div>
+          <ErrorBoundary>
+            <div className="space-y-4 sm:space-y-6">
+              <SolarForecastChart height={280} />
+              <ForecastComparison modelType="solar" height={240} />
+            </div>
+          </ErrorBoundary>
         )}
 
         {/* Voltage Tab */}
         {activeTab === "voltage" && (
-          <div className="space-y-4 sm:space-y-6">
-            <VoltageMonitorChart height={280} />
-            <NetworkTopology />
-          </div>
+          <ErrorBoundary>
+            <div className="space-y-4 sm:space-y-6">
+              <VoltageMonitorChart height={280} />
+              <NetworkTopology />
+            </div>
+          </ErrorBoundary>
         )}
 
         {/* Grid Operations Tab */}
         {activeTab === "grid" && (
-          <div className="space-y-4 sm:space-y-6">
-            {/* TOR Functions Header */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                Grid Operations - TOR Extended Functions
-              </h2>
-              <p className="text-sm text-gray-600">
-                Load Forecast (7.5.1.3) | Demand Forecast (7.5.1.2) | Imbalance Forecast (7.5.1.4)
-              </p>
-            </div>
+          <ErrorBoundary>
+            <div className="space-y-4 sm:space-y-6">
+              {/* TOR Functions Header */}
+              <div className="bg-white rounded-lg shadow p-4">
+                <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                  Grid Operations - TOR Extended Functions
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Load Forecast (7.5.1.3) | Demand Forecast (7.5.1.2) | Imbalance Forecast (7.5.1.4)
+                </p>
+              </div>
 
-            {/* Load and Demand Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <LoadForecastChart height={260} level="system" />
-              <DemandForecastChart height={260} />
-            </div>
+              {/* Load and Demand Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <LoadForecastChart height={260} level="system" />
+                <DemandForecastChart height={260} />
+              </div>
 
-            {/* Imbalance Monitor */}
-            <ImbalanceMonitor height={280} area="system" />
-          </div>
+              {/* Imbalance Monitor */}
+              <ImbalanceMonitor height={280} area="system" />
+            </div>
+          </ErrorBoundary>
         )}
 
         {/* Alerts Tab */}
         {activeTab === "alerts" && (
-          <div className="space-y-4 sm:space-y-6">
-            <AlertDashboard height={260} />
+          <ErrorBoundary>
+            <div className="space-y-4 sm:space-y-6">
+              <AlertDashboard height={260} />
 
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-1">
-                Alert Configuration
-              </h3>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-500">Voltage Upper</p>
-                  <p className="font-semibold text-red-600 text-sm sm:text-base">242V (+5%)</p>
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-500">Voltage Lower</p>
-                  <p className="font-semibold text-red-600 text-sm sm:text-base">218V (-5%)</p>
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-500">Warning</p>
-                  <p className="font-semibold text-amber-600 text-sm sm:text-base">±3.5%</p>
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-500">Nominal</p>
-                  <p className="font-semibold text-sm sm:text-base">230V</p>
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-1">
+                  Alert Configuration
+                </h3>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-500">Voltage Upper</p>
+                    <p className="font-semibold text-red-600 text-sm sm:text-base">242V (+5%)</p>
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-500">Voltage Lower</p>
+                    <p className="font-semibold text-red-600 text-sm sm:text-base">218V (-5%)</p>
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-500">Warning</p>
+                    <p className="font-semibold text-amber-600 text-sm sm:text-base">±3.5%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-500">Nominal</p>
+                    <p className="font-semibold text-sm sm:text-base">230V</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </ErrorBoundary>
         )}
 
         {/* History Tab */}
         {activeTab === "history" && (
-          <div className="space-y-4 sm:space-y-6">
-            <DayAheadReport height={240} />
-            <HistoricalAnalysis height={240} />
-          </div>
+          <ErrorBoundary>
+            <div className="space-y-4 sm:space-y-6">
+              <DayAheadReport height={240} />
+              <HistoricalAnalysis height={240} />
+            </div>
+          </ErrorBoundary>
         )}
       </div>
 

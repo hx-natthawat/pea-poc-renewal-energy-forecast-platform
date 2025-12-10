@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { HelpTrigger } from "@/components/help/HelpTrigger";
+import { ErrorBanner } from "@/components/ui";
 import { useSolarWebSocket } from "@/hooks";
 import { getApiBaseUrl } from "@/lib/api";
 
@@ -160,9 +161,12 @@ export default function SolarForecastChart({
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-amber-50 text-amber-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded mb-3 sm:mb-4 text-xs sm:text-sm">
-          {error}
-        </div>
+        <ErrorBanner
+          message={error}
+          severity="warning"
+          onRetry={loadData}
+          className="mb-3 sm:mb-4"
+        />
       )}
 
       {/* Chart */}
