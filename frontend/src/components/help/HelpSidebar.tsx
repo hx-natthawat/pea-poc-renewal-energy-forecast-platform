@@ -64,39 +64,42 @@ export function HelpSidebar() {
         <div className="fixed inset-0 bg-black/20 z-40" onClick={closeHelp} aria-hidden="true" />
       )}
 
+      {/* Collapse/Expand toggle - positioned outside aside to avoid aria-hidden conflict */}
+      {activeSection && (
+        <button
+          type="button"
+          onClick={handleToggle}
+          className={cn(
+            "fixed z-50 top-1/2 -translate-y-1/2",
+            "w-10 h-14 flex items-center justify-center",
+            "bg-pea-purple text-white rounded-l-lg shadow-lg",
+            "hover:bg-pea-purple/90 transition-all duration-300 ease-in-out",
+            isOpen ? "right-80 max-[85vw]:right-[85vw]" : "right-0"
+          )}
+          aria-label={isOpen ? "Collapse help panel" : "Expand help panel"}
+          aria-expanded={isOpen}
+          aria-controls="help-sidebar"
+        >
+          {isOpen ? (
+            <PanelRightClose className="h-5 w-5" />
+          ) : (
+            <PanelRightOpen className="h-5 w-5" />
+          )}
+        </button>
+      )}
+
       {/* Sidebar - fixed right side panel, full height */}
       <aside
+        id="help-sidebar"
         className={cn(
           "fixed z-50 top-0 right-0 h-screen",
           "bg-white shadow-xl border-l border-gray-200",
           "transition-all duration-300 ease-in-out",
-          "overflow-visible", // Allow button to be visible outside
           isOpen ? "w-80 max-w-[85vw]" : "w-0"
         )}
         aria-label="Help sidebar"
         aria-hidden={!isOpen}
       >
-        {/* Collapse/Expand toggle on left edge - only show if there's a section to display */}
-        {activeSection && (
-          <button
-            type="button"
-            onClick={handleToggle}
-            className={cn(
-              "absolute -left-10 top-1/2 -translate-y-1/2 z-50",
-              "w-10 h-14 flex items-center justify-center",
-              "bg-pea-purple text-white rounded-l-lg shadow-lg",
-              "hover:bg-pea-purple/90 transition-colors"
-            )}
-            aria-label={isOpen ? "Collapse help panel" : "Expand help panel"}
-          >
-            {isOpen ? (
-              <PanelRightClose className="h-5 w-5" />
-            ) : (
-              <PanelRightOpen className="h-5 w-5" />
-            )}
-          </button>
-        )}
-
         {/* Content wrapper - clips content when collapsed */}
         <div className="h-full overflow-hidden">
           {isOpen && (
