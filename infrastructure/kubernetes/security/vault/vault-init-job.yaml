@@ -1,0 +1,233 @@
+# Vault Initialization Job for PEA RE Forecast Platform
+# Initializes Vault and configures secrets for the application
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-init-scripts
+  namespace: vault
+data:
+  init-vault.sh: |
+    #!/bin/sh
+    set -e
+
+    VAULT_ADDR="http://vault:8200"
+    export VAULT_ADDR
+
+    echo "=== PEA RE Forecast Platform - Vault Initialization ==="
+    echo "Waiting for Vault to be ready..."
+
+    # Wait for Vault to be ready
+    until curl -s ${VAULT_ADDR}/v1/sys/health | grep -q '"initialized"'; do
+      echo "Waiting for Vault..."
+      sleep 2
+    done
+
+    # Check if already initialized
+    INIT_STATUS=$(curl -s ${VAULT_ADDR}/v1/sys/health | grep -o '"initialized":[^,]*' | cut -d: -f2)
+
+    if [ "$INIT_STATUS" = "false" ]; then
+      echo "Initializing Vault..."
+
+      # Initialize Vault with 5 key shares and 3 key threshold
+      INIT_RESPONSE=$(curl -s -X PUT ${VAULT_ADDR}/v1/sys/init \
+        -d '{"secret_shares": 5, "secret_threshold": 3}')
+
+      # Extract root token and unseal keys
+      ROOT_TOKEN=$(echo $INIT_RESPONSE | grep -o '"root_token":"[^"]*"' | cut -d'"' -f4)
+
+      # Save to Kubernetes secret for operator access
+      # In production, these should be stored securely offline
+      echo "$INIT_RESPONSE" > /vault-init/vault-init.json
+
+      echo "Vault initialized. Root token and unseal keys saved."
+      echo "WARNING: In production, store these securely and delete this file!"
+
+      # Auto-unseal for development (remove in production)
+      # Extract keys from keys_base64 array using sed
+      UNSEAL_KEY1=$(echo $INIT_RESPONSE | sed 's/.*"keys_base64":\["//' | sed 's/".*//')
+      UNSEAL_KEY2=$(echo $INIT_RESPONSE | sed 's/.*"keys_base64":\["[^"]*","//' | sed 's/".*//')
+      UNSEAL_KEY3=$(echo $INIT_RESPONSE | sed 's/.*"keys_base64":\["[^"]*","[^"]*","//' | sed 's/".*//')
+
+      curl -s -X PUT ${VAULT_ADDR}/v1/sys/unseal -d "{\"key\": \"$UNSEAL_KEY1\"}"
+      curl -s -X PUT ${VAULT_ADDR}/v1/sys/unseal -d "{\"key\": \"$UNSEAL_KEY2\"}"
+      curl -s -X PUT ${VAULT_ADDR}/v1/sys/unseal -d "{\"key\": \"$UNSEAL_KEY3\"}"
+
+      echo "Vault unsealed."
+    else
+      echo "Vault already initialized."
+      ROOT_TOKEN=$(cat /vault-init/vault-init.json 2>/dev/null | grep -o '"root_token":"[^"]*"' | cut -d'"' -f4 || echo "")
+
+      if [ -z "$ROOT_TOKEN" ]; then
+        echo "ERROR: Cannot find root token. Manual intervention required."
+        exit 1
+      fi
+    fi
+
+    # Check seal status
+    SEALED=$(curl -s ${VAULT_ADDR}/v1/sys/health | grep -o '"sealed":[^,]*' | cut -d: -f2)
+    if [ "$SEALED" = "true" ]; then
+      echo "Vault is sealed. Manual unseal required in production."
+      exit 0
+    fi
+
+    echo "Configuring Vault for PEA RE Forecast Platform..."
+    export VAULT_TOKEN="$ROOT_TOKEN"
+
+    # Enable KV secrets engine v2
+    curl -s -X POST ${VAULT_ADDR}/v1/sys/mounts/pea-forecast \
+      -H "X-Vault-Token: $VAULT_TOKEN" \
+      -d '{"type": "kv", "options": {"version": "2"}}' || true
+
+    echo "KV secrets engine enabled at pea-forecast/"
+
+    # Store database secrets
+    curl -s -X POST ${VAULT_ADDR}/v1/pea-forecast/data/database \
+      -H "X-Vault-Token: $VAULT_TOKEN" \
+      -d '{
+        "data": {
+          "DB_USER": "postgres",
+          "DB_PASSWORD": "postgres",
+          "DB_HOST": "timescaledb",
+          "DB_PORT": "5432",
+          "DB_NAME": "pea_forecast",
+          "DATABASE_URL": "postgresql://postgres:postgres@timescaledb:5432/pea_forecast"
+        }
+      }'
+
+    echo "Database secrets stored."
+
+    # Store Redis secrets
+    curl -s -X POST ${VAULT_ADDR}/v1/pea-forecast/data/redis \
+      -H "X-Vault-Token: $VAULT_TOKEN" \
+      -d '{
+        "data": {
+          "REDIS_HOST": "redis",
+          "REDIS_PORT": "6379",
+          "REDIS_PASSWORD": "",
+          "REDIS_URL": "redis://redis:6379/0"
+        }
+      }'
+
+    echo "Redis secrets stored."
+
+    # Store application secrets
+    curl -s -X POST ${VAULT_ADDR}/v1/pea-forecast/data/app \
+      -H "X-Vault-Token: $VAULT_TOKEN" \
+      -d '{
+        "data": {
+          "APP_SECRET_KEY": "'"$(openssl rand -hex 32)"'",
+          "JWT_SECRET_KEY": "'"$(openssl rand -hex 32)"'",
+          "ENCRYPTION_KEY": "'"$(openssl rand -hex 32)"'"
+        }
+      }'
+
+    echo "Application secrets stored."
+
+    # Store Keycloak secrets (for auth integration)
+    curl -s -X POST ${VAULT_ADDR}/v1/pea-forecast/data/keycloak \
+      -H "X-Vault-Token: $VAULT_TOKEN" \
+      -d '{
+        "data": {
+          "KEYCLOAK_URL": "http://keycloak:8080",
+          "KEYCLOAK_REALM": "pea-forecast",
+          "KEYCLOAK_CLIENT_ID": "pea-forecast-api",
+          "KEYCLOAK_CLIENT_SECRET": "change-in-production"
+        }
+      }'
+
+    echo "Keycloak secrets stored."
+
+    # Create policy for backend application
+    curl -s -X PUT ${VAULT_ADDR}/v1/sys/policies/acl/pea-forecast-backend \
+      -H "X-Vault-Token: $VAULT_TOKEN" \
+      -d '{
+        "policy": "# PEA RE Forecast Backend Policy\n# Read-only access to application secrets\n\npath \"pea-forecast/data/database\" {\n  capabilities = [\"read\"]\n}\n\npath \"pea-forecast/data/redis\" {\n  capabilities = [\"read\"]\n}\n\npath \"pea-forecast/data/app\" {\n  capabilities = [\"read\"]\n}\n\npath \"pea-forecast/data/keycloak\" {\n  capabilities = [\"read\"]\n}"
+      }'
+
+    echo "Backend policy created."
+
+    # Enable Kubernetes auth method
+    curl -s -X POST ${VAULT_ADDR}/v1/sys/auth/kubernetes \
+      -H "X-Vault-Token: $VAULT_TOKEN" \
+      -d '{"type": "kubernetes"}' || true
+
+    echo "Kubernetes auth enabled."
+
+    # Configure Kubernetes auth
+    # Get the Kubernetes API server address
+    KUBE_HOST="https://kubernetes.default.svc"
+    KUBE_CA_CERT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt | base64 | tr -d '\n')
+    TOKEN_REVIEWER_JWT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+
+    curl -s -X POST ${VAULT_ADDR}/v1/auth/kubernetes/config \
+      -H "X-Vault-Token: $VAULT_TOKEN" \
+      -d "{
+        \"kubernetes_host\": \"$KUBE_HOST\",
+        \"kubernetes_ca_cert\": \"$(cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt)\",
+        \"token_reviewer_jwt\": \"$TOKEN_REVIEWER_JWT\"
+      }"
+
+    echo "Kubernetes auth configured."
+
+    # Create role for backend service account
+    curl -s -X POST ${VAULT_ADDR}/v1/auth/kubernetes/role/pea-forecast-backend \
+      -H "X-Vault-Token: $VAULT_TOKEN" \
+      -d '{
+        "bound_service_account_names": ["backend", "default"],
+        "bound_service_account_namespaces": ["pea-forecast"],
+        "policies": ["pea-forecast-backend"],
+        "ttl": "24h"
+      }'
+
+    echo "Backend Kubernetes role created."
+
+    # Enable audit logging (TOR 7.1.6 requirement)
+    curl -s -X PUT ${VAULT_ADDR}/v1/sys/audit/file \
+      -H "X-Vault-Token: $VAULT_TOKEN" \
+      -d '{"type": "file", "options": {"file_path": "/vault/logs/audit.log"}}' || true
+
+    echo "Audit logging enabled."
+
+    echo ""
+    echo "=== Vault Configuration Complete ==="
+    echo "Vault UI: http://localhost:30820 (NodePort)"
+    echo "Secrets path: pea-forecast/"
+    echo ""
+    echo "To access secrets from backend:"
+    echo "  1. Use Vault Agent Injector (recommended)"
+    echo "  2. Or use HVAC Python library"
+    echo ""
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-init
+  namespace: vault
+  labels:
+    app.kubernetes.io/name: vault-init
+spec:
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      serviceAccountName: vault
+      restartPolicy: OnFailure
+      containers:
+        - name: vault-init
+          image: curlimages/curl:8.5.0
+          command: ["/bin/sh", "/scripts/init-vault.sh"]
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: init-output
+              mountPath: /vault-init
+          env:
+            - name: VAULT_ADDR
+              value: "http://vault:8200"
+      volumes:
+        - name: scripts
+          configMap:
+            name: vault-init-scripts
+            defaultMode: 0755
+        - name: init-output
+          emptyDir: {}

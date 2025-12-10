@@ -208,3 +208,41 @@ monitoring:
 # Enable in production for zero-trust networking
 networkPolicy:
   enabled: false  # Enable in production
+
+# HashiCorp Vault Configuration (TOR Table 2: Key Management)
+vault:
+  enabled: false  # Enable in production for secrets management
+  address: "http://vault.vault.svc.cluster.local:8200"
+  role: "pea-forecast-backend"
+  mountPoint: "pea-forecast"
+  # Agent injector annotations (added to backend deployment when enabled)
+  agent:
+    enabled: false
+    inject: true
+    image: "hashicorp/vault:1.21.1"
+    secrets:
+      - path: "pea-forecast/data/database"
+        template: |
+          {{- with secret "pea-forecast/data/database" -}}
+          export DATABASE_URL="{{ .Data.data.DATABASE_URL }}"
+          export DB_USER="{{ .Data.data.DB_USER }}"
+          export DB_PASSWORD="{{ .Data.data.DB_PASSWORD }}"
+          {{- end }}
+      - path: "pea-forecast/data/redis"
+        template: |
+          {{- with secret "pea-forecast/data/redis" -}}
+          export REDIS_URL="{{ .Data.data.REDIS_URL }}"
+          {{- end }}
+      - path: "pea-forecast/data/app"
+        template: |
+          {{- with secret "pea-forecast/data/app" -}}
+          export APP_SECRET_KEY="{{ .Data.data.APP_SECRET_KEY }}"
+          {{- end }}
+  # SDK-based secrets loading (alternative to agent injector)
+  sdk:
+    enabled: true  # Use Python hvac library
+    env:
+      VAULT_ENABLED: "true"
+      VAULT_ADDR: "http://vault.vault.svc.cluster.local:8200"
+      VAULT_ROLE: "pea-forecast-backend"
+      VAULT_MOUNT_POINT: "pea-forecast"

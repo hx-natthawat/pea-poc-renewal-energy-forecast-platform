@@ -1,0 +1,9 @@
+# Vault Namespace for PEA RE Forecast Platform
+# TOR Requirement: 7.1.6 - Security and Key Management
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vault
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/part-of: pea-re-forecast-platform
