@@ -1,0 +1,11 @@
+# Observability Namespace
+# TOR Requirement: Prometheus, Grafana, Jaeger, Opensearch
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    app.kubernetes.io/name: monitoring
+    app.kubernetes.io/part-of: pea-re-forecast-platform
+    kubernetes.io/metadata.name: monitoring

@@ -1,0 +1,188 @@
+# Prometheus Alert Rules
+# PEA RE Forecast Platform specific alerts
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: pea-re-forecast-platform
+data:
+  pea-forecast-alerts.yml: |
+    groups:
+      - name: pea-forecast-api
+        rules:
+          # API Latency Alert
+          - alert: APIHighLatency
+            expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="pea-backend"}[5m])) > 0.5
+            for: 5m
+            labels:
+              severity: warning
+              team: platform
+            annotations:
+              summary: "High API latency detected"
+              description: "API p95 latency is {{ $value | printf \"%.2f\" }}s (threshold: 500ms)"
+
+          # API Error Rate
+          - alert: APIHighErrorRate
+            expr: sum(rate(http_requests_total{job="pea-backend", status=~"5.."}[5m])) / sum(rate(http_requests_total{job="pea-backend"}[5m])) > 0.05
+            for: 5m
+            labels:
+              severity: critical
+              team: platform
+            annotations:
+              summary: "High API error rate"
+              description: "API error rate is {{ $value | printf \"%.2f\" }}% (threshold: 5%)"
+
+          # Backend Pod Down
+          - alert: BackendPodDown
+            expr: absent(up{job="pea-backend"} == 1)
+            for: 2m
+            labels:
+              severity: critical
+              team: platform
+            annotations:
+              summary: "Backend API is down"
+              description: "No healthy backend pods detected"
+
+      - name: pea-forecast-ml
+        rules:
+          # Solar Forecast Accuracy
+          - alert: SolarForecastHighMAPE
+            expr: pea_solar_forecast_mape > 10
+            for: 15m
+            labels:
+              severity: warning
+              team: ml
+            annotations:
+              summary: "Solar forecast accuracy degraded"
+              description: "Solar MAPE is {{ $value | printf \"%.2f\" }}% (target: <10%)"
+
+          # Voltage Prediction Accuracy
+          - alert: VoltageHighMAE
+            expr: pea_voltage_prediction_mae > 2
+            for: 15m
+            labels:
+              severity: warning
+              team: ml
+            annotations:
+              summary: "Voltage prediction accuracy degraded"
+              description: "Voltage MAE is {{ $value | printf \"%.2f\" }}V (target: <2V)"
+
+          # Model Inference Latency
+          - alert: ModelInferenceSlowdown
+            expr: histogram_quantile(0.95, rate(pea_model_inference_duration_seconds_bucket[5m])) > 1
+            for: 5m
+            labels:
+              severity: warning
+              team: ml
+            annotations:
+              summary: "ML model inference is slow"
+              description: "Model inference p95 is {{ $value | printf \"%.2f\" }}s"
+
+      - name: pea-forecast-voltage
+        rules:
+          # Voltage Over-limit Alert
+          - alert: VoltageOverLimit
+            expr: pea_prosumer_voltage > 242
+            for: 1m
+            labels:
+              severity: critical
+              team: operations
+            annotations:
+              summary: "Voltage exceeds upper limit"
+              description: "Prosumer {{ $labels.prosumer_id }} voltage is {{ $value }}V (limit: 242V)"
+
+          # Voltage Under-limit Alert
+          - alert: VoltageUnderLimit
+            expr: pea_prosumer_voltage < 218
+            for: 1m
+            labels:
+              severity: critical
+              team: operations
+            annotations:
+              summary: "Voltage below lower limit"
+              description: "Prosumer {{ $labels.prosumer_id }} voltage is {{ $value }}V (limit: 218V)"
+
+          # High Voltage Alert Count
+          - alert: TooManyVoltageAlerts
+            expr: sum(increase(pea_voltage_alerts_total[1h])) > 50
+            for: 5m
+            labels:
+              severity: warning
+              team: operations
+            annotations:
+              summary: "High volume of voltage alerts"
+              description: "{{ $value }} voltage alerts in the last hour"
+
+      - name: pea-forecast-database
+        rules:
+          # Database Connection Issues
+          - alert: DatabaseConnectionFailure
+            expr: pea_database_connections_active == 0
+            for: 1m
+            labels:
+              severity: critical
+              team: platform
+            annotations:
+              summary: "Database connection failure"
+              description: "No active database connections"
+
+          # High Database Query Time
+          - alert: DatabaseSlowQueries
+            expr: histogram_quantile(0.95, rate(pea_database_query_duration_seconds_bucket[5m])) > 1
+            for: 5m
+            labels:
+              severity: warning
+              team: platform
+            annotations:
+              summary: "Database queries are slow"
+              description: "Query p95 latency is {{ $value | printf \"%.2f\" }}s"
+
+          # Redis Connection Issues
+          - alert: RedisConnectionFailure
+            expr: pea_redis_connected == 0
+            for: 1m
+            labels:
+              severity: warning
+              team: platform
+            annotations:
+              summary: "Redis connection failure"
+              description: "Backend cannot connect to Redis cache"
+
+      - name: pea-forecast-infrastructure
+        rules:
+          # Pod Memory Usage High
+          - alert: PodHighMemoryUsage
+            expr: container_memory_usage_bytes{namespace="pea-forecast"} / container_spec_memory_limit_bytes{namespace="pea-forecast"} > 0.85
+            for: 5m
+            labels:
+              severity: warning
+              team: platform
+            annotations:
+              summary: "High memory usage"
+              description: "Pod {{ $labels.pod }} memory usage is {{ $value | humanizePercentage }}"
+
+          # Pod CPU Usage High
+          - alert: PodHighCPUUsage
+            expr: rate(container_cpu_usage_seconds_total{namespace="pea-forecast"}[5m]) / container_spec_cpu_quota{namespace="pea-forecast"} * 100000 > 80
+            for: 5m
+            labels:
+              severity: warning
+              team: platform
+            annotations:
+              summary: "High CPU usage"
+              description: "Pod {{ $labels.pod }} CPU usage is high"
+
+          # PVC Usage High
+          - alert: PVCHighUsage
+            expr: kubelet_volume_stats_used_bytes{namespace="pea-forecast"} / kubelet_volume_stats_capacity_bytes{namespace="pea-forecast"} > 0.85
+            for: 5m
+            labels:
+              severity: warning
+              team: platform
+            annotations:
+              summary: "High storage usage"
+              description: "PVC {{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full"
