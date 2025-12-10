@@ -7,6 +7,7 @@ import {
   Bell,
   Calendar,
   Gauge,
+  Globe,
   Menu,
   Settings,
   Shield,
@@ -92,6 +93,11 @@ const NetworkTopology = dynamic(
   { loading: () => <DashboardSkeleton /> }
 );
 
+const TORPortal = dynamic(
+  () => import("@/components/dashboard").then((mod) => ({ default: mod.TORPortal })),
+  { loading: () => <DashboardSkeleton /> }
+);
+
 // Loading skeletons
 function ChartSkeleton() {
   return (
@@ -121,8 +127,8 @@ export default function Home() {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "solar" | "voltage" | "grid" | "alerts" | "history"
-  >("overview");
+    "tor" | "overview" | "solar" | "voltage" | "grid" | "alerts" | "history"
+  >("tor");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -144,6 +150,7 @@ export default function Home() {
   }, []);
 
   const tabs = [
+    { id: "tor", label: "TOR Functions", shortLabel: "TOR", icon: Globe },
     { id: "overview", label: "Overview", shortLabel: "Home", icon: BarChart3 },
     { id: "solar", label: "Solar Forecast", shortLabel: "Solar", icon: Sun },
     { id: "voltage", label: "Voltage Monitor", shortLabel: "Voltage", icon: Zap },
@@ -297,6 +304,11 @@ export default function Home() {
               Run: <code className="bg-amber-100 px-1 rounded text-xs">docker compose up -d</code>
             </p>
           </div>
+        )}
+
+        {/* TOR Functions Tab */}
+        {activeTab === "tor" && (
+          <TORPortal onNavigate={(tab) => setActiveTab(tab as typeof activeTab)} />
         )}
 
         {/* Overview Tab */}
