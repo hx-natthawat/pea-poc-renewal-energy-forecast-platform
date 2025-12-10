@@ -183,7 +183,8 @@
       "Bash(pnpm dev)",
       "Bash(pnpm install:*)",
       "Bash(DATABASE_URL=\"postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast\":*)",
-      "Bash(./venv/bin/uvicorn:*)"
+      "Bash(./venv/bin/uvicorn:*)",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": []

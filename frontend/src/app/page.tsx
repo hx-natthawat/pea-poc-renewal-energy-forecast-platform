@@ -130,6 +130,7 @@ export default function Home() {
     "tor" | "overview" | "solar" | "voltage" | "grid" | "alerts" | "history"
   >("tor");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     const checkHealth = async () => {
@@ -203,12 +204,65 @@ export default function Home() {
                 size="sm"
                 label="Open help"
               />
-              <button
-                type="button"
-                className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors hidden sm:block"
-              >
-                <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+              {/* Settings Dropdown */}
+              <div className="relative hidden sm:block">
+                <button
+                  type="button"
+                  className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  onClick={() => setSettingsOpen(!settingsOpen)}
+                >
+                  <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+                {settingsOpen && (
+                  <>
+                    <button
+                      type="button"
+                      className="fixed inset-0 z-40 cursor-default"
+                      onClick={() => setSettingsOpen(false)}
+                      aria-label="Close settings menu"
+                    />
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50 py-2">
+                      <div className="px-3 py-2 border-b border-gray-100">
+                        <p className="text-xs font-semibold text-gray-500 uppercase">Settings</p>
+                      </div>
+                      <a
+                        href="/audit"
+                        className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        <Shield className="w-4 h-4 mr-3 text-gray-400" />
+                        Audit Logs
+                      </a>
+                      <button
+                        type="button"
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => {
+                          setActiveTab("alerts");
+                          setSettingsOpen(false);
+                        }}
+                      >
+                        <Bell className="w-4 h-4 mr-3 text-gray-400" />
+                        Alert Settings
+                      </button>
+                      <div className="border-t border-gray-100 mt-2 pt-2">
+                        <div className="px-3 py-2">
+                          <p className="text-xs text-gray-500">API Status</p>
+                          <div className="flex items-center mt-1">
+                            <span
+                              className={`w-2 h-2 rounded-full mr-2 ${health ? "bg-green-500" : "bg-red-500"}`}
+                            />
+                            <span className="text-sm text-gray-700">
+                              {health ? "Connected" : "Disconnected"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border-t border-gray-100 mt-2 pt-2 px-3 py-2">
+                        <p className="text-xs text-gray-400">Version 0.1.0 (POC)</p>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
               {/* Mobile menu button */}
               <button
                 type="button"
