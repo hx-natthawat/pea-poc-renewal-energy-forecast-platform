@@ -191,7 +191,11 @@
       "Bash(/dev/null echo echo '4. Active Alerts:' curl -s http://localhost:9090/api/v1/query?query=ALERTS{alertstate=\"\"firing\"\"})",
       "Bash('http://localhost:3001/api/dashboards/db')",
       "Bash(git check-ignore:*)",
-      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff frontend/package.json)"
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff frontend/package.json)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform show HEAD:frontend/package.json)",
+      "Bash(pnpm view:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform checkout frontend/package.json)"
     ],
     "deny": [],
     "ask": []
