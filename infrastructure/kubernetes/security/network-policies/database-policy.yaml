@@ -1,0 +1,95 @@
+# Database (TimescaleDB) Network Policy
+# TOR Requirement: 7.1.3 - Zero-Trust Networking
+#
+# Allows:
+# - Ingress from backend pods only (port 5432)
+# - Egress to DNS (for hostname resolution)
+#
+# Denies all other traffic for maximum data protection
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: timescaledb-network-policy
+  namespace: pea-forecast
+  labels:
+    app.kubernetes.io/name: timescaledb
+    app.kubernetes.io/part-of: pea-re-forecast-platform
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: timescaledb
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # Only allow traffic from backend pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: backend
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow traffic from ML service (if deployed separately)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ml-service
+      ports:
+        - protocol: TCP
+          port: 5432
+
+  egress:
+    # Allow DNS resolution only
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# Redis Network Policy
+# Allows only backend access
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-network-policy
+  namespace: pea-forecast
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/part-of: pea-re-forecast-platform
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # Only allow traffic from backend pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: backend
+      ports:
+        - protocol: TCP
+          port: 6379
+
+  egress:
+    # Redis typically doesn't need egress, but allow DNS
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
