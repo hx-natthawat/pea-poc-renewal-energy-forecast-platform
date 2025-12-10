@@ -76,14 +76,30 @@
 - ArgoCD GitOps ready
 - Kind cluster tested
 
-### Observability Stack
+### Observability Stack (TOR Requirement)
 
-- Prometheus metrics collection
-- Grafana dashboards
-- Alert rules for all components
-- Jaeger tracing
+- **Prometheus v2.48.0**: Metrics collection with 15s scrape interval
+- **Grafana v10.2.0**: Dashboards with Prometheus datasource
+- **AlertManager v0.26.0**: Team-based alert routing (ML, Operations, Platform)
+- Alert rules: API latency, voltage limits (218-242V), MAPE/MAE thresholds
+- Jaeger tracing (planned)
 
-### Security
+### Security (TOR 7.1.3, 7.1.6)
+
+**Secrets Management (HashiCorp Vault)**:
+
+- Vault v1.15 with Kubernetes auth method
+- Backend integration via hvac client
+- Environment fallback for development
+
+**Network Policies (Zero-Trust)**:
+
+- Default deny-all baseline
+- Backend, Frontend, Database policies
+- Cross-namespace Vault access
+- Egress limited to DNS and required services
+
+**Security Scanning**:
 
 - Trivy vulnerability scanning
 - SonarQube code analysis
@@ -97,16 +113,18 @@
 
 ## Key Files
 
-| Category       | Path                                        |
-| -------------- | ------------------------------------------- |
-| Backend Entry  | `backend/app/main.py`                     |
-| Frontend Entry | `frontend/src/app/page.tsx`               |
-| ML Models      | `ml/models/`                              |
-| Helm Charts    | `infrastructure/helm/pea-re-forecast/`    |
-| CI/CD          | `.gitlab-ci.yml`                          |
-| Observability  | `docker/docker-compose.observability.yml` |
-| Security       | `docker/docker-compose.security.yml`      |
-| Load Tests     | `tests/load/locustfile.py`                |
+| Category         | Path                                                     |
+| ---------------- | -------------------------------------------------------- |
+| Backend Entry    | `backend/app/main.py`                                    |
+| Frontend Entry   | `frontend/src/app/page.tsx`                              |
+| ML Models        | `ml/models/`                                             |
+| Helm Charts      | `infrastructure/helm/pea-re-forecast/`                   |
+| CI/CD            | `.gitlab-ci.yml`                                         |
+| Observability    | `infrastructure/kubernetes/observability/`               |
+| Network Policies | `infrastructure/kubernetes/security/network-policies/`   |
+| Vault            | `infrastructure/kubernetes/security/vault/`              |
+| Secrets Module   | `backend/app/core/secrets.py`                            |
+| Load Tests       | `tests/load/locustfile.py`                               |
 
 ---
 
@@ -150,6 +168,17 @@ None - all critical issues resolved.
 
 *Phase 2a completed December 6, 2025. UI components added for Load/Demand/Imbalance forecasts.*
 
+### Phase 3: Infrastructure (TOR 7.1.3, 7.1.6, Table 2)
+
+| Component          | TOR Ref   | Status      | Implementation                            |
+| ------------------ | --------- | ----------- | ----------------------------------------- |
+| Vault Secrets      | Table 2   | ✅ Complete | HashiCorp Vault v1.15 + K8s auth          |
+| Network Policies   | 7.1.3     | ✅ Complete | Zero-trust with default deny              |
+| Observability      | Table 2   | ✅ Complete | Prometheus + Grafana + AlertManager       |
+| TLS/cert-manager   | 7.1.3     | ⏳ Pending  | Production certificates                   |
+
+*Phase 3 infrastructure completed December 10, 2025.*
+
 ### Next Steps
 
 1. ~~Fix remaining test failures~~ ✅ Complete
@@ -159,10 +188,13 @@ None - all critical issues resolved.
 5. ~~Add multi-region support~~ ✅ Complete
 6. ~~Phase 2a: Load/Demand/Imbalance APIs~~ ✅ Complete
 7. ~~Phase 2a: Grid Operations UI (Load/Demand/Imbalance)~~ ✅ Complete
-8. Deploy to staging environment
-9. Conduct UAT with stakeholders
-10. Production deployment
-11. Phase 2b: DOE implementation (requires network model)
+8. ~~Phase 3: Vault secrets management~~ ✅ Complete
+9. ~~Phase 3: Network Policies~~ ✅ Complete
+10. ~~Phase 3: Observability Stack~~ ✅ Complete
+11. Deploy to staging environment
+12. Conduct UAT with stakeholders
+13. Production deployment
+14. Phase 2b: DOE implementation (requires network model)
 
 ---
 
@@ -230,4 +262,4 @@ The platform is **ready for staging deployment**:
 ---
 
 *Generated: December 4, 2025*
-*Updated: December 6, 2025*
+*Updated: December 10, 2025*
