@@ -1,0 +1,99 @@
+_format_version: "3.0"
+_transform: true
+
+# =============================================================================
+# Kong Declarative Configuration
+# Path-Based Routing for PEA RE Forecast Platform
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Backend API Service (FastAPI)
+  # Route: /api/* → backend:8000
+  # ---------------------------------------------------------------------------
+  - name: backend-api
+    url: http://host.docker.internal:8000
+    routes:
+      - name: backend-api-route
+        paths:
+          - /api
+        strip_path: false
+        preserve_host: true
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 1000
+          policy: local
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Request-ID
+          exposed_headers:
+            - X-Request-ID
+          credentials: true
+          max_age: 3600
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Forwarded-Via: kong"
+
+  # ---------------------------------------------------------------------------
+  # ML Service
+  # Route: /ml/* → ml-service:8001
+  # ---------------------------------------------------------------------------
+  - name: ml-service
+    url: http://host.docker.internal:8001
+    routes:
+      - name: ml-service-route
+        paths:
+          - /ml
+        strip_path: true
+        preserve_host: true
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 500
+          policy: local
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Forwarded-Via: kong"
+
+  # ---------------------------------------------------------------------------
+  # Frontend Service (Next.js)
+  # Route: /* → frontend:3000 (catch-all, lowest priority)
+  # ---------------------------------------------------------------------------
+  - name: frontend
+    url: http://host.docker.internal:3000
+    routes:
+      - name: frontend-route
+        paths:
+          - /
+        strip_path: false
+        preserve_host: true
+        # Lower regex priority ensures this is the fallback
+        regex_priority: 0
+
+# =============================================================================
+# Global Plugins
+# =============================================================================
+plugins:
+  # Add correlation ID to all requests
+  - name: correlation-id
+    config:
+      header_name: X-Request-ID
+      generator: uuid
+      echo_downstream: true

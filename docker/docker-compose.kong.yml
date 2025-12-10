@@ -1,0 +1,55 @@
+# Kong API Gateway - Docker Compose
+# TOR 7.1.3 Compliant API Gateway
+#
+# Usage:
+#   docker-compose -f docker/docker-compose.kong.yml up -d
+#
+# Access:
+#   - Kong Proxy: http://localhost:8080 (routes to services)
+#   - Kong Admin: http://localhost:8001 (management API)
+
+services:
+  kong:
+    image: kong:3.8
+    container_name: pea-kong
+    environment:
+      # DB-less mode (declarative configuration)
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
+
+      # Proxy settings
+      KONG_PROXY_LISTEN: "0.0.0.0:8080, 0.0.0.0:8443 ssl"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001"
+
+      # Logging
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+
+      # Performance
+      KONG_NGINX_WORKER_PROCESSES: "2"
+
+    volumes:
+      - ./kong:/kong/declarative:ro
+    ports:
+      - "8888:8080"   # Proxy port (main entry point)
+      - "8444:8443"   # Proxy SSL port
+      - "8881:8001"   # Admin API port
+    networks:
+      - pea-network
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+    # Allow access to host services
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  pea-network:
+    external: true
+    name: docker_default
