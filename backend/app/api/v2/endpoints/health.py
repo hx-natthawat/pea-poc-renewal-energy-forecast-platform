@@ -11,6 +11,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from app.core.config import settings
+from app.core.health import is_ready, run_all_checks
 from app.core.versioning import APIVersion, create_versioned_response
 
 router = APIRouter()
@@ -54,36 +55,22 @@ async def health_check() -> dict[str, Any]:
     """
     uptime = (datetime.now() - _start_time).total_seconds()
 
-    # Check component health (placeholder - implement actual checks)
+    # Run actual health checks
+    checks, overall_status = await run_all_checks()
+
+    # Convert to ComponentHealth models
     components = [
         ComponentHealth(
-            name="database",
-            status="healthy",
-            latency_ms=5.2,
-            message="PostgreSQL connection OK",
-        ),
-        ComponentHealth(
-            name="cache",
-            status="healthy",
-            latency_ms=1.1,
-            message="Redis connection OK",
-        ),
-        ComponentHealth(
-            name="ml_models",
-            status="healthy",
-            message="All models loaded",
-        ),
+            name=check.name,
+            status=check.status.value,
+            latency_ms=check.latency_ms,
+            message=check.message,
+        )
+        for check in checks
     ]
 
-    # Determine overall status
-    overall_status = "healthy"
-    if any(c.status == "unhealthy" for c in components):
-        overall_status = "unhealthy"
-    elif any(c.status == "degraded" for c in components):
-        overall_status = "degraded"
-
     data = HealthResponse(
-        status=overall_status,
+        status=overall_status.value,
         timestamp=datetime.now().isoformat(),
         service=settings.APP_NAME,
         version=settings.APP_VERSION,
@@ -121,17 +108,12 @@ async def readiness_probe() -> dict[str, Any]:
 
     Checks if the service is ready to accept traffic.
     """
-    # TODO: Add actual readiness checks (DB, cache, models)
-    ready = True
+    ready, checks = await is_ready()
 
     return create_versioned_response(
         data={
             "status": "ready" if ready else "not_ready",
-            "checks": {
-                "database": True,
-                "cache": True,
-                "models": True,
-            },
+            "checks": checks,
         },
         version=APIVersion.V2,
     )

@@ -28,6 +28,9 @@ from app.core.rate_limit import RateLimitConfig, RateLimitMiddleware
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     """Application lifespan manager for startup/shutdown events."""
+    from app.core.cache import cache
+    from app.db.session import engine
+
     # Startup
     print(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
 
@@ -38,14 +41,34 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     set_model_loaded("solar", "v1.0.0", False)
     set_model_loaded("voltage", "v1.0.0", False)
 
-    # TODO: Initialize database connections
-    # TODO: Initialize Redis connection
-    # TODO: Load ML models
+    # Initialize Redis connection (optional - graceful degradation if unavailable)
+    try:
+        await cache.connect()
+        print("Redis cache connected")
+    except Exception as e:
+        print(f"Redis cache unavailable (will operate without cache): {e}")
+
+    # Database connection pool is lazy-initialized by SQLAlchemy
+    # No explicit connection needed here
+
     yield
+
     # Shutdown
     print(f"Shutting down {settings.APP_NAME}")
-    # TODO: Close database connections
-    # TODO: Close Redis connection
+
+    # Close Redis connection
+    try:
+        await cache.disconnect()
+        print("Redis cache disconnected")
+    except Exception:
+        pass
+
+    # Dispose database engine
+    try:
+        await engine.dispose()
+        print("Database connections closed")
+    except Exception:
+        pass
 
 
 app = FastAPI(

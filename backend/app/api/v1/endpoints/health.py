@@ -7,6 +7,8 @@ from typing import Any
 
 from fastapi import APIRouter
 
+from app.core.health import is_ready
+
 router = APIRouter()
 
 
@@ -32,17 +34,15 @@ async def readiness_check() -> dict[str, Any]:
     Checks if the application is ready to serve requests.
     This includes database and cache connectivity.
     """
-    # TODO: Add actual database and Redis connectivity checks
-    checks = {
-        "database": "ok",
-        "redis": "ok",
-        "ml_models": "ok",
+    ready, checks = await is_ready()
+
+    # Convert bool checks to status strings for backward compatibility
+    check_status = {
+        name: "ok" if status else "error" for name, status in checks.items()
     }
 
-    all_healthy = all(status == "ok" for status in checks.values())
-
     return {
-        "status": "ready" if all_healthy else "not_ready",
+        "status": "ready" if ready else "not_ready",
         "timestamp": datetime.now(UTC).isoformat(),
-        "checks": checks,
+        "checks": check_status,
     }
