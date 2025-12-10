@@ -124,6 +124,7 @@
 | Network Policies | `infrastructure/kubernetes/security/network-policies/`   |
 | Vault            | `infrastructure/kubernetes/security/vault/`              |
 | TLS/cert-manager | `infrastructure/kubernetes/security/cert-manager/`       |
+| Kong API Gateway | `infrastructure/kubernetes/ingress/kong/`                |
 | Secrets Module   | `backend/app/core/secrets.py`                            |
 | Load Tests       | `tests/load/locustfile.py`                               |
 
@@ -177,6 +178,7 @@ None - all critical issues resolved.
 | Network Policies   | 7.1.3     | ✅ Complete | Zero-trust with default deny              |
 | Observability      | Table 2   | ✅ Complete | Prometheus + Grafana + AlertManager       |
 | TLS/cert-manager   | 7.1.3     | ✅ Complete | Let's Encrypt + self-signed dev certs     |
+| API Gateway        | 7.1.3     | ✅ Complete | Kong 3.8 with path-based routing          |
 
 *Phase 3 infrastructure completed December 10, 2025.*
 
