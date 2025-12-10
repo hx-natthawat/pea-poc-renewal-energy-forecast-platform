@@ -69,9 +69,9 @@ The observability stack provides comprehensive monitoring, alerting, and visuali
 
 | Component | Version | Port | Purpose |
 |-----------|---------|------|---------|
-| Prometheus | v2.48.0 | 9090 | Metrics collection |
-| Grafana | v10.2.0 | 3000 | Visualization |
-| AlertManager | v0.26.0 | 9093 | Alert routing |
+| Prometheus | v3.8.0 | 9090 | Metrics collection |
+| Grafana | v12.3.0 | 3000 | Visualization |
+| AlertManager | v0.29.0 | 9093 | Alert routing |
 
 ## Deployment
 

@@ -78,9 +78,9 @@
 
 ### Observability Stack (TOR Requirement)
 
-- **Prometheus v2.48.0**: Metrics collection with 15s scrape interval
-- **Grafana v10.2.0**: Dashboards with Prometheus datasource
-- **AlertManager v0.26.0**: Team-based alert routing (ML, Operations, Platform)
+- **Prometheus v3.8.0**: Metrics collection with 15s scrape interval
+- **Grafana v12.3.0**: Dashboards with Prometheus datasource
+- **AlertManager v0.29.0**: Team-based alert routing (ML, Operations, Platform)
 - Alert rules: API latency, voltage limits (218-242V), MAPE/MAE thresholds
 - Jaeger tracing (planned)
 
