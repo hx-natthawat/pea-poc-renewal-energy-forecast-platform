@@ -20,6 +20,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { HelpSidebar, HelpTrigger } from "@/components/help";
+import { ErrorBanner } from "@/components/ui";
 import { getApiBaseUrl } from "@/lib/api";
 
 interface HealthStatus {
@@ -28,48 +29,22 @@ interface HealthStatus {
   service: string;
 }
 
-interface NavTab {
-  id: string;
-  href: string;
-  label: string;
-  shortLabel: string;
-  icon: typeof BarChart3;
-}
-
-const navTabs: NavTab[] = [
-  { id: "tor", href: "/", label: "TOR Functions", shortLabel: "TOR", icon: Globe },
-  { id: "overview", href: "/overview", label: "Overview", shortLabel: "Home", icon: BarChart3 },
-  { id: "solar", href: "/solar", label: "Solar Forecast", shortLabel: "Solar", icon: Sun },
-  { id: "voltage", href: "/voltage", label: "Voltage Monitor", shortLabel: "Voltage", icon: Zap },
-  { id: "grid", href: "/grid", label: "Grid Operations", shortLabel: "Grid", icon: Gauge },
-  { id: "alerts", href: "/alerts", label: "Alerts", shortLabel: "Alerts", icon: Bell },
-  { id: "history", href: "/history", label: "History", shortLabel: "History", icon: Calendar },
+const navItems = [
+  { id: "tor", path: "/", label: "TOR Functions", shortLabel: "TOR", icon: Globe },
+  { id: "overview", path: "/overview", label: "Overview", shortLabel: "Home", icon: BarChart3 },
+  { id: "solar", path: "/solar", label: "Solar Forecast", shortLabel: "Solar", icon: Sun },
+  { id: "voltage", path: "/voltage", label: "Voltage Monitor", shortLabel: "Voltage", icon: Zap },
+  { id: "grid", path: "/grid", label: "Grid Operations", shortLabel: "Grid", icon: Gauge },
+  { id: "alerts", path: "/alerts", label: "Alerts", shortLabel: "Alerts", icon: Bell },
+  { id: "history", path: "/history", label: "History", shortLabel: "History", icon: Calendar },
 ];
 
-interface DashboardShellProps {
-  children: React.ReactNode;
-  activeTab?: string;
-  showTabs?: boolean;
-}
-
-export function DashboardShell({ children, activeTab, showTabs = true }: DashboardShellProps) {
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const pathname = usePathname();
-
-  // Determine active state based on pathname
-  const getActiveTab = () => {
-    if (activeTab) return activeTab;
-    if (pathname === "/") return "tor";
-    if (pathname === "/audit") return "audit";
-    const tab = navTabs.find((t) => t.href !== "/" && pathname.startsWith(t.href));
-    return tab?.id || "tor";
-  };
-
-  const currentActiveTab = getActiveTab();
-  const isAuditPage = pathname === "/audit";
 
   useEffect(() => {
     const checkHealth = async () => {
@@ -89,8 +64,13 @@ export function DashboardShell({ children, activeTab, showTabs = true }: Dashboa
     return () => clearInterval(interval);
   }, []);
 
+  const isActive = (path: string) => {
+    if (path === "/") return pathname === "/";
+    return pathname.startsWith(path);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <main className="min-h-screen bg-gray-50">
       {/* Header - PEA Brand Purple */}
       <header className="bg-gradient-to-r from-[#74045F] to-[#5A0349] text-white shadow-lg sticky top-0 z-50">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
@@ -122,9 +102,7 @@ export function DashboardShell({ children, activeTab, showTabs = true }: Dashboa
               )}
               <Link
                 href="/audit"
-                className={`p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors hidden sm:block ${
-                  isAuditPage ? "bg-white/20" : ""
-                }`}
+                className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors hidden sm:block"
                 title="Audit Logs"
               >
                 <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -186,7 +164,7 @@ export function DashboardShell({ children, activeTab, showTabs = true }: Dashboa
                         </div>
                       </div>
                       <div className="border-t border-gray-100 mt-2 pt-2 px-3 py-2">
-                        <p className="text-xs text-gray-400">Version 1.0.0 (POC)</p>
+                        <p className="text-xs text-gray-400">Version 0.1.0 (POC)</p>
                       </div>
                     </div>
                   </>
@@ -205,127 +183,101 @@ export function DashboardShell({ children, activeTab, showTabs = true }: Dashboa
         </div>
 
         {/* Navigation Tabs - Desktop */}
-        {showTabs && (
-          <div className="container mx-auto px-3 sm:px-4 hidden sm:block">
-            <nav className="flex space-x-1 overflow-x-auto scrollbar-hide">
-              {navTabs.map((tab) => (
-                <Link
-                  key={tab.id}
-                  href={tab.href}
-                  className={`flex items-center px-3 md:px-4 py-2.5 md:py-3 text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
-                    currentActiveTab === tab.id
-                      ? "bg-white text-[#74045F] rounded-t-lg"
-                      : "text-[#D4A43D] hover:text-white hover:bg-white/10 rounded-t-lg"
-                  }`}
-                >
-                  <tab.icon className="w-4 h-4 mr-1.5 md:mr-2" />
-                  <span className="hidden md:inline">{tab.label}</span>
-                  <span className="md:hidden">{tab.shortLabel}</span>
-                </Link>
-              ))}
-              {/* Audit tab in nav when on audit page */}
-              {isAuditPage && (
-                <Link
-                  href="/audit"
-                  className="flex items-center px-3 md:px-4 py-2.5 md:py-3 text-xs md:text-sm font-medium transition-colors whitespace-nowrap bg-white text-[#74045F] rounded-t-lg"
-                >
-                  <Shield className="w-4 h-4 mr-1.5 md:mr-2" />
-                  <span className="hidden md:inline">Audit Logs</span>
-                  <span className="md:hidden">Audit</span>
-                </Link>
-              )}
-            </nav>
-          </div>
-        )}
+        <div className="container mx-auto px-3 sm:px-4 hidden sm:block">
+          <nav className="flex space-x-1 overflow-x-auto scrollbar-hide" suppressHydrationWarning>
+            {navItems.map((item) => (
+              <Link
+                key={item.id}
+                href={item.path}
+                className={`flex items-center px-3 md:px-4 py-2.5 md:py-3 text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
+                  isActive(item.path)
+                    ? "bg-white text-[#74045F] rounded-t-lg"
+                    : "text-[#D4A43D] hover:text-white hover:bg-white/10 rounded-t-lg"
+                }`}
+              >
+                <item.icon className="w-4 h-4 mr-1.5 md:mr-2" />
+                <span className="hidden md:inline">{item.label}</span>
+                <span className="md:hidden">{item.shortLabel}</span>
+              </Link>
+            ))}
+          </nav>
+        </div>
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
           <div className="sm:hidden bg-[#5A0349] border-t border-white/10">
-            <nav className="container mx-auto px-3 py-2">
-              {navTabs.map((tab) => (
+            <nav className="container mx-auto px-3 py-2" suppressHydrationWarning>
+              {navItems.map((item) => (
                 <Link
-                  key={tab.id}
-                  href={tab.href}
+                  key={item.id}
+                  href={item.path}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center w-full px-3 py-3 text-sm font-medium transition-colors rounded-lg mb-1 ${
-                    currentActiveTab === tab.id
+                    isActive(item.path)
                       ? "bg-white text-[#74045F]"
                       : "text-[#D4A43D] hover:text-white hover:bg-white/10"
                   }`}
                 >
-                  <tab.icon className="w-5 h-5 mr-3" />
-                  {tab.label}
+                  <item.icon className="w-5 h-5 mr-3" />
+                  {item.label}
                 </Link>
               ))}
-              <Link
-                href="/audit"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center w-full px-3 py-3 text-sm font-medium transition-colors rounded-lg mb-1 ${
-                  isAuditPage
-                    ? "bg-white text-[#74045F]"
-                    : "text-[#D4A43D] hover:text-white hover:bg-white/10"
-                }`}
-              >
-                <Shield className="w-5 h-5 mr-3" />
-                Audit Logs
-              </Link>
             </nav>
           </div>
         )}
-      </header>
 
-      {/* Main Content */}
-      <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 sm:pb-6">
-        {/* Status Banner */}
-        {error && (
-          <div className="bg-amber-50 border border-amber-200 text-amber-800 px-3 sm:px-4 py-2 sm:py-3 rounded-lg mb-4 sm:mb-6">
-            <div className="flex items-center">
-              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" />
-              <span className="font-medium text-sm sm:text-base">{error}</span>
-            </div>
-            <p className="text-xs sm:text-sm mt-1 text-amber-600 overflow-x-auto">
-              Run: <code className="bg-amber-100 px-1 rounded text-xs">docker compose up -d</code>
-            </p>
-          </div>
-        )}
-        {children}
-      </main>
-
-      {/* Mobile Bottom Navigation */}
-      {showTabs && (
+        {/* Mobile Bottom Navigation */}
         <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 pb-safe">
-          <nav className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory">
-            {navTabs.map((tab) => (
+          <nav
+            className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+            suppressHydrationWarning
+          >
+            {navItems.map((item) => (
               <Link
-                key={tab.id}
-                href={tab.href}
+                key={item.id}
+                href={item.path}
                 className={`flex flex-col items-center py-2 px-2 min-w-[52px] snap-center ${
-                  currentActiveTab === tab.id ? "text-[#74045F]" : "text-gray-500"
+                  isActive(item.path) ? "text-[#74045F]" : "text-gray-500"
                 }`}
               >
-                <tab.icon
-                  className={`w-5 h-5 ${currentActiveTab === tab.id ? "text-[#74045F]" : "text-gray-400"}`}
+                <item.icon
+                  className={`w-5 h-5 ${isActive(item.path) ? "text-[#74045F]" : "text-gray-400"}`}
                 />
                 <span className="text-[9px] mt-0.5 font-medium whitespace-nowrap">
-                  {tab.shortLabel}
+                  {item.shortLabel}
                 </span>
               </Link>
             ))}
           </nav>
         </div>
-      )}
+      </header>
 
-      {/* Footer - PEA Brand Purple */}
-      <footer className="bg-[#5A0349] text-white py-4 sm:py-6 mt-auto hidden sm:block">
+      {/* Main Content - Add bottom padding for mobile nav */}
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 sm:pb-6">
+        {/* Status Banner */}
+        {error && (
+          <ErrorBanner
+            message={error}
+            severity="error"
+            details="Run: docker compose up -d"
+            className="mb-4 sm:mb-6"
+          />
+        )}
+
+        {children}
+      </div>
+
+      {/* Footer - PEA Brand Purple - Hidden on mobile (bottom nav takes space) */}
+      <footer className="bg-[#5A0349] text-white py-4 sm:py-6 mt-4 sm:mt-8 hidden sm:block">
         <div className="container mx-auto px-4 text-center text-xs sm:text-sm">
           <p className="font-medium">PEA RE Forecast Platform - การไฟฟ้าส่วนภูมิภาค</p>
           <p className="mt-1 text-[#D4A43D]">Provincial Electricity Authority of Thailand</p>
-          <p className="mt-2 text-gray-300">Version 1.0.0 | TOR Compliant</p>
+          <p className="mt-2 text-gray-300">Version 0.1.0 (POC) | TOR Compliant</p>
         </div>
       </footer>
 
       {/* Help Sidebar */}
       <HelpSidebar />
-    </div>
+    </main>
   );
 }

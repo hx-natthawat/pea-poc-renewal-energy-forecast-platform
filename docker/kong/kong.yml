@@ -9,15 +9,16 @@ _transform: true
 services:
   # ---------------------------------------------------------------------------
   # Backend API Service (FastAPI)
-  # Route: /api/* → backend:8000
+  # Route: /backend/* → backend:8000 (strip /backend prefix)
+  # Frontend calls: /backend/api/v1/... → backend receives /api/v1/...
   # ---------------------------------------------------------------------------
   - name: backend-api
     url: http://host.docker.internal:8000
     routes:
       - name: backend-api-route
         paths:
-          - /api
-        strip_path: false
+          - /backend
+        strip_path: true
         preserve_host: true
     plugins:
       - name: rate-limiting
@@ -74,18 +75,16 @@ services:
 
   # ---------------------------------------------------------------------------
   # Frontend Service (Next.js)
-  # Route: /* → frontend:3000 (catch-all, lowest priority)
+  # Route: /console/* → frontend:3000 (explicit prefix for clean routing)
   # ---------------------------------------------------------------------------
   - name: frontend
     url: http://host.docker.internal:3000
     routes:
       - name: frontend-route
         paths:
-          - /
+          - /console
         strip_path: false
         preserve_host: true
-        # Lower regex priority ensures this is the fallback
-        regex_priority: 0
 
 # =============================================================================
 # Global Plugins

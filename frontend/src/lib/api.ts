@@ -23,16 +23,17 @@ export function getApiBaseUrl(): string {
 
   // Client-side: detect Kong gateway (port 8888) or direct access
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    // If accessing via Kong (port 8888), use same origin with /api path
+    // If accessing via Kong (port 8888), use /backend prefix
+    // Kong routes: /backend/* → backend:8000 (strips /backend)
     if (window.location.port === "8888") {
-      return `${window.location.protocol}//${window.location.host}`;
+      return `${window.location.protocol}//${window.location.host}/backend`;
     }
     // Direct frontend access (port 3000) - use backend at port 8000
     return "http://localhost:8000";
   }
 
-  // Production: use same host (assumes API is on same domain or proxied)
-  return `${window.location.protocol}//${window.location.host}`;
+  // Production: use /backend prefix (Kong gateway)
+  return `${window.location.protocol}//${window.location.host}/backend`;
 }
 
 /**

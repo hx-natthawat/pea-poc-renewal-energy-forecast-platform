@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+
 import AuditLogViewer from "@/components/admin/AuditLogViewer";
-import { DashboardShell } from "@/components/layout";
 
 export const metadata: Metadata = {
   title: "Audit Logs | PEA RE Forecast",
@@ -8,9 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function AuditPage() {
-  return (
-    <DashboardShell activeTab="audit">
-      <AuditLogViewer />
-    </DashboardShell>
-  );
+  return <AuditLogViewer />;
 }

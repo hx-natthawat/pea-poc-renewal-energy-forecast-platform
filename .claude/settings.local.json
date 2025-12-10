@@ -195,7 +195,11 @@
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff)",
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform show HEAD:frontend/package.json)",
       "Bash(pnpm view:*)",
-      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform checkout frontend/package.json)"
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform checkout frontend/package.json)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff HEAD -- frontend/package.json)",
+      "Bash(jq -r \".data[] | \"\"\\(.name): \\(.paths[])\"\"\")",
+      "Bash(kong:3.8)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
