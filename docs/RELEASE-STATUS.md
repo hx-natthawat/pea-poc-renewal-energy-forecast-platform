@@ -123,6 +123,7 @@
 | Observability    | `infrastructure/kubernetes/observability/`               |
 | Network Policies | `infrastructure/kubernetes/security/network-policies/`   |
 | Vault            | `infrastructure/kubernetes/security/vault/`              |
+| TLS/cert-manager | `infrastructure/kubernetes/security/cert-manager/`       |
 | Secrets Module   | `backend/app/core/secrets.py`                            |
 | Load Tests       | `tests/load/locustfile.py`                               |
 
@@ -175,7 +176,7 @@ None - all critical issues resolved.
 | Vault Secrets      | Table 2   | ✅ Complete | HashiCorp Vault v1.15 + K8s auth          |
 | Network Policies   | 7.1.3     | ✅ Complete | Zero-trust with default deny              |
 | Observability      | Table 2   | ✅ Complete | Prometheus + Grafana + AlertManager       |
-| TLS/cert-manager   | 7.1.3     | ⏳ Pending  | Production certificates                   |
+| TLS/cert-manager   | 7.1.3     | ✅ Complete | Let's Encrypt + self-signed dev certs     |
 
 *Phase 3 infrastructure completed December 10, 2025.*
 
@@ -191,10 +192,11 @@ None - all critical issues resolved.
 8. ~~Phase 3: Vault secrets management~~ ✅ Complete
 9. ~~Phase 3: Network Policies~~ ✅ Complete
 10. ~~Phase 3: Observability Stack~~ ✅ Complete
-11. Deploy to staging environment
-12. Conduct UAT with stakeholders
-13. Production deployment
-14. Phase 2b: DOE implementation (requires network model)
+11. ~~Phase 3: TLS/cert-manager~~ ✅ Complete
+12. Deploy to staging environment
+13. Conduct UAT with stakeholders
+14. Production deployment
+15. Phase 2b: DOE implementation (requires network model)
 
 ---
 
