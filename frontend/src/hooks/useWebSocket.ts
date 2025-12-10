@@ -58,8 +58,6 @@ interface UseWebSocketReturn {
   reconnect: () => void;
 }
 
-import { getWebSocketBaseUrl } from "@/lib/api";
-
 export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketReturn {
   const {
     channels = ["all"],
@@ -99,9 +97,16 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       wsRef.current.close();
     }
 
-    // Build URL with channels - call getWebSocketBaseUrl() here to ensure browser context
+    // Build URL with channels - detect Kong gateway directly
     const channelParam = channels.join(",");
-    const wsBaseUrl = getWebSocketBaseUrl();
+    const port = window.location.port;
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+
+    // Kong gateway detection (port 8888) or /console path
+    const isKongGateway = port === "8888" || window.location.pathname.startsWith("/console");
+    const wsBaseUrl = isKongGateway
+      ? `${wsProtocol}//${window.location.host}/backend/api/v1/ws`
+      : `ws://localhost:8000/api/v1/ws`;
     const url = `${wsBaseUrl}?channels=${channelParam}`;
 
     try {

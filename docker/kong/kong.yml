@@ -28,7 +28,10 @@ services:
       - name: cors
         config:
           origins:
-            - "*"
+            - "http://localhost:8888"
+            - "http://localhost:3000"
+            - "http://127.0.0.1:8888"
+            - "http://127.0.0.1:3000"
           methods:
             - GET
             - POST
@@ -40,15 +43,33 @@ services:
             - Authorization
             - Content-Type
             - X-Request-ID
+            - Accept
+            - Origin
           exposed_headers:
             - X-Request-ID
           credentials: true
           max_age: 3600
+          preflight_continue: false
       - name: request-transformer
         config:
           add:
             headers:
               - "X-Forwarded-Via: kong"
+
+  # ---------------------------------------------------------------------------
+  # Backend WebSocket Service
+  # Route: /backend/api/v1/ws → backend:8000/api/v1/ws (WebSocket)
+  # Separate route without CORS/rate-limiting for WebSocket compatibility
+  # Kong handles WebSocket upgrade automatically with http/https protocols
+  # ---------------------------------------------------------------------------
+  - name: backend-ws
+    url: http://host.docker.internal:8000/api/v1/ws
+    routes:
+      - name: backend-ws-route
+        paths:
+          - /backend/api/v1/ws
+        strip_path: true
+        preserve_host: true
 
   # ---------------------------------------------------------------------------
   # ML Service

@@ -4,9 +4,9 @@
  * Part of v1.1.0 Mobile-Responsive Dashboard (PWA) feature.
  */
 
-const CACHE_NAME = "pea-forecast-v1.1.0";
-const STATIC_CACHE = "pea-static-v1.1.0";
-const DATA_CACHE = "pea-data-v1.1.0";
+const CACHE_NAME = "pea-forecast-v1.2.0";
+const STATIC_CACHE = "pea-static-v1.2.0";
+const DATA_CACHE = "pea-data-v1.2.0";
 
 // Static assets to cache on install
 const STATIC_ASSETS = ["/", "/manifest.json", "/icons/icon.svg", "/offline.html"];

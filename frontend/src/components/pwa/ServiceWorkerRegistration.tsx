@@ -10,8 +10,12 @@ import { useEffect } from "react";
 export function ServiceWorkerRegistration() {
   useEffect(() => {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      // Use basePath when running behind Kong gateway
+      const basePath = process.env.NEXT_PUBLIC_USE_KONG === "true" ? "/console" : "";
+      const swPath = `${basePath}/sw.js`;
+
       navigator.serviceWorker
-        .register("/sw.js")
+        .register(swPath)
         .then((registration) => {
           console.log("[PWA] Service Worker registered:", registration.scope);
 

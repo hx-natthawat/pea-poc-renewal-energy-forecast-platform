@@ -18,7 +18,7 @@ RUN pnpm install --frozen-lockfile || pnpm install
 
 COPY . .
 
-ARG NEXT_PUBLIC_API_URL=http://localhost:8000
+ARG NEXT_PUBLIC_API_URL=/backend
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 EXPOSE 3000

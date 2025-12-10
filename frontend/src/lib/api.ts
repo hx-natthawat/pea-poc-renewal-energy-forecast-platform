@@ -7,56 +7,84 @@ import type { AuditLogFilter, AuditLogResponse, AuditLogStatsResponse } from "@/
 
 /**
  * Get the base API URL based on the current environment.
- * Uses NEXT_PUBLIC_API_URL environment variable if set.
- * Falls back to same-origin API in production.
+ * Detects Kong gateway and uses relative URLs to avoid CORS issues.
  */
 export function getApiBaseUrl(): string {
-  // Use environment variable if configured (works on both server and client)
+  // Server-side rendering: use direct backend URL
+  if (typeof window === "undefined") {
+    // SSR calls go directly to backend
+    return process.env.NEXT_PUBLIC_API_URL || "http://backend:8000";
+  }
+
+  // Client-side: detect Kong gateway
+  const port = window.location.port;
+  const pathname = window.location.pathname || "";
+  const hostname = window.location.hostname;
+
+  // Kong gateway detection (most common case first)
+  // Port 8888 = Kong gateway, use relative /backend path
+  if (port === "8888") {
+    return "/backend";
+  }
+
+  // Check if accessed via /console path (Kong basePath routing)
+  if (pathname.startsWith("/console")) {
+    return "/backend";
+  }
+
+  // Environment variable override (build-time)
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
 
-  // Server-side fallback
-  if (typeof window === "undefined") {
+  // Direct localhost access on port 3000 - use backend at 8000
+  const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+  if (isLocalhost && (port === "3000" || port === "")) {
     return "http://localhost:8000";
   }
 
-  // Client-side: detect Kong gateway (port 8888) or direct access
-  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    // If accessing via Kong (port 8888), use /backend prefix
-    // Kong routes: /backend/* → backend:8000 (strips /backend)
-    if (window.location.port === "8888") {
-      return `${window.location.protocol}//${window.location.host}/backend`;
-    }
-    // Direct frontend access (port 3000) - use backend at port 8000
-    return "http://localhost:8000";
-  }
-
-  // Production: use /backend prefix (Kong gateway)
-  return `${window.location.protocol}//${window.location.host}/backend`;
+  // Default: use relative backend path (production)
+  return "/backend";
 }
 
 /**
  * Get the WebSocket base URL based on the current environment.
- * Uses NEXT_PUBLIC_WS_URL environment variable if set.
+ * Detects Kong gateway and uses appropriate WebSocket URL.
  */
 export function getWebSocketBaseUrl(): string {
+  // Server-side fallback
+  if (typeof window === "undefined") {
+    return process.env.NEXT_PUBLIC_WS_URL || "ws://backend:8000/api/v1/ws";
+  }
+
   // Use environment variable if configured
   if (process.env.NEXT_PUBLIC_WS_URL) {
     return process.env.NEXT_PUBLIC_WS_URL;
   }
 
-  // Server-side fallback
-  if (typeof window === "undefined") {
-    return "ws://localhost:8000/api/v1/ws";
+  const port = window.location.port;
+  const pathname = window.location.pathname || "";
+  const hostname = window.location.hostname;
+  const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+
+  // Kong gateway detection (port 8888)
+  if (port === "8888") {
+    return `${wsProtocol}//${window.location.host}/backend/api/v1/ws`;
   }
 
-  // Client-side: derive from API URL or current location
-  const apiUrl = getApiBaseUrl();
-  const wsProtocol = apiUrl.startsWith("https") ? "wss:" : "ws:";
-  const apiHost = apiUrl.replace(/^https?:\/\//, "");
+  // Check if accessed via /console path (Kong basePath routing)
+  if (pathname.startsWith("/console")) {
+    return `${wsProtocol}//${window.location.host}/backend/api/v1/ws`;
+  }
 
-  return `${wsProtocol}//${apiHost}/api/v1/ws`;
+  // Direct localhost access - connect to backend port 8000
+  const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+  if (isLocalhost && (port === "3000" || port === "")) {
+    return `ws://${hostname}:8000/api/v1/ws`;
+  }
+
+  // Default: production with /backend prefix
+  return `${wsProtocol}//${window.location.host}/backend/api/v1/ws`;
 }
 
 /**
