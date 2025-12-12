@@ -13,7 +13,7 @@ services:
   # Frontend calls: /backend/api/v1/... → backend receives /api/v1/...
   # ---------------------------------------------------------------------------
   - name: backend-api
-    url: http://host.docker.internal:8000
+    url: http://localhost:8000
     routes:
       - name: backend-api-route
         paths:
@@ -63,7 +63,7 @@ services:
   # Kong handles WebSocket upgrade automatically with http/https protocols
   # ---------------------------------------------------------------------------
   - name: backend-ws
-    url: http://host.docker.internal:8000/api/v1/ws
+    url: http://localhost:8000/api/v1/ws
     routes:
       - name: backend-ws-route
         paths:
@@ -76,7 +76,7 @@ services:
   # Route: /ml/* → ml-service:8001
   # ---------------------------------------------------------------------------
   - name: ml-service
-    url: http://host.docker.internal:8001
+    url: http://localhost:8001
     routes:
       - name: ml-service-route
         paths:
@@ -99,7 +99,7 @@ services:
   # Route: /console/* → frontend:3000 (explicit prefix for clean routing)
   # ---------------------------------------------------------------------------
   - name: frontend
-    url: http://host.docker.internal:3000
+    url: http://localhost:3000
     routes:
       - name: frontend-route
         paths:
@@ -112,7 +112,7 @@ services:
   # Route: /__nextjs_font/* → frontend:3000 (pass-through)
   # ---------------------------------------------------------------------------
   - name: nextjs-internals
-    url: http://host.docker.internal:3000
+    url: http://localhost:3000
     routes:
       - name: nextjs-font-route
         paths:

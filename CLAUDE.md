@@ -162,6 +162,7 @@ Custom slash commands are available to invoke specialized agents for this projec
 | Command           | Description                                                                    | When to Use                                                    |
 | ----------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
 | `/orchestrate`  | **Autonomous SDLC Orchestrator** - Full lifecycle from dev to production | Complex tasks, releases, production deployments, user feedback |
+| `/one`          | **Short alias for /orchestrate** - Same as above, just quicker to type   | Same as /orchestrate - use when you want the short form        |
 | `/sprint-plan`  | Sprint planning and task breakdown                                             | Beginning of sprint, prioritization                            |
 | `/health-check` | Comprehensive project health check                                             | Daily checks, pre-release verification                         |
 | `/release`      | Release management and versioning                                              | Preparing releases, version bumps                              |
