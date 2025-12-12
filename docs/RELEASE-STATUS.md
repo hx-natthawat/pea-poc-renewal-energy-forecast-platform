@@ -195,7 +195,7 @@ None - all critical issues resolved.
 9. ~~Phase 3: Network Policies~~ ✅ Complete
 10. ~~Phase 3: Observability Stack~~ ✅ Complete
 11. ~~Phase 3: TLS/cert-manager~~ ✅ Complete
-12. Deploy to staging environment
+12. ~~Deploy to staging environment~~ ✅ Complete (Kind cluster, 7 pods healthy)
 13. Conduct UAT with stakeholders
 14. Production deployment
 15. Phase 2b: DOE implementation (requires network model)
@@ -260,7 +260,7 @@ The platform is **ready for staging deployment**:
 5. ✅ v1.1.0 features complete
 6. ✅ Security audit passed
 7. ✅ Client handover documentation complete
-8. ⏳ Pending: Staging deployment (requires กฟภ. infrastructure)
+8. ✅ Staging deployment validated (Kind cluster, 7 pods healthy, smoke tests pass)
 9. ⏳ Pending: UAT with stakeholders
 10. ⏳ Pending: Production deployment
 
