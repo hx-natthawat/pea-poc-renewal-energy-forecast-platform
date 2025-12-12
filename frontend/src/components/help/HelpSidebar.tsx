@@ -72,8 +72,8 @@ export function HelpSidebar() {
           className={cn(
             "fixed z-50 top-1/2 -translate-y-1/2",
             "w-10 h-14 flex items-center justify-center",
-            "bg-pea-purple text-white rounded-l-lg shadow-lg",
-            "hover:bg-pea-purple/90 transition-all duration-300 ease-in-out",
+            "bg-[#74045F] text-white rounded-l-lg shadow-lg",
+            "hover:bg-[#74045F]/90 transition-all duration-300 ease-in-out",
             isOpen ? "right-80 max-[85vw]:right-[85vw]" : "right-0"
           )}
           aria-label={isOpen ? "Collapse help panel" : "Expand help panel"}
@@ -110,7 +110,7 @@ export function HelpSidebar() {
                   <div className="flex items-center gap-2 min-w-0">
                     {section && (
                       <>
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-pea-purple/10 text-pea-purple flex-shrink-0">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#74045F]/10 text-[#74045F] flex-shrink-0">
                           <section.icon className="h-4 w-4" />
                         </div>
                         <h2 className="font-semibold text-gray-900 text-sm truncate">
@@ -181,7 +181,7 @@ function HelpContent({ section, language, onNavigate }: HelpContentProps) {
           <ul className="space-y-3">
             {section.features.map((feature: HelpFeature) => (
               <li key={feature.title} className="flex gap-3">
-                <div className="flex-shrink-0 h-1.5 w-1.5 mt-2 rounded-full bg-pea-purple" />
+                <div className="flex-shrink-0 h-1.5 w-1.5 mt-2 rounded-full bg-[#74045F]" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">
                     {getLocalizedText(feature.title, feature.titleTh)}
@@ -233,10 +233,10 @@ function HelpContent({ section, language, onNavigate }: HelpContentProps) {
                     className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors group"
                   >
                     <span className="flex items-center gap-2">
-                      <related.icon className="h-4 w-4 text-gray-400 group-hover:text-pea-purple" />
+                      <related.icon className="h-4 w-4 text-gray-400 group-hover:text-[#74045F]" />
                       {getLocalizedText(related.title, related.titleTh)}
                     </span>
-                    <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-pea-purple" />
+                    <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-[#74045F]" />
                   </button>
                 </li>
               );

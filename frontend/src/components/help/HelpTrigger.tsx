@@ -45,28 +45,28 @@ export function HelpTrigger({
       }}
       className={cn(
         "inline-flex items-center justify-center rounded-full transition-all duration-200",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-pea-purple focus-visible:ring-offset-2",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#74045F] focus-visible:ring-offset-2",
         buttonSizeClasses[size],
         // Default variant - visible, with touch target for standalone use
         variant === "default" && [
           "min-w-[44px] min-h-[44px]",
-          "text-pea-purple/60 hover:text-pea-purple hover:bg-pea-purple/10",
-          "active:bg-pea-purple/20",
-          isActive && "text-pea-purple bg-pea-purple/10",
+          "text-[#74045F]/60 hover:text-[#74045F] hover:bg-[#74045F]/10",
+          "active:bg-[#74045F]/20",
+          isActive && "text-[#74045F] bg-[#74045F]/10",
         ],
         // Subtle variant - compact for inline use with text (no large touch target)
         variant === "subtle" && [
-          "text-pea-purple/60 hover:text-pea-purple",
-          "active:text-pea-purple",
-          isActive && "text-pea-purple",
+          "text-[#74045F]/60 hover:text-[#74045F]",
+          "active:text-[#74045F]",
+          isActive && "text-[#74045F]",
         ],
         // Card variant - for absolute positioning on cards, with touch target
         variant === "card" && [
           "min-w-[44px] min-h-[44px]",
-          "text-pea-purple/50 hover:text-pea-purple",
-          "bg-pea-purple/5 hover:bg-pea-purple/10",
-          "active:bg-pea-purple/20",
-          isActive && "text-pea-purple bg-pea-purple/10",
+          "text-[#74045F]/50 hover:text-[#74045F]",
+          "bg-[#74045F]/5 hover:bg-[#74045F]/10",
+          "active:bg-[#74045F]/20",
+          isActive && "text-[#74045F] bg-[#74045F]/10",
         ],
         className
       )}

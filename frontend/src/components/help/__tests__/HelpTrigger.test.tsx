@@ -83,7 +83,7 @@ describe("HelpTrigger", () => {
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
     // Card variant should have brand-colored background for visibility
-    expect(button).toHaveClass("bg-pea-purple/5");
+    expect(button).toHaveClass("bg-[#74045F]/5");
   });
 
   it("renders with subtle variant", () => {

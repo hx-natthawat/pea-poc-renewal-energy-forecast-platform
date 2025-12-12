@@ -18,10 +18,12 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
+import { HelpTrigger } from "@/components/help";
 
 interface TORFunctionProps {
   number: number;
   torRef: string;
+  helpSectionId: string;
   titleTh: string;
   titleEn: string;
   description: string;
@@ -36,6 +38,7 @@ interface TORFunctionProps {
 function TORFunctionCard({
   number,
   torRef,
+  helpSectionId,
   titleTh,
   titleEn,
   description,
@@ -104,7 +107,12 @@ function TORFunctionCard({
               <span className="text-xs font-bold text-[#74045F] bg-[#74045F]/10 px-2 py-0.5 rounded">
                 F{number}
               </span>
-              <span className="text-xs text-gray-500">{torRef}</span>
+              <HelpTrigger
+                sectionId={helpSectionId}
+                size="sm"
+                variant="subtle"
+                label={`View ${torRef} details`}
+              />
             </div>
             <h3 className="font-semibold text-gray-900 text-sm sm:text-base mt-1">{titleEn}</h3>
             <p className="text-xs text-gray-500">{titleTh}</p>
@@ -180,6 +188,7 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
     {
       number: 1,
       torRef: "TOR 7.5.1.2",
+      helpSectionId: "tor-7.5.1.2",
       titleTh: "พยากรณ์กำลังผลิตไฟฟ้าจากพลังงานหมุนเวียน",
       titleEn: "RE Forecast",
       description:
@@ -194,6 +203,7 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
     {
       number: 2,
       torRef: "TOR 7.5.1.2",
+      helpSectionId: "tor-actual-demand",
       titleTh: "พยากรณ์ความต้องการใช้ไฟฟ้าจริงตามจุดซื้อขาย",
       titleEn: "Actual Demand Forecast",
       description:
@@ -207,6 +217,7 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
     {
       number: 3,
       torRef: "TOR 7.5.1.3",
+      helpSectionId: "tor-7.5.1.3",
       titleTh: "พยากรณ์ความต้องการใช้ไฟฟ้าระดับพื้นที่",
       titleEn: "Load Forecast",
       description:
@@ -220,6 +231,7 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
     {
       number: 4,
       torRef: "TOR 7.5.1.4",
+      helpSectionId: "tor-7.5.1.4",
       titleTh: "พยากรณ์ค่าความไม่สมดุลของการซื้อขายไฟฟ้า",
       titleEn: "Imbalance Forecast",
       description:
@@ -236,6 +248,7 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
     {
       number: 5,
       torRef: "TOR 7.5.1.5",
+      helpSectionId: "tor-7.5.1.5",
       titleTh: "พยากรณ์แรงดันไฟฟ้าในระบบจำหน่ายทุกระดับแรงดัน",
       titleEn: "Voltage Prediction",
       description:
@@ -250,6 +263,7 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
     {
       number: 6,
       torRef: "TOR 7.5.1.6",
+      helpSectionId: "tor-7.5.1.6",
       titleTh: "พยากรณ์กรอบการทำงานแบบพลวัตของแหล่งผลิตไฟฟ้า",
       titleEn: "Dynamic Operating Envelope (DOE)",
       description:
@@ -262,6 +276,7 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
     {
       number: 7,
       torRef: "TOR 7.5.1.7",
+      helpSectionId: "tor-7.5.1.7",
       titleTh: "พยากรณ์ขีดความสามารถในการรองรับการเชื่อมต่อระบบ",
       titleEn: "Hosting Capacity Forecast",
       description:
@@ -357,8 +372,16 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
           <Server className="w-5 h-5 text-gray-600 mt-0.5" />
-          <div>
-            <h3 className="font-semibold text-gray-900">Infrastructure (TOR 7.1)</h3>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-gray-900">Infrastructure</h3>
+              <HelpTrigger
+                sectionId="tor-7.1"
+                size="sm"
+                variant="subtle"
+                label="View TOR 7.1 details"
+              />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3 text-sm">
               <div>
                 <p className="text-gray-500">Web Server</p>
@@ -389,24 +412,56 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
           <Activity className="w-5 h-5 text-green-600 mt-0.5" />
-          <div>
-            <h3 className="font-semibold text-green-900">TOR Compliance Status</h3>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-green-900">TOR Compliance Status</h3>
+              <HelpTrigger
+                sectionId="tor-overview"
+                size="sm"
+                variant="subtle"
+                label="View TOR overview"
+              />
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-600" />
-                <span>7.1.4 CI/CD</span>
+                <span>CI/CD</span>
+                <HelpTrigger
+                  sectionId="tor-7.1.4"
+                  size="sm"
+                  variant="subtle"
+                  label="View TOR 7.1.4 details"
+                />
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-600" />
-                <span>7.1.5 Licensing</span>
+                <span>Licensing</span>
+                <HelpTrigger
+                  sectionId="tor-7.1.5"
+                  size="sm"
+                  variant="subtle"
+                  label="View TOR 7.1.5 details"
+                />
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-600" />
-                <span>7.1.6 Audit Log</span>
+                <span>Audit Log</span>
+                <HelpTrigger
+                  sectionId="tor-7.1.6"
+                  size="sm"
+                  variant="subtle"
+                  label="View TOR 7.1.6 details"
+                />
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-600" />
-                <span>7.1.7 Scalability</span>
+                <span>Scalability</span>
+                <HelpTrigger
+                  sectionId="tor-7.1.7"
+                  size="sm"
+                  variant="subtle"
+                  label="View TOR 7.1.7 details"
+                />
               </div>
             </div>
           </div>

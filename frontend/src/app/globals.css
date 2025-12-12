@@ -6,6 +6,25 @@
    Note: Prompt font is loaded via Next.js next/font in layout.tsx
    ============================================================================= */
 
+/* Register custom colors with Tailwind v4 for utility class generation */
+@theme {
+  /* PEA Brand Colors (Primary) */
+  --color-pea-purple: #74045f;
+  --color-pea-purple-light: #8b1a75;
+  --color-pea-purple-dark: #5a0349;
+
+  /* PEA Brand Colors (Secondary) */
+  --color-pea-gold: #c7911b;
+  --color-pea-gold-light: #d4a43d;
+  --color-pea-gold-dark: #a67814;
+
+  /* Semantic Colors */
+  --color-pea-success: #10b981;
+  --color-pea-warning: #f59e0b;
+  --color-pea-error: #ef4444;
+  --color-pea-info: #3b82f6;
+}
+
 :root {
   /* PEA Brand Colors (Primary) */
   --pea-purple: #74045f;

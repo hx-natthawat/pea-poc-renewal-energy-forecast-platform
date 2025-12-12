@@ -15,7 +15,8 @@
       "!**/playwright-report",
       "!**/test-results",
       "!**/*.config.js",
-      "!**/*.config.ts"
+      "!**/*.config.ts",
+      "!**/*.css"
     ]
   },
   "formatter": {
@@ -50,6 +51,14 @@
       "quoteStyle": "double",
       "semicolons": "always",
       "trailingCommas": "es5"
+    }
+  },
+  "css": {
+    "formatter": {
+      "enabled": false
+    },
+    "linter": {
+      "enabled": false
     }
   }
 }

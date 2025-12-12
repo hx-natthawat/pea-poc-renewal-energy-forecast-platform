@@ -5,6 +5,7 @@ import { gridHelp } from "./grid";
 import { historyHelp } from "./history";
 import { overviewHelp } from "./overview";
 import { solarHelp } from "./solar";
+import { torHelp } from "./tor";
 import { voltageHelp } from "./voltage";
 
 export const helpContent: HelpContentRegistry = {
@@ -15,6 +16,7 @@ export const helpContent: HelpContentRegistry = {
   ...alertsHelp,
   ...historyHelp,
   ...auditHelp,
+  ...torHelp,
 };
 
 export function getHelpSection(sectionId: string) {
