@@ -8,61 +8,104 @@
 
 /* Register custom colors with Tailwind v4 for utility class generation */
 @theme {
-  /* PEA Brand Colors (Primary) */
+  /* PEA Brand Colors (Primary) - Based on Mascot Color Guide */
   --color-pea-purple: #74045f;
   --color-pea-purple-light: #8b1a75;
-  --color-pea-purple-dark: #5a0349;
+  --color-pea-purple-dark: #51124d;
+  --color-pea-purple-muted: #5a0349;
 
-  /* PEA Brand Colors (Secondary) */
+  /* PEA Brand Colors (Secondary) - Based on Mascot Color Guide */
   --color-pea-gold: #c7911b;
   --color-pea-gold-light: #d4a43d;
-  --color-pea-gold-dark: #a67814;
+  --color-pea-gold-dark: #966428;
+  --color-pea-gold-bright: #fac83c;
+
+  /* Mascot Accent Colors */
+  --color-pea-magenta: #c73e8a;
+  --color-pea-pink: #c86e8c;
 
   /* Semantic Colors */
   --color-pea-success: #10b981;
+  --color-pea-success-light: #d1fae5;
   --color-pea-warning: #f59e0b;
+  --color-pea-warning-light: #fef3c7;
   --color-pea-error: #ef4444;
+  --color-pea-error-light: #fee2e2;
   --color-pea-info: #3b82f6;
+  --color-pea-info-light: #dbeafe;
 }
 
 :root {
-  /* PEA Brand Colors (Primary) */
+  /* ==========================================================================
+     PEA Brand Colors - Based on Mascot Color Guide & Brand Bible 2022
+     See: docs/guides/design-guideline.md for full specifications
+     ========================================================================== */
+
+  /* Primary Purple Palette (Pantone 7650) */
   --pea-purple: #74045f;
   --pea-purple-light: #8b1a75;
-  --pea-purple-dark: #5a0349;
+  --pea-purple-dark: #51124d;
+  --pea-purple-muted: #5a0349;
 
-  /* PEA Brand Colors (Secondary) */
+  /* Secondary Gold Palette (Pantone 1245) */
   --pea-gold: #c7911b;
   --pea-gold-light: #d4a43d;
-  --pea-gold-dark: #a67814;
+  --pea-gold-dark: #966428;
+  --pea-gold-bright: #fac83c;
+
+  /* Mascot Accent Colors */
+  --pea-magenta: #c73e8a;
+  --pea-pink: #c86e8c;
 
   /* Neutral Colors */
   --pea-white: #ffffff;
+  --pea-black: #000000;
   --pea-gray-50: #f9fafb;
   --pea-gray-100: #f3f4f6;
   --pea-gray-200: #e5e7eb;
   --pea-gray-300: #d1d5db;
+  --pea-gray-400: #9ca3af;
   --pea-gray-500: #6b7280;
+  --pea-gray-600: #4b5563;
   --pea-gray-700: #374151;
+  --pea-gray-800: #1f2937;
   --pea-gray-900: #111827;
 
   /* Semantic Colors */
   --pea-success: #10b981;
+  --pea-success-light: #d1fae5;
   --pea-warning: #f59e0b;
+  --pea-warning-light: #fef3c7;
   --pea-error: #ef4444;
+  --pea-error-light: #fee2e2;
   --pea-info: #3b82f6;
+  --pea-info-light: #dbeafe;
 
   /* Chart Colors - Solar (Gold theme) */
   --color-chart-solar: #c7911b;
   --color-chart-solar-gradient-1: #c7911b;
   --color-chart-solar-gradient-2: #d4a43d;
-  --color-chart-solar-gradient-3: #e8c87a;
+  --color-chart-solar-gradient-3: #fac83c;
+  --color-chart-solar-area: rgba(199, 145, 27, 0.2);
 
   /* Chart Colors - Voltage (Purple theme) */
   --color-chart-voltage: #74045f;
   --color-chart-phase-a: #74045f;
   --color-chart-phase-b: #c7911b;
   --color-chart-phase-c: #6b7280;
+  --color-chart-limit-upper: #ef4444;
+  --color-chart-limit-lower: #f59e0b;
+  --color-chart-nominal: #10b981;
+
+  /* Categorical Chart Colors (for multiple series) */
+  --color-chart-1: #74045f;
+  --color-chart-2: #c7911b;
+  --color-chart-3: #10b981;
+  --color-chart-4: #3b82f6;
+  --color-chart-5: #f59e0b;
+  --color-chart-6: #ec4899;
+  --color-chart-7: #8b5cf6;
+  --color-chart-8: #06b6d4;
 
   /* Legacy mappings for compatibility */
   --color-pea-primary: var(--pea-purple);
@@ -75,6 +118,7 @@
   --color-status-normal: var(--pea-success);
   --color-status-warning: var(--pea-warning);
   --color-status-critical: var(--pea-error);
+  --color-status-offline: var(--pea-gray-500);
 
   /* Base Colors */
   --foreground-rgb: 17, 24, 39;

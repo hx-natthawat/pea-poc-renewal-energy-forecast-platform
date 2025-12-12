@@ -1,6 +1,27 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { enhanceSystemPrompt, searchKnowledge } from "@/lib/rag";
+
+// Helper to extract text content from a message (handles both UIMessage and legacy formats)
+function extractMessageText(
+  message: UIMessage | { content?: string; parts?: Array<{ type: string; text?: string }> }
+): string {
+  // Legacy format with content string
+  if ("content" in message && typeof message.content === "string") {
+    return message.content;
+  }
+  // UI Message format with parts
+  if ("parts" in message && Array.isArray(message.parts)) {
+    return message.parts
+      .filter(
+        (part): part is { type: "text"; text: string } =>
+          part.type === "text" && typeof part.text === "string"
+      )
+      .map((part) => part.text)
+      .join("\n");
+  }
+  return "";
+}
 
 // Create OpenRouter provider (OpenAI-compatible)
 const openrouter = createOpenAI({
@@ -67,14 +88,15 @@ export async function POST(req: Request) {
     // Get the base system prompt
     const basePrompt = language === "th" ? systemPromptTh : systemPromptEn;
 
-    // Extract the last user message for RAG search
+    // Extract the last user message for RAG search (handles both UIMessage and legacy formats)
     const lastUserMessage = messages.filter((m: { role: string }) => m.role === "user").pop();
+    const lastUserText = lastUserMessage ? extractMessageText(lastUserMessage) : "";
 
     // Enhance system prompt with RAG context
     let systemPrompt = basePrompt;
-    if (lastUserMessage?.content) {
+    if (lastUserText) {
       try {
-        const context = searchKnowledge(lastUserMessage.content, {
+        const context = searchKnowledge(lastUserText, {
           maxResults: 5,
           minRelevance: 2,
           includeRelated: true,
@@ -90,13 +112,16 @@ export async function POST(req: Request) {
       }
     }
 
+    // Convert UIMessages to ModelMessages for streamText
+    const modelMessages = convertToModelMessages(messages as UIMessage[]);
+
     // Use Claude 3.5 Sonnet via OpenRouter (or fallback to GPT-4o-mini)
     const model = process.env.OPENROUTER_MODEL || "anthropic/claude-3.5-sonnet";
 
     const result = await streamText({
       model: openrouter(model),
       system: systemPrompt,
-      messages,
+      messages: modelMessages,
     });
 
     return result.toTextStreamResponse();

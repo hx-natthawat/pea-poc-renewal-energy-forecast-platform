@@ -11,7 +11,12 @@ export function ServiceWorkerRegistration() {
   useEffect(() => {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       // Use basePath when running behind Kong gateway
-      const basePath = process.env.NEXT_PUBLIC_USE_KONG === "true" ? "/console" : "";
+      // Check at runtime since env might be set via runtime config
+      const isKong =
+        typeof window !== "undefined" &&
+        (window.location.pathname.startsWith("/console") ||
+          document.querySelector('meta[name="x-kong-gateway"]') !== null);
+      const basePath = isKong ? "/console" : "";
       const swPath = `${basePath}/sw.js`;
 
       navigator.serviceWorker
@@ -68,9 +73,10 @@ export function usePushNotifications() {
 
     try {
       const registration = await navigator.serviceWorker.ready;
+      // Note: VAPID key should be passed as prop or configured via runtime config
+      // Push notifications are optional for this POC
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
       });
       return subscription;
     } catch (error) {

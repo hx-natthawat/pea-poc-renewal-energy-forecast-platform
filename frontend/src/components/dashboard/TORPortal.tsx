@@ -104,7 +104,7 @@ function TORFunctionCard({
           <div className="p-2.5 bg-white rounded-lg shadow-sm">{icon}</div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-[#74045F] bg-[#74045F]/10 px-2 py-0.5 rounded">
+              <span className="text-xs font-bold text-pea-purple bg-pea-purple/10 px-2 py-0.5 rounded">
                 F{number}
               </span>
               <HelpTrigger
@@ -140,7 +140,7 @@ function TORFunctionCard({
             {pocTests.map((test) => (
               <span
                 key={test}
-                className="text-xs bg-[#74045F]/10 text-[#74045F] px-2 py-0.5 rounded"
+                className="text-xs bg-pea-purple/10 text-pea-purple px-2 py-0.5 rounded"
               >
                 {test}
               </span>
@@ -295,14 +295,14 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#74045F] to-[#5A0349] rounded-xl p-5 sm:p-6 text-white">
+      <div className="bg-gradient-to-r from-pea-purple to-pea-purple-muted rounded-xl p-5 sm:p-6 text-white">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-white/20 rounded-lg">
             <Globe className="w-6 h-6" />
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-bold">TOR 7 Functions Portal</h1>
-            <p className="text-[#D4A43D] text-sm">แพลตฟอร์มศูนย์ข้อมูลพยากรณ์พลังงานหมุนเวียน กฟภ.</p>
+            <p className="text-pea-gold-light text-sm">แพลตฟอร์มศูนย์ข้อมูลพยากรณ์พลังงานหมุนเวียน กฟภ.</p>
           </div>
         </div>
 
@@ -339,7 +339,7 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
           </div>
           <div className="h-2 bg-white/20 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-green-400 to-[#D4A43D] rounded-full transition-all"
+              className="h-full bg-gradient-to-r from-green-400 to-pea-gold-light rounded-full transition-all"
               style={{ width: `${((implementedCount + simulationCount) / 7) * 100}%` }}
             />
           </div>

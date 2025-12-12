@@ -71,8 +71,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Header - PEA Brand Purple */}
-      <header className="bg-gradient-to-r from-[#74045F] to-[#5A0349] text-white shadow-lg sticky top-0 z-50">
+      {/* Header - PEA Brand Purple (see design-guideline.md) */}
+      <header className="bg-gradient-to-r from-pea-purple to-pea-purple-muted text-white shadow-lg sticky top-0 z-50">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-2 sm:space-x-4">
@@ -81,7 +81,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </div>
               <div>
                 <h1 className="text-base sm:text-xl font-bold">PEA RE Forecast</h1>
-                <p className="text-[#D4A43D] text-xs sm:text-sm font-medium hidden sm:block">
+                <p className="text-pea-gold-light text-xs sm:text-sm font-medium hidden sm:block">
                   แพลตฟอร์มศูนย์ข้อมูลพยากรณ์พลังงานหมุนเวียน
                 </p>
               </div>
@@ -191,8 +191,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 href={item.path}
                 className={`flex items-center px-3 md:px-4 py-2.5 md:py-3 text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
                   isActive(item.path)
-                    ? "bg-white text-[#74045F] rounded-t-lg"
-                    : "text-[#D4A43D] hover:text-white hover:bg-white/10 rounded-t-lg"
+                    ? "bg-white text-pea-purple rounded-t-lg"
+                    : "text-pea-gold-light hover:text-white hover:bg-white/10 rounded-t-lg"
                 }`}
               >
                 <item.icon className="w-4 h-4 mr-1.5 md:mr-2" />
@@ -205,7 +205,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="sm:hidden bg-[#5A0349] border-t border-white/10">
+          <div className="sm:hidden bg-pea-purple-muted border-t border-white/10">
             <nav className="container mx-auto px-3 py-2" suppressHydrationWarning>
               {navItems.map((item) => (
                 <Link
@@ -214,8 +214,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center w-full px-3 py-3 text-sm font-medium transition-colors rounded-lg mb-1 ${
                     isActive(item.path)
-                      ? "bg-white text-[#74045F]"
-                      : "text-[#D4A43D] hover:text-white hover:bg-white/10"
+                      ? "bg-white text-pea-purple"
+                      : "text-pea-gold-light hover:text-white hover:bg-white/10"
                   }`}
                 >
                   <item.icon className="w-5 h-5 mr-3" />
@@ -237,11 +237,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 key={item.id}
                 href={item.path}
                 className={`flex flex-col items-center py-2 px-2 min-w-[52px] snap-center ${
-                  isActive(item.path) ? "text-[#74045F]" : "text-gray-500"
+                  isActive(item.path) ? "text-pea-purple" : "text-gray-500"
                 }`}
               >
                 <item.icon
-                  className={`w-5 h-5 ${isActive(item.path) ? "text-[#74045F]" : "text-gray-400"}`}
+                  className={`w-5 h-5 ${isActive(item.path) ? "text-pea-purple" : "text-gray-400"}`}
                 />
                 <span className="text-[9px] mt-0.5 font-medium whitespace-nowrap">
                   {item.shortLabel}
@@ -268,10 +268,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Footer - PEA Brand Purple - Hidden on mobile (bottom nav takes space) */}
-      <footer className="bg-[#5A0349] text-white py-4 sm:py-6 mt-4 sm:mt-8 hidden sm:block">
+      <footer className="bg-pea-purple-muted text-white py-4 sm:py-6 mt-4 sm:mt-8 hidden sm:block">
         <div className="container mx-auto px-4 text-center text-xs sm:text-sm">
           <p className="font-medium">PEA RE Forecast Platform - การไฟฟ้าส่วนภูมิภาค</p>
-          <p className="mt-1 text-[#D4A43D]">Provincial Electricity Authority of Thailand</p>
+          <p className="mt-1 text-pea-gold-light">Provincial Electricity Authority of Thailand</p>
           <p className="mt-2 text-gray-300">Version 0.1.0 (POC) | TOR Compliant</p>
         </div>
       </footer>
