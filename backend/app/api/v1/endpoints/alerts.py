@@ -32,6 +32,7 @@ VOLTAGE_WARNING_LOWER = 222.0
 
 class Alert(BaseModel):
     """Alert model."""
+
     id: int | None = None
     time: datetime
     alert_type: str
@@ -46,20 +47,31 @@ class Alert(BaseModel):
 
 class AlertResponse(BaseModel):
     """Alert response model."""
+
     status: str
     data: dict[str, Any]
 
 
 class VoltageCheckRequest(BaseModel):
     """Request to check voltage for violations."""
+
     timestamp: datetime = Field(default_factory=datetime.now)
     prosumer_ids: list[str] = Field(
-        default=["prosumer1", "prosumer2", "prosumer3", "prosumer4", "prosumer5", "prosumer6", "prosumer7"]
+        default=[
+            "prosumer1",
+            "prosumer2",
+            "prosumer3",
+            "prosumer4",
+            "prosumer5",
+            "prosumer6",
+            "prosumer7",
+        ]
     )
 
 
 class AlertStats(BaseModel):
     """Alert statistics."""
+
     total: int
     critical: int
     warning: int
@@ -93,25 +105,27 @@ async def get_alerts(
 
     alerts = []
     for row in rows:
-        alerts.append({
-            "id": row.id,
-            "time": row.time.isoformat(),
-            "alert_type": row.alert_type,
-            "severity": row.severity,
-            "target_id": row.target_id,
-            "message": row.message,
-            "current_value": row.current_value,
-            "threshold_value": row.threshold_value,
-            "acknowledged": row.acknowledged,
-            "resolved": row.resolved,
-        })
+        alerts.append(
+            {
+                "id": row.id,
+                "time": row.time.isoformat(),
+                "alert_type": row.alert_type,
+                "severity": row.severity,
+                "target_id": row.target_id,
+                "message": row.message,
+                "current_value": row.current_value,
+                "threshold_value": row.threshold_value,
+                "acknowledged": row.acknowledged,
+                "resolved": row.resolved,
+            }
+        )
 
     return AlertResponse(
         status="success",
         data={
             "alerts": alerts,
             "count": len(alerts),
-        }
+        },
     )
 
 
@@ -132,10 +146,10 @@ async def get_alert_stats(
             COUNT(*) FILTER (WHERE severity = 'info') as info,
             COUNT(*) FILTER (WHERE acknowledged = false) as unacknowledged
         FROM alerts
-        WHERE time >= NOW() - INTERVAL ':hours hours'
-    """.replace(":hours", str(hours)))
+        WHERE time >= NOW() - INTERVAL '1 hour' * :hours
+    """)
 
-    result = await db.execute(query)
+    result = await db.execute(query, {"hours": hours})
     row = result.fetchone()
 
     stats = {
@@ -151,7 +165,7 @@ async def get_alert_stats(
         data={
             "stats": stats,
             "period_hours": hours,
-        }
+        },
     )
 
 
@@ -159,21 +173,27 @@ async def get_alert_stats(
 async def check_voltage_violations(
     request: VoltageCheckRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: CurrentUser = Depends(
-        require_roles(["admin", "operator", "api"])
-    ),
+    current_user: CurrentUser = Depends(require_roles(["admin", "operator", "api"])),
 ) -> AlertResponse:
     """
     Check for voltage violations using ML predictions and create alerts.
     """
     inference = get_voltage_inference()
     alerts_created = []
+    prediction_errors = []
 
     for prosumer_id in request.prosumer_ids:
-        result = inference.predict(
-            timestamp=request.timestamp,
-            prosumer_id=prosumer_id,
-        )
+        try:
+            result = inference.predict(
+                timestamp=request.timestamp,
+                prosumer_id=prosumer_id,
+            )
+        except Exception as e:
+            logger.error(
+                f"Voltage prediction failed for {prosumer_id}: {type(e).__name__}: {e}"
+            )
+            prediction_errors.append(prosumer_id)
+            continue
 
         voltage = result["predicted_voltage"]
         status = result["status"]
@@ -183,11 +203,19 @@ async def check_voltage_violations(
             severity = status
             if voltage > VOLTAGE_NOMINAL:
                 alert_type = "overvoltage"
-                threshold = VOLTAGE_UPPER_LIMIT if status == "critical" else VOLTAGE_WARNING_UPPER
+                threshold = (
+                    VOLTAGE_UPPER_LIMIT
+                    if status == "critical"
+                    else VOLTAGE_WARNING_UPPER
+                )
                 message = f"High voltage detected at {prosumer_id}: {voltage:.1f}V (threshold: {threshold}V)"
             else:
                 alert_type = "undervoltage"
-                threshold = VOLTAGE_LOWER_LIMIT if status == "critical" else VOLTAGE_WARNING_LOWER
+                threshold = (
+                    VOLTAGE_LOWER_LIMIT
+                    if status == "critical"
+                    else VOLTAGE_WARNING_LOWER
+                )
                 message = f"Low voltage detected at {prosumer_id}: {voltage:.1f}V (threshold: {threshold}V)"
 
             # Insert alert into database
@@ -198,29 +226,36 @@ async def check_voltage_violations(
             """)
 
             try:
-                result = await db.execute(insert_query, {
-                    "time": request.timestamp,
-                    "alert_type": alert_type,
-                    "severity": severity,
-                    "target_id": prosumer_id,
-                    "message": message,
-                    "current_value": voltage,
-                    "threshold_value": threshold,
-                })
+                result = await db.execute(
+                    insert_query,
+                    {
+                        "time": request.timestamp,
+                        "alert_type": alert_type,
+                        "severity": severity,
+                        "target_id": prosumer_id,
+                        "message": message,
+                        "current_value": voltage,
+                        "threshold_value": threshold,
+                    },
+                )
                 await db.commit()
                 alert_id = result.scalar()
 
-                alerts_created.append({
-                    "id": alert_id,
-                    "prosumer_id": prosumer_id,
-                    "alert_type": alert_type,
-                    "severity": severity,
-                    "voltage": voltage,
-                    "message": message,
-                })
-            except Exception:
-                # Log error but continue
-                pass
+                alerts_created.append(
+                    {
+                        "id": alert_id,
+                        "prosumer_id": prosumer_id,
+                        "alert_type": alert_type,
+                        "severity": severity,
+                        "voltage": voltage,
+                        "message": message,
+                    }
+                )
+            except Exception as e:
+                # Log error but continue checking other prosumers
+                logger.error(
+                    f"Failed to insert alert for {prosumer_id}: {type(e).__name__}: {e}"
+                )
 
     return AlertResponse(
         status="success",
@@ -228,7 +263,8 @@ async def check_voltage_violations(
             "alerts_created": alerts_created,
             "count": len(alerts_created),
             "timestamp": request.timestamp.isoformat(),
-        }
+            "prediction_errors": prediction_errors if prediction_errors else None,
+        },
     )
 
 
@@ -236,9 +272,7 @@ async def check_voltage_violations(
 async def acknowledge_alert(
     alert_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: CurrentUser = Depends(
-        require_roles(["admin", "operator"])
-    ),
+    current_user: CurrentUser = Depends(require_roles(["admin", "operator"])),
 ) -> AlertResponse:
     """
     Acknowledge an alert.
@@ -255,8 +289,7 @@ async def acknowledge_alert(
 
     if not row:
         return AlertResponse(
-            status="error",
-            data={"message": f"Alert {alert_id} not found"}
+            status="error", data={"message": f"Alert {alert_id} not found"}
         )
 
     return AlertResponse(
@@ -265,7 +298,7 @@ async def acknowledge_alert(
             "alert_id": row.id,
             "target_id": row.target_id,
             "acknowledged": True,
-        }
+        },
     )
 
 
@@ -273,9 +306,7 @@ async def acknowledge_alert(
 async def resolve_alert(
     alert_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: CurrentUser = Depends(
-        require_roles(["admin", "operator"])
-    ),
+    current_user: CurrentUser = Depends(require_roles(["admin", "operator"])),
 ) -> AlertResponse:
     """
     Resolve an alert.
@@ -292,8 +323,7 @@ async def resolve_alert(
 
     if not row:
         return AlertResponse(
-            status="error",
-            data={"message": f"Alert {alert_id} not found"}
+            status="error", data={"message": f"Alert {alert_id} not found"}
         )
 
     return AlertResponse(
@@ -302,7 +332,7 @@ async def resolve_alert(
             "alert_id": row.id,
             "target_id": row.target_id,
             "resolved": True,
-        }
+        },
     )
 
 
@@ -355,7 +385,7 @@ async def get_alert_summary(
             "by_prosumer": by_prosumer,
             "total_critical": total_critical,
             "total_warning": total_warning,
-        }
+        },
     )
 
 
@@ -403,14 +433,16 @@ async def get_alert_timeline(
 
     timeline = []
     for row in rows:
-        timeline.append({
-            "time": row.bucket.isoformat() if row.bucket else None,
-            "total": row.total,
-            "critical": row.critical,
-            "warning": row.warning,
-            "info": row.info,
-            "affected_prosumers": row.affected_prosumers or [],
-        })
+        timeline.append(
+            {
+                "time": row.bucket.isoformat() if row.bucket else None,
+                "total": row.total,
+                "critical": row.critical,
+                "warning": row.warning,
+                "info": row.info,
+                "affected_prosumers": row.affected_prosumers or [],
+            }
+        )
 
     return AlertResponse(
         status="success",
@@ -419,7 +451,7 @@ async def get_alert_timeline(
             "period_hours": hours,
             "interval": interval,
             "count": len(timeline),
-        }
+        },
     )
 
 
@@ -443,28 +475,32 @@ async def get_prosumer_alerts(
                current_value, threshold_value, acknowledged, resolved
         FROM alerts
         WHERE target_id = :prosumer_id
-          AND time >= NOW() - INTERVAL ':hours hours'
+          AND time >= NOW() - INTERVAL '1 hour' * :hours
         ORDER BY time DESC
         LIMIT :limit
-    """.replace(":hours", str(hours)))
+    """)
 
-    result = await db.execute(query, {"prosumer_id": prosumer_id, "limit": limit})
+    result = await db.execute(
+        query, {"prosumer_id": prosumer_id, "hours": hours, "limit": limit}
+    )
     rows = result.fetchall()
 
     alerts = []
     for row in rows:
-        alerts.append({
-            "id": row.id,
-            "time": row.time.isoformat(),
-            "alert_type": row.alert_type,
-            "severity": row.severity,
-            "target_id": row.target_id,
-            "message": row.message,
-            "current_value": row.current_value,
-            "threshold_value": row.threshold_value,
-            "acknowledged": row.acknowledged,
-            "resolved": row.resolved,
-        })
+        alerts.append(
+            {
+                "id": row.id,
+                "time": row.time.isoformat(),
+                "alert_type": row.alert_type,
+                "severity": row.severity,
+                "target_id": row.target_id,
+                "message": row.message,
+                "current_value": row.current_value,
+                "threshold_value": row.threshold_value,
+                "acknowledged": row.acknowledged,
+                "resolved": row.resolved,
+            }
+        )
 
     return AlertResponse(
         status="success",
@@ -473,5 +509,5 @@ async def get_prosumer_alerts(
             "alerts": alerts,
             "count": len(alerts),
             "period_hours": hours,
-        }
+        },
     )
