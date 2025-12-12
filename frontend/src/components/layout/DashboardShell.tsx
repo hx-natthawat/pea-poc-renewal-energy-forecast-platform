@@ -19,6 +19,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { AIChatSidebar, ChatTrigger } from "@/components/chat";
 import { HelpSidebar, HelpTrigger } from "@/components/help";
 import { getApiBaseUrl } from "@/lib/api";
 
@@ -326,6 +327,10 @@ export function DashboardShell({ children, activeTab, showTabs = true }: Dashboa
 
       {/* Help Sidebar */}
       <HelpSidebar />
+
+      {/* AI Chat */}
+      <ChatTrigger />
+      <AIChatSidebar />
     </div>
   );
 }

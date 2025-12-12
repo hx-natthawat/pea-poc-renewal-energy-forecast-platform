@@ -26,8 +26,11 @@
     "sw:clear": "echo 'Clear service worker in browser: DevTools > Application > Service Workers > Unregister'"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.85",
+    "@ai-sdk/react": "^2.0.114",
     "@tanstack/react-query": "5.90.12",
     "@xyflow/react": "^12.10.0",
+    "ai": "^5.0.112",
     "clsx": "2.1.1",
     "date-fns": "4.1.0",
     "lucide-react": "0.556.0",
