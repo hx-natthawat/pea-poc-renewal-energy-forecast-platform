@@ -8,6 +8,7 @@ Provides WebSocket connections for:
 """
 
 import json
+import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
@@ -15,13 +16,17 @@ from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 from app.api.v1.websocket.manager import manager
 from app.ml import get_solar_inference, get_voltage_inference
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 
 
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    channels: str = Query(default="all", description="Comma-separated channels: solar,voltage,alerts,all"),
+    channels: str = Query(
+        default="all", description="Comma-separated channels: solar,voltage,alerts,all"
+    ),
 ):
     """
     Main WebSocket endpoint for real-time data streaming.
@@ -110,9 +115,14 @@ async def websocket_endpoint(
                         websocket,
                     )
 
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
+                logger.warning(f"WebSocket JSON decode error: {e}")
                 await manager.send_personal_message(
-                    {"type": "error", "message": "Invalid JSON"},
+                    {
+                        "type": "error",
+                        "message": "Invalid JSON",
+                        "error_code": "INVALID_JSON",
+                    },
                     websocket,
                 )
 

@@ -49,6 +49,8 @@
 | Help UX Responsive Fixes         | 2025-12-07 | Mobile touch targets, card variant |
 | AI Chat with RAG Integration     | 2025-12-12 | AI SDK v5 + OpenRouter + RAG system |
 | PEA Brand Color Alignment        | 2025-12-13 | Mascot guide colors + Turbopack fix |
+| Security Hardening               | 2025-12-13 | SQL injection, DoS, Redis perf fix |
+| Runtime Type Validation          | 2025-12-13 | TS type guards, prosumer ID check |
 
 ---
 
