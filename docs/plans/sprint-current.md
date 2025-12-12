@@ -61,6 +61,8 @@
 | Python Deps Version Fix          | 2025-12-13 | Fixed 15 invalid package versions |
 | Docker Images Build              | 2025-12-13 | Backend & Frontend images built |
 | Kind Cluster Validation          | 2025-12-13 | Core services running in staging |
+| ML Service Docker Build          | 2025-12-13 | pea-forecast/ml:latest deployed |
+| Full Cluster Test                | 2025-12-13 | All 5 services running (762 tests pass) |
 
 ---
 
