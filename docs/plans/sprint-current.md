@@ -58,6 +58,9 @@
 | ML Prediction Timeout            | 2025-12-13 | 5s timeout prevents hung requests  |
 | Smoke Test Script                | 2025-12-13 | scripts/smoke-test.sh for UAT prep |
 | Pre-Deployment Checklist         | 2025-12-13 | Comprehensive deployment checklist |
+| Python Deps Version Fix          | 2025-12-13 | Fixed 15 invalid package versions |
+| Docker Images Build              | 2025-12-13 | Backend & Frontend images built |
+| Kind Cluster Validation          | 2025-12-13 | Core services running in staging |
 
 ---
 
