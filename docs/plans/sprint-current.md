@@ -47,6 +47,8 @@
 | Priority 2: NetworkPolicies      | 2025-12-06 | templates/networkpolicy.yaml     |
 | Help Tooltip & Sidebar System    | 2025-12-07 | 17+ sections, bilingual (EN/TH)  |
 | Help UX Responsive Fixes         | 2025-12-07 | Mobile touch targets, card variant |
+| AI Chat with RAG Integration     | 2025-12-12 | AI SDK v5 + OpenRouter + RAG system |
+| PEA Brand Color Alignment        | 2025-12-13 | Mascot guide colors + Turbopack fix |
 
 ---
 
@@ -89,7 +91,7 @@
 
 | Metric          | Target     | Actual             |
 | --------------- | ---------- | ------------------ |
-| Test Pass Rate  | 100%       | 100% (735/735)     |
+| Test Pass Rate  | 100%       | 100% (762/762)     |
 | Code Coverage   | 80%        | 80%+               |
 | Security Issues | 0 Critical | 0                  |
 | Blockers        | 0          | 0                  |
@@ -116,4 +118,4 @@ None currently.
 
 ---
 
-_Updated: December 10, 2025_
+_Updated: December 13, 2025_

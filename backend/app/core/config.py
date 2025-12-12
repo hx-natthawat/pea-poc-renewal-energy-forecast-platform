@@ -5,8 +5,7 @@ All configuration is loaded from environment variables with sensible defaults
 for local development.
 """
 
-
-from pydantic import computed_field
+from pydantic import Field, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -30,7 +29,9 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
 
     # Database (TimescaleDB on port 5433)
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast"
+    DATABASE_URL: str = (
+        "postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast"
+    )
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -42,7 +43,11 @@ class Settings(BaseSettings):
     @property
     def CORS_ORIGINS(self) -> list[str]:
         """Parse CORS origins from comma-separated string."""
-        return [origin.strip() for origin in self.CORS_ORIGINS_STR.split(",") if origin.strip()]
+        return [
+            origin.strip()
+            for origin in self.CORS_ORIGINS_STR.split(",")
+            if origin.strip()
+        ]
 
     # Authentication (Keycloak)
     AUTH_ENABLED: bool = False  # Set to True to require authentication
@@ -70,9 +75,14 @@ class Settings(BaseSettings):
 
     # TMD (Thai Meteorological Department) API
     # Register at: https://data.tmd.go.th/nwpapi/register
+    # SECURITY: Override via TMD_API_UID and TMD_API_KEY env vars in production!
     TMD_API_BASE_URL: str = "https://data.tmd.go.th/api"
-    TMD_API_UID: str = "api"  # Public demo credentials
-    TMD_API_KEY: str = "api12345"  # Public demo credentials
+    TMD_API_UID: str = Field(
+        default="api", description="TMD API user ID - set via env var in production"
+    )
+    TMD_API_KEY: str = Field(
+        default="api12345", description="TMD API key - set via env var in production"
+    )
     TMD_API_TIMEOUT: int = 10  # seconds
     TMD_CACHE_TTL: int = 300  # 5 minutes
 

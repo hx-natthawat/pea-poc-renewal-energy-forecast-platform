@@ -228,11 +228,12 @@ class RedisCache:
 
         try:
             info = await self._client.info("stats")
-            keys = await self._client.keys("pea:*")
+            # Use DBSIZE instead of KEYS for O(1) performance (KEYS scans entire DB)
+            db_size = await self._client.dbsize()
             return {
                 "connected": True,
                 "enabled": self.config.enabled,
-                "total_keys": len(keys),
+                "total_keys": db_size,
                 "hits": info.get("keyspace_hits", 0),
                 "misses": info.get("keyspace_misses", 0),
                 "solar_ttl": self.config.solar_ttl,

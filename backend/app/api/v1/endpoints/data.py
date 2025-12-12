@@ -29,6 +29,7 @@ router = APIRouter()
 
 class SolarDataPoint(BaseModel):
     """Solar measurement data point for chart."""
+
     time: str
     power_kw: float
     predicted_kw: float
@@ -37,6 +38,7 @@ class SolarDataPoint(BaseModel):
 
 class VoltageDataPoint(BaseModel):
     """Voltage measurement data point for chart."""
+
     time: str
     prosumer1: float | None = None
     prosumer2: float | None = None
@@ -78,12 +80,12 @@ async def get_latest_solar_data(
             ambtemp
         FROM solar_measurements
         WHERE station_id = :station_id
-          AND time >= NOW() - INTERVAL ':hours hours'
+          AND time >= NOW() - INTERVAL '1 hour' * :hours
         ORDER BY time ASC
         LIMIT 288
-    """.replace(":hours", str(hours)))
+    """)
 
-    result = await db.execute(query, {"station_id": station_id})
+    result = await db.execute(query, {"station_id": station_id, "hours": hours})
     rows = result.fetchall()
 
     # If no recent data, get the most recent data available
@@ -108,12 +110,14 @@ async def get_latest_solar_data(
     for row in rows:
         # Simple prediction: actual * 0.95 + noise
         predicted = row.power_kw * 0.95 if row.power_kw else 0
-        data.append({
-            "time": row.time.strftime("%H:%M"),
-            "power_kw": round(row.power_kw or 0, 1),
-            "predicted_kw": round(predicted, 1),
-            "irradiance": round(row.irradiance or 0, 1),
-        })
+        data.append(
+            {
+                "time": row.time.strftime("%H:%M"),
+                "power_kw": round(row.power_kw or 0, 1),
+                "predicted_kw": round(predicted, 1),
+                "irradiance": round(row.irradiance or 0, 1),
+            }
+        )
 
     # Calculate summary stats
     powers = [d["power_kw"] for d in data if d["power_kw"] > 0]
@@ -129,8 +133,8 @@ async def get_latest_solar_data(
                 "current_power": current_power,
                 "peak_power": peak_power,
                 "data_points": len(data),
-            }
-        }
+            },
+        },
     }
 
 
@@ -164,11 +168,15 @@ async def get_solar_stats(
         "data": {
             "station_id": station_id,
             "total_count": row.total_count if row else 0,
-            "first_record": row.first_record.isoformat() if row and row.first_record else None,
-            "last_record": row.last_record.isoformat() if row and row.last_record else None,
+            "first_record": row.first_record.isoformat()
+            if row and row.first_record
+            else None,
+            "last_record": row.last_record.isoformat()
+            if row and row.last_record
+            else None,
             "avg_power": round(row.avg_power, 2) if row and row.avg_power else 0,
             "max_power": round(row.max_power, 2) if row and row.max_power else 0,
-        }
+        },
     }
 
 
@@ -205,8 +213,8 @@ async def get_latest_voltage_data(
             "data": {
                 "chart_data": [],
                 "prosumer_status": [],
-                "summary": {"violations": 0, "avg_voltage": 230}
-            }
+                "summary": {"violations": 0, "avg_voltage": 230},
+            },
         }
 
     latest_time = latest_row.latest_time
@@ -224,7 +232,9 @@ async def get_latest_voltage_data(
         ORDER BY bucket ASC
     """)
 
-    result = await db.execute(query, {"start_time": start_time, "end_time": latest_time})
+    result = await db.execute(
+        query, {"start_time": start_time, "end_time": latest_time}
+    )
     rows = result.fetchall()
 
     # Pivot data by time bucket
@@ -252,9 +262,13 @@ async def get_latest_voltage_data(
     status_rows = status_result.fetchall()
 
     prosumer_phases = {
-        "prosumer1": "A", "prosumer2": "A", "prosumer3": "A",
-        "prosumer4": "B", "prosumer5": "B", "prosumer6": "B",
-        "prosumer7": "C"
+        "prosumer1": "A",
+        "prosumer2": "A",
+        "prosumer3": "A",
+        "prosumer4": "B",
+        "prosumer5": "B",
+        "prosumer6": "B",
+        "prosumer7": "C",
     }
 
     prosumer_status = []
@@ -272,13 +286,15 @@ async def get_latest_voltage_data(
             status = "warning"
             violations += 1
 
-        prosumer_status.append({
-            "id": row.prosumer_id,
-            "name": f"Prosumer {row.prosumer_id[-1]}",
-            "phase": prosumer_phases.get(row.prosumer_id, "A"),
-            "voltage": voltage,
-            "status": status,
-        })
+        prosumer_status.append(
+            {
+                "id": row.prosumer_id,
+                "name": f"Prosumer {row.prosumer_id[-1]}",
+                "phase": prosumer_phases.get(row.prosumer_id, "A"),
+                "voltage": voltage,
+                "status": status,
+            }
+        )
 
     avg_voltage = sum(voltages) / len(voltages) if voltages else 230
 
@@ -291,8 +307,8 @@ async def get_latest_voltage_data(
                 "violations": violations,
                 "avg_voltage": round(avg_voltage, 1),
                 "data_points": len(chart_data),
-            }
-        }
+            },
+        },
     }
 
 
@@ -312,7 +328,9 @@ async def get_prosumer_voltage(
 
     Returns voltage measurements with pagination support.
     """
-    logger.info(f"Prosumer {prosumer_id} voltage requested by user: {current_user.username}")
+    logger.info(
+        f"Prosumer {prosumer_id} voltage requested by user: {current_user.username}"
+    )
     query = text("""
         SELECT
             time,
@@ -330,12 +348,16 @@ async def get_prosumer_voltage(
 
     data = []
     for row in reversed(rows):
-        data.append({
-            "time": row.time.strftime("%H:%M"),
-            "voltage": round(row.voltage, 1),
-            "active_power": round(row.active_power, 2) if row.active_power else 0,
-            "reactive_power": round(row.reactive_power, 2) if row.reactive_power else 0,
-        })
+        data.append(
+            {
+                "time": row.time.strftime("%H:%M"),
+                "voltage": round(row.voltage, 1),
+                "active_power": round(row.active_power, 2) if row.active_power else 0,
+                "reactive_power": round(row.reactive_power, 2)
+                if row.reactive_power
+                else 0,
+            }
+        )
 
     return {
         "status": "success",
@@ -343,7 +365,7 @@ async def get_prosumer_voltage(
             "prosumer_id": prosumer_id,
             "measurements": data,
             "count": len(data),
-        }
+        },
     }
 
 
@@ -389,7 +411,10 @@ async def get_data_statistics(
     # Prosumer list
     prosumer_query = text("SELECT id, name, phase FROM prosumers ORDER BY id")
     prosumer_result = await db.execute(prosumer_query)
-    prosumers = [{"id": r.id, "name": r.name, "phase": r.phase} for r in prosumer_result.fetchall()]
+    prosumers = [
+        {"id": r.id, "name": r.name, "phase": r.phase}
+        for r in prosumer_result.fetchall()
+    ]
 
     return {
         "status": "success",
@@ -397,18 +422,26 @@ async def get_data_statistics(
             "solar_measurements": {
                 "total_count": solar_row.count if solar_row else 0,
                 "date_range": {
-                    "start": solar_row.first_time.isoformat() if solar_row and solar_row.first_time else None,
-                    "end": solar_row.last_time.isoformat() if solar_row and solar_row.last_time else None,
-                }
+                    "start": solar_row.first_time.isoformat()
+                    if solar_row and solar_row.first_time
+                    else None,
+                    "end": solar_row.last_time.isoformat()
+                    if solar_row and solar_row.last_time
+                    else None,
+                },
             },
             "voltage_measurements": {
                 "total_count": voltage_row.count if voltage_row else 0,
                 "prosumer_count": voltage_row.prosumer_count if voltage_row else 0,
                 "date_range": {
-                    "start": voltage_row.first_time.isoformat() if voltage_row and voltage_row.first_time else None,
-                    "end": voltage_row.last_time.isoformat() if voltage_row and voltage_row.last_time else None,
-                }
+                    "start": voltage_row.first_time.isoformat()
+                    if voltage_row and voltage_row.first_time
+                    else None,
+                    "end": voltage_row.last_time.isoformat()
+                    if voltage_row and voltage_row.last_time
+                    else None,
+                },
             },
             "prosumers": prosumers,
-        }
+        },
     }

@@ -22,6 +22,9 @@ class ConnectionManager:
     - alerts: System alerts and notifications
     """
 
+    # Maximum connections per TOR 7.1.7: ≥300,000 consumers
+    MAX_CONNECTIONS = 10000
+
     def __init__(self):
         # All active connections
         self.active_connections: list[WebSocket] = []
@@ -42,7 +45,15 @@ class ConnectionManager:
         Args:
             websocket: The WebSocket connection
             channels: List of channels to subscribe to (default: ["all"])
+
+        Returns:
+            bool: True if connected, False if at capacity
         """
+        # Check connection limit before accepting (DoS protection)
+        if len(self.active_connections) >= self.MAX_CONNECTIONS:
+            await websocket.close(code=1013, reason="Server at capacity")
+            return False
+
         await websocket.accept()
 
         async with self._lock:
@@ -70,7 +81,10 @@ class ConnectionManager:
     async def subscribe(self, websocket: WebSocket, channel: str):
         """Subscribe a connection to a specific channel."""
         async with self._lock:
-            if channel in self.channel_subscriptions and websocket not in self.channel_subscriptions[channel]:
+            if (
+                channel in self.channel_subscriptions
+                and websocket not in self.channel_subscriptions[channel]
+            ):
                 self.channel_subscriptions[channel].append(websocket)
                 return True
         return False
@@ -78,12 +92,17 @@ class ConnectionManager:
     async def unsubscribe(self, websocket: WebSocket, channel: str):
         """Unsubscribe a connection from a specific channel."""
         async with self._lock:
-            if channel in self.channel_subscriptions and websocket in self.channel_subscriptions[channel]:
+            if (
+                channel in self.channel_subscriptions
+                and websocket in self.channel_subscriptions[channel]
+            ):
                 self.channel_subscriptions[channel].remove(websocket)
                 return True
         return False
 
-    async def send_personal_message(self, message: dict[str, Any], websocket: WebSocket):
+    async def send_personal_message(
+        self, message: dict[str, Any], websocket: WebSocket
+    ):
         """Send a message to a specific WebSocket connection."""
         try:
             await websocket.send_json(message)

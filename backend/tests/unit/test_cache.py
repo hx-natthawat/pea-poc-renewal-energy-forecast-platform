@@ -349,7 +349,7 @@ class TestRedisCacheOperations:
             mock_client.info = AsyncMock(
                 return_value={"keyspace_hits": 100, "keyspace_misses": 20}
             )
-            mock_client.keys = AsyncMock(return_value=["pea:solar:123"])
+            mock_client.dbsize = AsyncMock(return_value=1)
             mock_redis.from_url.return_value = mock_client
 
             await cache.connect()
