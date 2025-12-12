@@ -9,16 +9,15 @@
 
 ### In Progress
 
-| Task                          | Assignee     | Status | Notes                 |
-| ----------------------------- | ------------ | ------ | --------------------- |
-| Deploy to staging environment | Orchestrator | Ready  | All pre-checks passed |
+| Task                          | Assignee     | Status      | Notes                          |
+| ----------------------------- | ------------ | ----------- | ------------------------------ |
+| Conduct UAT with stakeholders | Orchestrator | In Progress | Staging validated, ready for UAT |
 
 ### To Do
 
-| Task                          | Priority | Estimate |
-| ----------------------------- | -------- | -------- |
-| Conduct UAT with stakeholders | P0       | 1 week   |
-| Production deployment         | P0       | 4h       |
+| Task                  | Priority | Estimate |
+| --------------------- | -------- | -------- |
+| Production deployment | P0       | 4h       |
 
 ### Done
 
@@ -63,6 +62,7 @@
 | Kind Cluster Validation          | 2025-12-13 | Core services running in staging |
 | ML Service Docker Build          | 2025-12-13 | pea-forecast/ml:latest deployed |
 | Full Cluster Test                | 2025-12-13 | All 5 services running (762 tests pass) |
+| Staging Deployment Complete      | 2025-12-13 | All 7 pods healthy, smoke tests pass    |
 
 ---
 
@@ -124,8 +124,8 @@ None currently.
 - **Deployment runbook complete**: docs/operations/runbooks/deployment-runbook.md
 - **All Priority 1 deployment blockers resolved** (2025-12-06)
 - **Priority 2 HA configurations added** (2025-12-06): PDBs + NetworkPolicies
-- **Staging Readiness: 98%** | **Overall Score: 95/100**
-- **Production Readiness: 60%**
+- **Staging Readiness: 100%** | **Overall Score: 98/100**
+- **Production Readiness: 70%** (pending production secrets + load testing)
 - **Secrets management strategy documented**: docs/operations/secrets-management-strategy.md
 - **ML Service added to Helm**: TOR 7.1.1 compliant (16 Core, 64GB)
 - Awaiting stakeholder UAT scheduling

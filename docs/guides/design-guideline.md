@@ -77,44 +77,44 @@ The PEA mascot uses a specific set of colors as defined in the official Color Gu
 ```css
 :root {
   /* === PRIMARY BRAND COLORS === */
-  --pea-purple: #74045F;
-  --pea-purple-light: #8B1A75;
-  --pea-purple-dark: #51124D;
-  --pea-purple-muted: #5A0349;
+  --pea-purple: #74045f;
+  --pea-purple-light: #8b1a75;
+  --pea-purple-dark: #51124d;
+  --pea-purple-muted: #5a0349;
 
   /* === SECONDARY BRAND COLORS === */
-  --pea-gold: #C7911B;
-  --pea-gold-light: #D4A43D;
+  --pea-gold: #c7911b;
+  --pea-gold-light: #d4a43d;
   --pea-gold-dark: #966428;
-  --pea-gold-bright: #FAC83C;
+  --pea-gold-bright: #fac83c;
 
   /* === MASCOT ACCENT COLORS === */
-  --pea-magenta: #C73E8A;
-  --pea-pink: #C86E8C;
+  --pea-magenta: #c73e8a;
+  --pea-pink: #c86e8c;
 
   /* === NEUTRAL PALETTE === */
-  --pea-white: #FFFFFF;
+  --pea-white: #ffffff;
   --pea-black: #000000;
-  --pea-gray-50: #F9FAFB;
-  --pea-gray-100: #F3F4F6;
-  --pea-gray-200: #E5E7EB;
-  --pea-gray-300: #D1D5DB;
-  --pea-gray-400: #9CA3AF;
-  --pea-gray-500: #6B7280;
-  --pea-gray-600: #4B5563;
+  --pea-gray-50: #f9fafb;
+  --pea-gray-100: #f3f4f6;
+  --pea-gray-200: #e5e7eb;
+  --pea-gray-300: #d1d5db;
+  --pea-gray-400: #9ca3af;
+  --pea-gray-500: #6b7280;
+  --pea-gray-600: #4b5563;
   --pea-gray-700: #374151;
-  --pea-gray-800: #1F2937;
+  --pea-gray-800: #1f2937;
   --pea-gray-900: #111827;
 
   /* === SEMANTIC COLORS === */
-  --pea-success: #10B981;
-  --pea-success-light: #D1FAE5;
-  --pea-warning: #F59E0B;
-  --pea-warning-light: #FEF3C7;
-  --pea-error: #EF4444;
-  --pea-error-light: #FEE2E2;
-  --pea-info: #3B82F6;
-  --pea-info-light: #DBEAFE;
+  --pea-success: #10b981;
+  --pea-success-light: #d1fae5;
+  --pea-warning: #f59e0b;
+  --pea-warning-light: #fef3c7;
+  --pea-error: #ef4444;
+  --pea-error-light: #fee2e2;
+  --pea-info: #3b82f6;
+  --pea-info-light: #dbeafe;
 }
 ```
 
@@ -142,10 +142,11 @@ For Thai language content, use **Prompt** font family as specified in the PEA Br
 
 ```css
 /* Google Fonts Import */
-@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
 
 /* Font Stack */
-font-family: 'Prompt', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+font-family: "Prompt", "Noto Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI",
+  sans-serif;
 ```
 
 ### Font Weights
@@ -162,21 +163,67 @@ font-family: 'Prompt', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Seg
 
 ```css
 /* Headings */
-.h1 { font-size: 2.25rem; line-height: 2.5rem; font-weight: 700; }   /* 36px */
-.h2 { font-size: 1.875rem; line-height: 2.25rem; font-weight: 600; } /* 30px */
-.h3 { font-size: 1.5rem; line-height: 2rem; font-weight: 600; }      /* 24px */
-.h4 { font-size: 1.25rem; line-height: 1.75rem; font-weight: 500; }  /* 20px */
-.h5 { font-size: 1.125rem; line-height: 1.75rem; font-weight: 500; } /* 18px */
-.h6 { font-size: 1rem; line-height: 1.5rem; font-weight: 500; }      /* 16px */
+.h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 700;
+} /* 36px */
+.h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 600;
+} /* 30px */
+.h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+} /* 24px */
+.h4 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 500;
+} /* 20px */
+.h5 {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 500;
+} /* 18px */
+.h6 {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+} /* 16px */
 
 /* Body Text */
-.body-lg { font-size: 1.125rem; line-height: 1.75rem; font-weight: 400; } /* 18px */
-.body { font-size: 1rem; line-height: 1.5rem; font-weight: 400; }         /* 16px */
-.body-sm { font-size: 0.875rem; line-height: 1.25rem; font-weight: 400; } /* 14px */
+.body-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 400;
+} /* 18px */
+.body {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 400;
+} /* 16px */
+.body-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 400;
+} /* 14px */
 
 /* Small Text */
-.caption { font-size: 0.75rem; line-height: 1rem; font-weight: 300; }  /* 12px */
-.overline { font-size: 0.625rem; line-height: 1rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; } /* 10px */
+.caption {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 300;
+} /* 12px */
+.overline {
+  font-size: 0.625rem;
+  line-height: 1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+} /* 10px */
 ```
 
 ---
@@ -280,7 +327,11 @@ font-family: 'Prompt', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Seg
 ```css
 /* Main Header */
 .header {
-  background: linear-gradient(135deg, var(--pea-purple) 0%, var(--pea-purple-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--pea-purple) 0%,
+    var(--pea-purple-dark) 100%
+  );
   color: white;
 }
 
@@ -298,7 +349,7 @@ font-family: 'Prompt', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Seg
 
 /* Active Indicator */
 .nav-item.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -366,47 +417,47 @@ font-family: 'Prompt', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Seg
 ```javascript
 // Solar/Energy Charts - Gold Theme
 export const solarColors = {
-  primary: '#C7911B',      // PEA Gold
-  secondary: '#74045F',    // PEA Purple
-  tertiary: '#10B981',     // Success green
-  gradient: ['#C7911B', '#D4A43D', '#FAC83C'],
-  area: 'rgba(199, 145, 27, 0.2)',
+  primary: "#C7911B", // PEA Gold
+  secondary: "#74045F", // PEA Purple
+  tertiary: "#10B981", // Success green
+  gradient: ["#C7911B", "#D4A43D", "#FAC83C"],
+  area: "rgba(199, 145, 27, 0.2)",
 };
 
 // Voltage Charts - Purple Theme
 export const voltageColors = {
-  primary: '#74045F',      // PEA Purple
-  secondary: '#C7911B',    // PEA Gold
+  primary: "#74045F", // PEA Purple
+  secondary: "#C7911B", // PEA Gold
   phases: {
-    A: '#74045F',          // Purple
-    B: '#C7911B',          // Gold
-    C: '#6B7280',          // Gray
+    A: "#74045F", // Purple
+    B: "#C7911B", // Gold
+    C: "#6B7280", // Gray
   },
   limits: {
-    upper: '#EF4444',      // Red
-    lower: '#F59E0B',      // Amber
-    nominal: '#10B981',    // Green
+    upper: "#EF4444", // Red
+    lower: "#F59E0B", // Amber
+    nominal: "#10B981", // Green
   },
 };
 
 // Status Colors
 export const statusColors = {
-  normal: '#10B981',       // Green
-  warning: '#F59E0B',      // Amber
-  critical: '#EF4444',     // Red
-  offline: '#6B7280',      // Gray
+  normal: "#10B981", // Green
+  warning: "#F59E0B", // Amber
+  critical: "#EF4444", // Red
+  offline: "#6B7280", // Gray
 };
 
 // Categorical Colors (for multiple series)
 export const categoricalColors = [
-  '#74045F',  // Purple
-  '#C7911B',  // Gold
-  '#10B981',  // Green
-  '#3B82F6',  // Blue
-  '#F59E0B',  // Amber
-  '#EC4899',  // Pink
-  '#8B5CF6',  // Violet
-  '#06B6D4',  // Cyan
+  "#74045F", // Purple
+  "#C7911B", // Gold
+  "#10B981", // Green
+  "#3B82F6", // Blue
+  "#F59E0B", // Amber
+  "#EC4899", // Pink
+  "#8B5CF6", // Violet
+  "#06B6D4", // Cyan
 ];
 ```
 
@@ -423,33 +474,35 @@ module.exports = {
         pea: {
           // Primary
           purple: {
-            DEFAULT: '#74045F',
-            light: '#8B1A75',
-            dark: '#51124D',
-            muted: '#5A0349',
+            DEFAULT: "#74045F",
+            light: "#8B1A75",
+            dark: "#51124D",
+            muted: "#5A0349",
           },
           // Secondary
           gold: {
-            DEFAULT: '#C7911B',
-            light: '#D4A43D',
-            dark: '#966428',
-            bright: '#FAC83C',
+            DEFAULT: "#C7911B",
+            light: "#D4A43D",
+            dark: "#966428",
+            bright: "#FAC83C",
           },
           // Mascot Accents
-          magenta: '#C73E8A',
-          pink: '#C86E8C',
+          magenta: "#C73E8A",
+          pink: "#C86E8C",
         },
       },
       fontFamily: {
-        prompt: ['Prompt', 'Noto Sans Thai', 'sans-serif'],
+        prompt: ["Prompt", "Noto Sans Thai", "sans-serif"],
       },
       boxShadow: {
-        'pea': '0 4px 6px -1px rgba(116, 4, 95, 0.1), 0 2px 4px -1px rgba(116, 4, 95, 0.06)',
-        'pea-lg': '0 10px 15px -3px rgba(116, 4, 95, 0.1), 0 4px 6px -2px rgba(116, 4, 95, 0.05)',
+        pea: "0 4px 6px -1px rgba(116, 4, 95, 0.1), 0 2px 4px -1px rgba(116, 4, 95, 0.06)",
+        "pea-lg":
+          "0 10px 15px -3px rgba(116, 4, 95, 0.1), 0 4px 6px -2px rgba(116, 4, 95, 0.05)",
       },
       backgroundImage: {
-        'pea-gradient': 'linear-gradient(135deg, #74045F 0%, #51124D 100%)',
-        'pea-gold-gradient': 'linear-gradient(135deg, #C7911B 0%, #966428 100%)',
+        "pea-gradient": "linear-gradient(135deg, #74045F 0%, #51124D 100%)",
+        "pea-gold-gradient":
+          "linear-gradient(135deg, #C7911B 0%, #966428 100%)",
       },
     },
   },
@@ -578,11 +631,21 @@ Based on 4px base unit:
 
 ```css
 /* Container widths */
-.container-sm { max-width: 640px; }
-.container-md { max-width: 768px; }
-.container-lg { max-width: 1024px; }
-.container-xl { max-width: 1280px; }
-.container-2xl { max-width: 1536px; }
+.container-sm {
+  max-width: 640px;
+}
+.container-md {
+  max-width: 768px;
+}
+.container-lg {
+  max-width: 1024px;
+}
+.container-xl {
+  max-width: 1280px;
+}
+.container-2xl {
+  max-width: 1536px;
+}
 
 /* Grid columns */
 .grid-dashboard {
@@ -610,10 +673,11 @@ PEA Pink:       #C86E8C | rgb(200, 110, 140) | Pantone P 74-4 C
 ### Font Stack
 
 ```css
-font-family: 'Prompt', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+font-family: "Prompt", "Noto Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI",
+  sans-serif;
 ```
 
 ---
 
-*Design Guidelines v2.0 - Based on PEA Brand Bible 2022 & Official Mascot Color Guide*
-*Last Updated: December 2025*
+_Design Guidelines v2.0 - Based on PEA Brand Bible 2022 & Official Mascot Color Guide_
+_Last Updated: December 2025_
