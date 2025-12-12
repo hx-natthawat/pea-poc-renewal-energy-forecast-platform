@@ -127,6 +127,7 @@ api_router.include_router(
 # Demo endpoints for stakeholder demonstrations
 api_router.include_router(
     demo.router,
+    prefix="/demo",
     tags=["demo"],
 )
 
