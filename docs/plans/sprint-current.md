@@ -51,6 +51,9 @@
 | PEA Brand Color Alignment        | 2025-12-13 | Mascot guide colors + Turbopack fix |
 | Security Hardening               | 2025-12-13 | SQL injection, DoS, Redis perf fix |
 | Runtime Type Validation          | 2025-12-13 | TS type guards, prosumer ID check |
+| ML Error Handling                | 2025-12-13 | HTTP 503 instead of 500 on predict() |
+| Alerts Endpoint Hardening        | 2025-12-13 | SQL injection + error logging |
+| SQL Injection Elimination        | 2025-12-13 | 12 total fixes across 4 endpoints |
 
 ---
 
