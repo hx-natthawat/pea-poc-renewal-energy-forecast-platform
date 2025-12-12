@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -217,6 +217,17 @@ async def predict_voltage(
     cache = await get_cache()
     inference = get_voltage_inference()
 
+    # Validate prosumer IDs (per TOR network topology: 7 prosumers)
+    from app.ml.voltage_inference import PROSUMER_CONFIG
+
+    valid_ids = set(PROSUMER_CONFIG.keys())
+    invalid_ids = [pid for pid in request.prosumer_ids if pid not in valid_ids]
+    if invalid_ids:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid prosumer IDs: {invalid_ids}. Valid IDs: {list(valid_ids)}",
+        )
+
     predictions = []
     model_version = "not_loaded"
     cache_hits = 0
@@ -365,7 +376,9 @@ async def get_voltage_history(
 
     Returns predictions with pagination support.
     """
-    logger.info(f"Voltage history for {prosumer_id} requested by user: {current_user.username}")
+    logger.info(
+        f"Voltage history for {prosumer_id} requested by user: {current_user.username}"
+    )
 
     # Query predictions from database
     query = text("""

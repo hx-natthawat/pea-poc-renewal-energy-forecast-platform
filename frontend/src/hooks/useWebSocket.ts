@@ -48,6 +48,37 @@ interface UseWebSocketOptions {
   reconnectInterval?: number;
 }
 
+// Type guards for runtime validation
+function isSolarUpdate(data: unknown): data is SolarUpdate {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "station_id" in data &&
+    "power_kw" in data &&
+    typeof (data as SolarUpdate).power_kw === "number"
+  );
+}
+
+function isVoltageUpdate(data: unknown): data is VoltageUpdate {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "prosumer_id" in data &&
+    "voltage" in data &&
+    typeof (data as VoltageUpdate).voltage === "number"
+  );
+}
+
+function isAlertUpdate(data: unknown): data is AlertUpdate {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "alert_type" in data &&
+    "severity" in data &&
+    "message" in data
+  );
+}
+
 interface UseWebSocketReturn {
   isConnected: boolean;
   lastMessage: WebSocketMessage | null;
@@ -155,23 +186,23 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
           const message: WebSocketMessage = JSON.parse(event.data);
           setLastMessage(message);
 
-          // Route message to appropriate handler
+          // Route message to appropriate handler with runtime type validation
           switch (message.type) {
             case "solar_update":
-              if (onSolarUpdate && message.data) {
-                onSolarUpdate(message.data as unknown as SolarUpdate);
+              if (onSolarUpdate && isSolarUpdate(message.data)) {
+                onSolarUpdate(message.data);
               }
               break;
 
             case "voltage_update":
-              if (onVoltageUpdate && message.data) {
-                onVoltageUpdate(message.data as unknown as VoltageUpdate);
+              if (onVoltageUpdate && isVoltageUpdate(message.data)) {
+                onVoltageUpdate(message.data);
               }
               break;
 
             case "alert":
-              if (onAlert && message.data) {
-                onAlert(message.data as unknown as AlertUpdate);
+              if (onAlert && isAlertUpdate(message.data)) {
+                onAlert(message.data);
               }
               break;
 
