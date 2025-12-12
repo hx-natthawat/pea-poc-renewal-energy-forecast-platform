@@ -210,7 +210,8 @@
       "Bash(pnpm remove:*)",
       "Bash(npx biome:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform log --oneline -4)"
     ],
     "deny": [],
     "ask": []
