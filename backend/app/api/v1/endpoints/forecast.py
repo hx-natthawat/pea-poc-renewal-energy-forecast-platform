@@ -150,16 +150,29 @@ async def predict_solar_power(
     # Get inference service
     inference = get_solar_inference()
 
-    # Make prediction using trained model
-    result = inference.predict(
-        timestamp=request.timestamp,
-        pyrano1=request.features.pyrano1,
-        pyrano2=request.features.pyrano2,
-        pvtemp1=request.features.pvtemp1,
-        pvtemp2=request.features.pvtemp2,
-        ambtemp=request.features.ambtemp,
-        windspeed=request.features.windspeed,
-    )
+    # Make prediction using trained model with error handling
+    try:
+        result = inference.predict(
+            timestamp=request.timestamp,
+            pyrano1=request.features.pyrano1,
+            pyrano2=request.features.pyrano2,
+            pvtemp1=request.features.pvtemp1,
+            pvtemp2=request.features.pvtemp2,
+            ambtemp=request.features.ambtemp,
+            windspeed=request.features.windspeed,
+        )
+    except RuntimeError as e:
+        logger.error(f"Solar model error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="Solar prediction service temporarily unavailable. Model not loaded.",
+        )
+    except Exception as e:
+        logger.error(f"Solar prediction failed: {type(e).__name__}: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="Solar prediction service error. Please retry.",
+        )
 
     prediction_time_ms = int((time.time() - start_time) * 1000)
 
@@ -242,11 +255,26 @@ async def predict_voltage(
             cache_hits += 1
             continue
 
-        # Make prediction using trained model
-        result = inference.predict(
-            timestamp=request.timestamp,
-            prosumer_id=prosumer_id,
-        )
+        # Make prediction using trained model with error handling
+        try:
+            result = inference.predict(
+                timestamp=request.timestamp,
+                prosumer_id=prosumer_id,
+            )
+        except RuntimeError as e:
+            logger.error(f"Voltage model error for {prosumer_id}: {e}")
+            raise HTTPException(
+                status_code=503,
+                detail=f"Voltage prediction service unavailable for {prosumer_id}. Model not loaded.",
+            )
+        except Exception as e:
+            logger.error(
+                f"Voltage prediction failed for {prosumer_id}: {type(e).__name__}: {e}"
+            )
+            raise HTTPException(
+                status_code=503,
+                detail=f"Voltage prediction error for {prosumer_id}. Please retry.",
+            )
 
         model_version = result["model_version"]
 
