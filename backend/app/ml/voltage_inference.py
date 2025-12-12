@@ -16,8 +16,9 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-# Model loading timeout in seconds (prevents hanging on corrupted files)
+# Timeout in seconds (prevents hanging on corrupted files or slow predictions)
 MODEL_LOAD_TIMEOUT = 30
+PREDICTION_TIMEOUT = 5  # 5 seconds max for inference
 
 
 # Prosumer configuration
@@ -199,7 +200,18 @@ class VoltageInference:
         )
         if self.model is None:
             raise RuntimeError("Model not loaded")
-        predicted_voltage = float(self.model.predict(X)[0])
+
+        # Run prediction with timeout to prevent hanging
+        try:
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(self.model.predict, X)
+                prediction_result = future.result(timeout=PREDICTION_TIMEOUT)
+            predicted_voltage = float(prediction_result[0])
+        except FuturesTimeoutError:
+            logger.error(
+                f"Voltage prediction timed out after {PREDICTION_TIMEOUT}s for {prosumer_id}"
+            )
+            raise RuntimeError(f"Prediction timeout for {prosumer_id}")
 
         # Calculate confidence based on CV metrics
         cv_mae = self.metrics.get("mae", 0.6)

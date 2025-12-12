@@ -16,8 +16,9 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-# Model loading timeout in seconds (prevents hanging on corrupted files)
+# Timeout in seconds (prevents hanging on corrupted files or slow predictions)
 MODEL_LOAD_TIMEOUT = 30
+PREDICTION_TIMEOUT = 5  # 5 seconds max for inference
 
 
 class SolarInference:
@@ -221,10 +222,17 @@ class SolarInference:
             timestamp, pyrano1, pyrano2, pvtemp1, pvtemp2, ambtemp, windspeed
         )
 
-        # Predict
+        # Predict with timeout to prevent hanging
         if self.model is None:
             raise RuntimeError("Model not loaded")
-        power_kw = float(self.model.predict(X)[0])
+        try:
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(self.model.predict, X)
+                prediction_result = future.result(timeout=PREDICTION_TIMEOUT)
+            power_kw = float(prediction_result[0])
+        except FuturesTimeoutError:
+            logger.error(f"Solar prediction timed out after {PREDICTION_TIMEOUT}s")
+            raise RuntimeError("Prediction timeout")
 
         # Ensure non-negative
         power_kw = max(0.0, power_kw)
