@@ -57,6 +57,7 @@
 | Reliability Improvements         | 2025-12-13 | TX rollback, model loading timeout |
 | ML Prediction Timeout            | 2025-12-13 | 5s timeout prevents hung requests  |
 | Smoke Test Script                | 2025-12-13 | scripts/smoke-test.sh for UAT prep |
+| Pre-Deployment Checklist         | 2025-12-13 | Comprehensive deployment checklist |
 
 ---
 
