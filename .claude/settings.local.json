@@ -200,7 +200,13 @@
       "Bash(jq -r \".data[] | \"\"\\(.name): \\(.paths[])\"\"\")",
       "Bash(kong:3.8)",
       "Bash(ls:*)",
-      "Bash(timeout 3 curl:*)"
+      "Bash(timeout 3 curl:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform check-ignore frontend/tsconfig.tsbuildinfo)",
+      "Bash(git rm:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff .claude/settings.local.json)",
+      "Bash(DATABASE_URL=\"postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast\" REDIS_URL=\"redis://localhost:6380/0\" PYTHONPATH=. ./venv/bin/pytest:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff --stat frontend/)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform check-ignore -v frontend/src/lib/api.ts)"
     ],
     "deny": [],
     "ask": []

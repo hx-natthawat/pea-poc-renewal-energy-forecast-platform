@@ -1,55 +1,46 @@
 /**
  * API configuration utilities for PEA RE Forecast Platform.
- * Handles dynamic URL resolution for both browser and server contexts.
+ *
+ * ARCHITECTURE:
+ * - Always use `/backend` as the API base path (unified approach)
+ * - Infrastructure handles routing:
+ *   - Local development: Next.js rewrites `/backend/*` → `http://localhost:8000/*`
+ *   - Production (Kong): Kong routes `/backend/*` → backend service
+ * - This eliminates environment-specific URL detection issues
  */
 
 import type { AuditLogFilter, AuditLogResponse, AuditLogStatsResponse } from "@/types/audit";
 
 /**
- * Get the base API URL based on the current environment.
- * Detects Kong gateway and uses relative URLs to avoid CORS issues.
+ * Get the base API URL.
+ *
+ * Strategy: Always use `/backend` relative path.
+ * - Local dev: Next.js rewrites handle proxying to localhost:8000
+ * - Production: Kong gateway routes to backend service
+ *
+ * This unified approach avoids:
+ * - CORS issues (same-origin requests)
+ * - Environment detection bugs
+ * - Path-based routing inconsistencies
  */
 export function getApiBaseUrl(): string {
-  // Server-side rendering: use direct backend URL
+  // Server-side rendering needs direct URL for internal calls
   if (typeof window === "undefined") {
-    // SSR calls go directly to backend
+    // In SSR context, use environment variable or default to docker service name
     return process.env.NEXT_PUBLIC_API_URL || "http://backend:8000";
   }
 
-  // Client-side: detect Kong gateway
-  const port = window.location.port;
-  const pathname = window.location.pathname || "";
-  const hostname = window.location.hostname;
-
-  // Kong gateway detection (most common case first)
-  // Port 8888 = Kong gateway, use relative /backend path
-  if (port === "8888") {
-    return "/backend";
-  }
-
-  // Check if accessed via /console path (Kong basePath routing)
-  if (pathname.startsWith("/console")) {
-    return "/backend";
-  }
-
-  // Environment variable override (build-time)
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-
-  // Direct localhost access on port 3000 - use backend at 8000
-  const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
-  if (isLocalhost && (port === "3000" || port === "")) {
-    return "http://localhost:8000";
-  }
-
-  // Default: use relative backend path (production)
+  // Client-side: Always use /backend relative path
+  // Infrastructure (Next.js rewrites or Kong) handles the routing
   return "/backend";
 }
 
 /**
- * Get the WebSocket base URL based on the current environment.
- * Detects Kong gateway and uses appropriate WebSocket URL.
+ * Get the WebSocket base URL.
+ *
+ * Strategy: Use same unified approach as API.
+ * - Local dev: Direct connection to backend (WebSocket can't be rewritten)
+ * - Production: Use /backend path through Kong
  */
 export function getWebSocketBaseUrl(): string {
   // Server-side fallback
@@ -57,33 +48,23 @@ export function getWebSocketBaseUrl(): string {
     return process.env.NEXT_PUBLIC_WS_URL || "ws://backend:8000/api/v1/ws";
   }
 
-  // Use environment variable if configured
+  // Check for explicit WebSocket URL override
   if (process.env.NEXT_PUBLIC_WS_URL) {
     return process.env.NEXT_PUBLIC_WS_URL;
   }
 
-  const port = window.location.port;
-  const pathname = window.location.pathname || "";
   const hostname = window.location.hostname;
+  const port = window.location.port;
   const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 
-  // Kong gateway detection (port 8888)
-  if (port === "8888") {
-    return `${wsProtocol}//${window.location.host}/backend/api/v1/ws`;
-  }
-
-  // Check if accessed via /console path (Kong basePath routing)
-  if (pathname.startsWith("/console")) {
-    return `${wsProtocol}//${window.location.host}/backend/api/v1/ws`;
-  }
-
-  // Direct localhost access - connect to backend port 8000
+  // Local development: connect directly to backend
+  // WebSocket connections can't be rewritten by Next.js
   const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
-  if (isLocalhost && (port === "3000" || port === "")) {
-    return `ws://${hostname}:8000/api/v1/ws`;
+  if (isLocalhost && (port === "3000" || port === "3001")) {
+    return "ws://localhost:8000/api/v1/ws";
   }
 
-  // Default: production with /backend prefix
+  // Production/Kong: use relative path through gateway
   return `${wsProtocol}//${window.location.host}/backend/api/v1/ws`;
 }
 

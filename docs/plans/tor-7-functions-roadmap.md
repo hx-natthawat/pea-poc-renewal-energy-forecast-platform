@@ -16,25 +16,25 @@ The TOR specifies 7 core forecasting functions. The current POC implementation c
 
 ### Phase 1: POC Functions (COMPLETE)
 
-| Function | POC Test | Target | Actual | Status |
-|----------|----------|--------|--------|--------|
-| RE Forecast (Solar) | POC 1, 2 | MAPE < 10% | 9.74% | ✅ PASS |
-| Voltage Prediction | POC 3, 4 | MAE < 2V | 0.036V | ✅ PASS |
+| Function            | POC Test | Target     | Actual | Status |
+| ------------------- | -------- | ---------- | ------ | ------ |
+| RE Forecast (Solar) | POC 1, 2 | MAPE < 10% | 9.74%  | ✅ PASS |
+| Voltage Prediction  | POC 3, 4 | MAE < 2V   | 0.036V | ✅ PASS |
 
 ### Phase 2a: Extended Functions (COMPLETE)
 
-| Function | Priority | Complexity | Dependencies | Status |
-|----------|----------|------------|--------------|--------|
-| Load Forecast | P1 | Medium | Historical load data | ✅ API Ready (Simulation) |
-| Actual Demand Forecast | P1 | Medium | RE Forecast, Load data | ✅ API Ready (Simulation) |
-| Imbalance Forecast | P2 | Medium | RE + Demand + Load | ✅ API Ready (Simulation) |
+| Function               | Priority | Complexity | Dependencies           | Status                   |
+| ---------------------- | -------- | ---------- | ---------------------- | ------------------------ |
+| Load Forecast          | P1       | Medium     | Historical load data   | ✅ API Ready (Simulation) |
+| Actual Demand Forecast | P1       | Medium     | RE Forecast, Load data | ✅ API Ready (Simulation) |
+| Imbalance Forecast     | P2       | Medium     | RE + Demand + Load     | ✅ API Ready (Simulation) |
 
 ### Phase 2b: Advanced Functions (BLOCKED - Awaiting Network Model)
 
-| Function | Priority | Complexity | Dependencies | Status |
-|----------|----------|------------|--------------|--------|
-| DOE | P2 | High | Voltage Prediction, Network model | ⏳ Blocked |
-| Hosting Capacity | P3 | High | All forecasts + Network model | ⏳ Future |
+| Function         | Priority | Complexity | Dependencies                      | Status    |
+| ---------------- | -------- | ---------- | --------------------------------- | --------- |
+| DOE              | P2       | High       | Voltage Prediction, Network model | ⏳ Blocked |
+| Hosting Capacity | P3       | High       | All forecasts + Network model     | ⏳ Future  |
 
 **Phase 2a API Endpoints (December 2025):**
 
@@ -214,33 +214,33 @@ Imbalance = Actual Demand - Scheduled Generation - Actual RE Generation
 
 ## AI/ML Techniques Matrix
 
-| Technique | Application | Functions |
-|-----------|-------------|-----------|
-| Linear Regression | Baseline models | All |
-| ANN | Non-linear patterns | 1, 2, 3, 5 |
-| SVM | Classification | 4, 6 |
-| LSTM | Time series | 1, 2, 3, 5 |
-| XGBoost | Tabular data | 1, 5 |
-| Ensemble | Production models | All |
+| Technique         | Application         | Functions  |
+| ----------------- | ------------------- | ---------- |
+| Linear Regression | Baseline models     | All        |
+| ANN               | Non-linear patterns | 1, 2, 3, 5 |
+| SVM               | Classification      | 4, 6       |
+| LSTM              | Time series         | 1, 2, 3, 5 |
+| XGBoost           | Tabular data        | 1, 5       |
+| Ensemble          | Production models   | All        |
 
 ---
 
 ## Accuracy Targets Summary
 
-| Function | Metric | Target |
-|----------|--------|--------|
-| RE Forecast (Solar) | MAPE | < 10% |
-| RE Forecast (Wind) | MAPE | < 15% |
-| RE Forecast (Biomass) | MAPE | < 5% |
-| Actual Demand | MAPE | < 5% |
-| Load (System) | MAPE | < 3% |
-| Load (Regional) | MAPE | < 5% |
-| Load (Substation) | MAPE | < 8% |
-| Imbalance | MAE | < 5% of load |
-| Voltage (LV) | MAE | < 2V |
-| Voltage (MV) | MAE | < 1% |
-| DOE | Violation | < 1% |
-| Hosting Capacity | Accuracy | ± 10% |
+| Function              | Metric    | Target       |
+| --------------------- | --------- | ------------ |
+| RE Forecast (Solar)   | MAPE      | < 10%        |
+| RE Forecast (Wind)    | MAPE      | < 15%        |
+| RE Forecast (Biomass) | MAPE      | < 5%         |
+| Actual Demand         | MAPE      | < 5%         |
+| Load (System)         | MAPE      | < 3%         |
+| Load (Regional)       | MAPE      | < 5%         |
+| Load (Substation)     | MAPE      | < 8%         |
+| Imbalance             | MAE       | < 5% of load |
+| Voltage (LV)          | MAE       | < 2V         |
+| Voltage (MV)          | MAE       | < 1%         |
+| DOE                   | Violation | < 1%         |
+| Hosting Capacity      | Accuracy  | ± 10%        |
 
 ---
 
