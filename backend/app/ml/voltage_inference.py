@@ -5,6 +5,7 @@ Loads the trained RandomForest model and provides prediction interface.
 """
 
 import logging
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,9 @@ import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+# Model loading timeout in seconds (prevents hanging on corrupted files)
+MODEL_LOAD_TIMEOUT = 30
 
 
 # Prosumer configuration
@@ -40,19 +44,28 @@ class VoltageInference:
         self._is_loaded = False
 
         if model_path is None:
-            model_path = Path(__file__).parent.parent.parent.parent / "ml" / "models" / "voltage_rf_v1.joblib"
+            model_path = (
+                Path(__file__).parent.parent.parent.parent
+                / "ml"
+                / "models"
+                / "voltage_rf_v1.joblib"
+            )
 
         self.model_path = Path(model_path)
         self._load_model()
 
     def _load_model(self) -> bool:
-        """Load model from disk."""
+        """Load model from disk with timeout protection."""
         if not self.model_path.exists():
             logger.warning(f"Model file not found: {self.model_path}")
             return False
 
         try:
-            artifact = joblib.load(self.model_path)
+            # Use thread pool with timeout to prevent hanging on corrupted files
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(joblib.load, self.model_path)
+                artifact = future.result(timeout=MODEL_LOAD_TIMEOUT)
+
             self.model = artifact["model"]
             self.feature_columns = artifact["feature_columns"]
             self.metrics = artifact.get("metrics", {})
@@ -60,6 +73,11 @@ class VoltageInference:
             self._is_loaded = True
             logger.info(f"Loaded voltage model: {self.version}")
             return True
+        except FuturesTimeoutError:
+            logger.error(
+                f"Model loading timed out after {MODEL_LOAD_TIMEOUT}s: {self.model_path}"
+            )
+            return False
         except Exception as e:
             logger.error(f"Failed to load model: {e}")
             return False
@@ -78,7 +96,9 @@ class VoltageInference:
         current: float = 4.0,
     ) -> pd.DataFrame:
         """Create feature vector for prediction."""
-        config = PROSUMER_CONFIG.get(prosumer_id, {"phase": "A", "position": 1, "has_ev": False})
+        config = PROSUMER_CONFIG.get(
+            prosumer_id, {"phase": "A", "position": 1, "has_ev": False}
+        )
 
         hour = timestamp.hour
         minute = timestamp.minute
@@ -107,7 +127,8 @@ class VoltageInference:
             "reactive_power": reactive_power,
             "energy_meter_current": current,
             "apparent_power": np.sqrt(active_power**2 + reactive_power**2),
-            "power_factor": active_power / max(np.sqrt(active_power**2 + reactive_power**2), 0.01),
+            "power_factor": active_power
+            / max(np.sqrt(active_power**2 + reactive_power**2), 0.01),
             "voltage_drop_indicator": int(config["position"]) * active_power,
             "load_intensity": current * int(config["position"]),
             # Rate of change (use 0 for single point)
@@ -156,7 +177,9 @@ class VoltageInference:
         Returns:
             Dictionary with prediction results
         """
-        config = PROSUMER_CONFIG.get(prosumer_id, {"phase": "A", "position": 1, "has_ev": False})
+        config = PROSUMER_CONFIG.get(
+            prosumer_id, {"phase": "A", "position": 1, "has_ev": False}
+        )
 
         if not self._is_loaded:
             # Fallback to simple estimation
@@ -171,7 +194,9 @@ class VoltageInference:
                 "is_ml_prediction": False,
             }
 
-        X = self._create_features(timestamp, prosumer_id, active_power, reactive_power, current)
+        X = self._create_features(
+            timestamp, prosumer_id, active_power, reactive_power, current
+        )
         if self.model is None:
             raise RuntimeError("Model not loaded")
         predicted_voltage = float(self.model.predict(X)[0])

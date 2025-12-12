@@ -252,7 +252,8 @@ async def check_voltage_violations(
                     }
                 )
             except Exception as e:
-                # Log error but continue checking other prosumers
+                # Rollback failed transaction and continue checking other prosumers
+                await db.rollback()
                 logger.error(
                     f"Failed to insert alert for {prosumer_id}: {type(e).__name__}: {e}"
                 )

@@ -5,6 +5,7 @@ Loads the trained XGBoost/GradientBoosting model and provides prediction interfa
 """
 
 import logging
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,9 @@ import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+# Model loading timeout in seconds (prevents hanging on corrupted files)
+MODEL_LOAD_TIMEOUT = 30
 
 
 class SolarInference:
@@ -36,19 +40,28 @@ class SolarInference:
 
         # Default model path
         if model_path is None:
-            model_path = Path(__file__).parent.parent.parent.parent / "ml" / "models" / "solar_xgb_v1.joblib"
+            model_path = (
+                Path(__file__).parent.parent.parent.parent
+                / "ml"
+                / "models"
+                / "solar_xgb_v1.joblib"
+            )
 
         self.model_path = Path(model_path)
         self._load_model()
 
     def _load_model(self) -> bool:
-        """Load model from disk."""
+        """Load model from disk with timeout protection."""
         if not self.model_path.exists():
             logger.warning(f"Model file not found: {self.model_path}")
             return False
 
         try:
-            artifact = joblib.load(self.model_path)
+            # Use thread pool with timeout to prevent hanging on corrupted files
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(joblib.load, self.model_path)
+                artifact = future.result(timeout=MODEL_LOAD_TIMEOUT)
+
             self.model = artifact["model"]
             self.feature_columns = artifact["feature_columns"]
             self.lag_periods = artifact.get("lag_periods", [1, 2, 3, 6, 12])
@@ -58,6 +71,11 @@ class SolarInference:
             self._is_loaded = True
             logger.info(f"Loaded solar model: {self.version}")
             return True
+        except FuturesTimeoutError:
+            logger.error(
+                f"Model loading timed out after {MODEL_LOAD_TIMEOUT}s: {self.model_path}"
+            )
+            return False
         except Exception as e:
             logger.error(f"Failed to load model: {e}")
             return False
