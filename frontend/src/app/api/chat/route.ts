@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { enhanceSystemPrompt, searchKnowledge } from "@/lib/rag";
 
 // Create OpenRouter provider (OpenAI-compatible)
 const openrouter = createOpenAI({
@@ -63,7 +64,31 @@ export async function POST(req: Request) {
   try {
     const { messages, language = "th" } = await req.json();
 
-    const systemPrompt = language === "th" ? systemPromptTh : systemPromptEn;
+    // Get the base system prompt
+    const basePrompt = language === "th" ? systemPromptTh : systemPromptEn;
+
+    // Extract the last user message for RAG search
+    const lastUserMessage = messages.filter((m: { role: string }) => m.role === "user").pop();
+
+    // Enhance system prompt with RAG context
+    let systemPrompt = basePrompt;
+    if (lastUserMessage?.content) {
+      try {
+        const context = searchKnowledge(lastUserMessage.content, {
+          maxResults: 5,
+          minRelevance: 2,
+          includeRelated: true,
+        });
+
+        // Only enhance if we found relevant knowledge
+        if (context.terms.length > 0 || context.acronyms.length > 0) {
+          systemPrompt = enhanceSystemPrompt(basePrompt, context, language === "th" ? "th" : "en");
+        }
+      } catch (ragError) {
+        // Log but don't fail - fall back to base prompt
+        console.warn("RAG search failed, using base prompt:", ragError);
+      }
+    }
 
     // Use Claude 3.5 Sonnet via OpenRouter (or fallback to GPT-4o-mini)
     const model = process.env.OPENROUTER_MODEL || "anthropic/claude-3.5-sonnet";
