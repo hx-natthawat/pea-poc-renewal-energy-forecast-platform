@@ -1,4 +1,9 @@
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import type { NextConfig } from "next";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * PEA RE Forecast Platform - Next.js Configuration
@@ -29,6 +34,12 @@ const nextConfig: NextConfig = {
 
   // basePath: Only set when behind Kong gateway
   ...(useKong && { basePath: "/console" }),
+
+  // Fix Turbopack workspace root warning (multiple lockfiles detected)
+  // Explicitly set root to this frontend directory
+  turbopack: {
+    root: __dirname,
+  },
 
   // Rewrites: Proxy /backend to actual backend in local development
   // In production, Kong handles this routing before requests reach Next.js
