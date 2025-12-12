@@ -36,6 +36,7 @@ router = APIRouter()
 
 class DriftDetectionRequest(BaseModel):
     """Request for drift detection analysis."""
+
     model_type: str = Field(..., description="Model type: solar or voltage")
     baseline_days: int = Field(default=30, ge=7, le=90)
     current_days: int = Field(default=7, ge=1, le=30)
@@ -44,12 +45,14 @@ class DriftDetectionRequest(BaseModel):
 
 class RetrainingEvaluationRequest(BaseModel):
     """Request for retraining evaluation."""
+
     model_type: str = Field(..., description="Model type: solar or voltage")
     force_check: bool = Field(default=False, description="Skip cooldown checks")
 
 
 class ABTestRequest(BaseModel):
     """Request to set up A/B test."""
+
     model_type: str
     champion_id: str
     challenger_id: str
@@ -58,18 +61,32 @@ class ABTestRequest(BaseModel):
 
 class ModelPromotionRequest(BaseModel):
     """Request to promote or rollback a model."""
+
     model_type: str
     action: str = Field(..., description="promote or rollback")
-    target_version: str | None = Field(default=None, description="Version to rollback to")
+    target_version: str | None = Field(
+        default=None, description="Version to rollback to"
+    )
 
 
 class RetrainingTriggerConfig(BaseModel):
     """Configuration for retraining triggers."""
-    mape_threshold: float = Field(default=12.0, description="MAPE threshold for solar models")
-    mae_threshold_voltage: float = Field(default=2.5, description="MAE threshold for voltage models")
-    drift_score_threshold: float = Field(default=2.0, description="Z-score threshold for drift")
-    max_days_without_retrain: int = Field(default=30, description="Max days before forced retrain")
-    consecutive_violations: int = Field(default=3, description="Consecutive violations to trigger")
+
+    mape_threshold: float = Field(
+        default=12.0, description="MAPE threshold for solar models"
+    )
+    mae_threshold_voltage: float = Field(
+        default=2.5, description="MAE threshold for voltage models"
+    )
+    drift_score_threshold: float = Field(
+        default=2.0, description="Z-score threshold for drift"
+    )
+    max_days_without_retrain: int = Field(
+        default=30, description="Max days before forced retrain"
+    )
+    consecutive_violations: int = Field(
+        default=3, description="Consecutive violations to trigger"
+    )
 
 
 # =============================================================================
@@ -100,7 +117,9 @@ async def fetch_feature_data(
     return np.array([row[0] for row in rows if row[0] is not None])
 
 
-async def get_current_metrics(db: AsyncSession, model_type: str, hours: int = 24) -> dict[str, float]:
+async def get_current_metrics(
+    db: AsyncSession, model_type: str, hours: int = 24
+) -> dict[str, float]:
     """Get current model performance metrics."""
     query = text("""
         SELECT
@@ -109,11 +128,11 @@ async def get_current_metrics(db: AsyncSession, model_type: str, hours: int = 24
             AVG(ABS((actual_value - predicted_value) / NULLIF(actual_value, 0)) * 100) as mape
         FROM predictions
         WHERE model_type = :model_type
-          AND time >= NOW() - INTERVAL ':hours hours'
+          AND time >= NOW() - INTERVAL '1 hour' * :hours
           AND actual_value IS NOT NULL
-    """.replace(":hours", str(hours)))
+    """)
 
-    result = await db.execute(query, {"model_type": model_type})
+    result = await db.execute(query, {"model_type": model_type, "hours": hours})
     row = result.fetchone()
 
     if row and row[0] is not None:
@@ -164,7 +183,9 @@ async def analyze_drift(
     - Population Stability Index (PSI)
     - Performance degradation check
     """
-    logger.info(f"Drift analysis requested for {request.model_type} by {current_user.username}")
+    logger.info(
+        f"Drift analysis requested for {request.model_type} by {current_user.username}"
+    )
 
     now = datetime.now()
     baseline_end = now - timedelta(days=request.current_days)
@@ -183,33 +204,45 @@ async def analyze_drift(
 
     for feature in features:
         try:
-            baseline_data = await fetch_feature_data(db, table, feature, baseline_start, baseline_end)
-            current_data = await fetch_feature_data(db, table, feature, current_start, now)
+            baseline_data = await fetch_feature_data(
+                db, table, feature, baseline_start, baseline_end
+            )
+            current_data = await fetch_feature_data(
+                db, table, feature, current_start, now
+            )
 
             if len(baseline_data) > 0 and len(current_data) > 0:
-                result = drift_service.detect_data_drift(baseline_data, current_data, feature)
-                drift_results.append({
-                    "feature": result.feature_name,
-                    "drift_type": result.drift_type.value,
-                    "drift_score": result.drift_score,
-                    "threshold": result.threshold,
-                    "drift_detected": result.drift_detected,
-                    "severity": result.severity.value,
-                    "p_value": result.p_value,
-                    "baseline_stats": result.baseline_stats,
-                    "current_stats": result.current_stats,
-                    "recommendation": result.recommendation,
-                })
+                result = drift_service.detect_data_drift(
+                    baseline_data, current_data, feature
+                )
+                drift_results.append(
+                    {
+                        "feature": result.feature_name,
+                        "drift_type": result.drift_type.value,
+                        "drift_score": result.drift_score,
+                        "threshold": result.threshold,
+                        "drift_detected": result.drift_detected,
+                        "severity": result.severity.value,
+                        "p_value": result.p_value,
+                        "baseline_stats": result.baseline_stats,
+                        "current_stats": result.current_stats,
+                        "recommendation": result.recommendation,
+                    }
+                )
         except Exception as e:
             logger.error(f"Error analyzing drift for {feature}: {e}")
-            drift_results.append({
-                "feature": feature,
-                "error": str(e),
-            })
+            drift_results.append(
+                {
+                    "feature": feature,
+                    "error": str(e),
+                }
+            )
 
     # Check performance drift
     current_metrics = await get_current_metrics(db, request.model_type)
-    baseline_metrics = await get_current_metrics(db, request.model_type, hours=request.baseline_days * 24)
+    baseline_metrics = await get_current_metrics(
+        db, request.model_type, hours=request.baseline_days * 24
+    )
 
     perf_result = drift_service.detect_performance_drift(
         model_type=request.model_type,
@@ -261,7 +294,9 @@ async def evaluate_retraining(
 
     Checks all retraining triggers and provides recommendation.
     """
-    logger.info(f"Retraining evaluation for {request.model_type} by {current_user.username}")
+    logger.info(
+        f"Retraining evaluation for {request.model_type} by {current_user.username}"
+    )
 
     # Get current metrics
     current_metrics = await get_current_metrics(db, request.model_type)
@@ -309,7 +344,9 @@ async def trigger_retraining(
 
     Initiates a background retraining job.
     """
-    logger.info(f"Manual retraining triggered for {model_type} by {current_user.username}")
+    logger.info(
+        f"Manual retraining triggered for {model_type} by {current_user.username}"
+    )
 
     # In a real implementation, this would:
     # 1. Fetch training data from database
@@ -397,7 +434,9 @@ async def promote_or_rollback(
 
     **Requires roles:** admin
     """
-    logger.info(f"Model {request.action} for {request.model_type} by {current_user.username}")
+    logger.info(
+        f"Model {request.action} for {request.model_type} by {current_user.username}"
+    )
 
     if request.action == "promote":
         result = registry.promote_challenger(request.model_type)
@@ -406,7 +445,9 @@ async def promote_or_rollback(
         result = registry.rollback(request.model_type, request.target_version)
         action_msg = f"rolled back to {request.target_version or 'previous version'}"
     else:
-        raise HTTPException(status_code=400, detail="Invalid action. Use 'promote' or 'rollback'")
+        raise HTTPException(
+            status_code=400, detail="Invalid action. Use 'promote' or 'rollback'"
+        )
 
     if result:
         return {
@@ -421,7 +462,9 @@ async def promote_or_rollback(
             },
         }
 
-    raise HTTPException(status_code=404, detail="No suitable model found for this action")
+    raise HTTPException(
+        status_code=404, detail="No suitable model found for this action"
+    )
 
 
 @router.get("/models/history")

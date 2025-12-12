@@ -42,6 +42,7 @@ class MetricType(str, Enum):
 
 class PerformanceMetric(BaseModel):
     """Performance metric for a time period."""
+
     period: str
     mape: float | None = None
     mae: float | None = None
@@ -53,6 +54,7 @@ class PerformanceMetric(BaseModel):
 
 class DriftIndicator(BaseModel):
     """Drift detection result."""
+
     feature: str
     drift_score: float
     drift_detected: bool
@@ -63,6 +65,7 @@ class DriftIndicator(BaseModel):
 
 class ModelHealth(BaseModel):
     """Model health status."""
+
     model_type: str
     model_version: str
     is_healthy: bool
@@ -78,7 +81,9 @@ class ModelHealth(BaseModel):
 # =============================================================================
 
 
-def calculate_metrics(predictions: list[float], actuals: list[float]) -> dict[str, float]:
+def calculate_metrics(
+    predictions: list[float], actuals: list[float]
+) -> dict[str, float]:
     """Calculate accuracy metrics."""
     if not predictions or not actuals or len(predictions) != len(actuals):
         return {}
@@ -163,7 +168,9 @@ async def get_model_health(
         latest_result = await db.execute(latest_query, {"model_type": model_type})
         latest_row = latest_result.fetchone()
 
-        last_prediction = latest_row[0].isoformat() if latest_row and latest_row[0] else None
+        last_prediction = (
+            latest_row[0].isoformat() if latest_row and latest_row[0] else None
+        )
         avg_latency = latest_row[1] if latest_row and latest_row[1] else 0
 
         # Get model version from ml_models table
@@ -188,20 +195,24 @@ async def get_model_health(
 
         if avg_latency > 500:
             issues.append(f"High latency: {avg_latency:.0f}ms (target: <500ms)")
-            accuracy_status = "warning" if accuracy_status == "good" else accuracy_status
+            accuracy_status = (
+                "warning" if accuracy_status == "good" else accuracy_status
+            )
 
         is_healthy = len(issues) == 0
 
-        health_status.append({
-            "model_type": model_type,
-            "model_version": model_version,
-            "is_healthy": is_healthy,
-            "last_prediction": last_prediction,
-            "predictions_24h": predictions_24h,
-            "avg_latency_ms": round(avg_latency, 1) if avg_latency else 0,
-            "accuracy_status": accuracy_status,
-            "issues": issues,
-        })
+        health_status.append(
+            {
+                "model_type": model_type,
+                "model_version": model_version,
+                "is_healthy": is_healthy,
+                "last_prediction": last_prediction,
+                "predictions_24h": predictions_24h,
+                "avg_latency_ms": round(avg_latency, 1) if avg_latency else 0,
+                "accuracy_status": accuracy_status,
+                "issues": issues,
+            }
+        )
 
     return {
         "status": "success",
@@ -228,7 +239,9 @@ async def get_model_performance(
 
     Returns accuracy metrics aggregated by the specified interval.
     """
-    logger.info(f"Performance metrics for {model_type.value} requested by {current_user.username}")
+    logger.info(
+        f"Performance metrics for {model_type.value} requested by {current_user.username}"
+    )
 
     # Map interval to time_bucket
     bucket_map = {"1h": "1 hour", "6h": "6 hours", "1d": "1 day"}
@@ -244,13 +257,13 @@ async def get_model_performance(
             SQRT(AVG(POWER(predicted_value - actual_value, 2))) as rmse
         FROM predictions
         WHERE model_type = :model_type
-          AND time >= NOW() - INTERVAL ':days days'
+          AND time >= NOW() - INTERVAL '1 day' * :days
           AND actual_value IS NOT NULL
         GROUP BY bucket
         ORDER BY bucket ASC
-    """.replace(":days", str(days)))
+    """)
 
-    result = await db.execute(query, {"model_type": model_type.value})
+    result = await db.execute(query, {"model_type": model_type.value, "days": days})
     rows = result.fetchall()
 
     metrics_timeline = []
@@ -261,13 +274,15 @@ async def get_model_performance(
             avg_act = row[3] or 0
             mape = abs((avg_act - avg_pred) / avg_act) * 100 if avg_act != 0 else 0
 
-            metrics_timeline.append({
-                "period": row[0].isoformat(),
-                "sample_count": row[1],
-                "mae": round(row[4], 4) if row[4] else None,
-                "rmse": round(row[5], 4) if row[5] else None,
-                "mape": round(mape, 2),
-            })
+            metrics_timeline.append(
+                {
+                    "period": row[0].isoformat(),
+                    "sample_count": row[1],
+                    "mae": round(row[4], 4) if row[4] else None,
+                    "rmse": round(row[5], 4) if row[5] else None,
+                    "mape": round(mape, 2),
+                }
+            )
 
     # Calculate overall metrics
     overall_query = text("""
@@ -277,11 +292,13 @@ async def get_model_performance(
             SQRT(AVG(POWER(predicted_value - actual_value, 2))) as rmse
         FROM predictions
         WHERE model_type = :model_type
-          AND time >= NOW() - INTERVAL ':days days'
+          AND time >= NOW() - INTERVAL '1 day' * :days
           AND actual_value IS NOT NULL
-    """.replace(":days", str(days)))
+    """)
 
-    overall_result = await db.execute(overall_query, {"model_type": model_type.value})
+    overall_result = await db.execute(
+        overall_query, {"model_type": model_type.value, "days": days}
+    )
     overall_row = overall_result.fetchone()
 
     # Define targets based on TOR
@@ -302,8 +319,12 @@ async def get_model_performance(
             },
             "overall_metrics": {
                 "total_predictions": overall_row[0] if overall_row else 0,
-                "mae": round(overall_row[1], 4) if overall_row and overall_row[1] else None,
-                "rmse": round(overall_row[2], 4) if overall_row and overall_row[2] else None,
+                "mae": round(overall_row[1], 4)
+                if overall_row and overall_row[1]
+                else None,
+                "rmse": round(overall_row[2], 4)
+                if overall_row and overall_row[2]
+                else None,
             },
             "targets": targets.get(model_type.value, {}),
             "metrics_timeline": metrics_timeline,
@@ -314,8 +335,12 @@ async def get_model_performance(
 @router.get("/drift/{model_type}")
 async def detect_drift(
     model_type: ModelType,
-    baseline_days: int = Query(default=30, ge=7, le=90, description="Baseline period (days)"),
-    current_days: int = Query(default=7, ge=1, le=30, description="Current period (days)"),
+    baseline_days: int = Query(
+        default=30, ge=7, le=90, description="Baseline period (days)"
+    ),
+    current_days: int = Query(
+        default=7, ge=1, le=30, description="Current period (days)"
+    ),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(require_roles(["admin", "analyst"])),
 ) -> dict[str, Any]:
@@ -326,7 +351,9 @@ async def detect_drift(
 
     Compares feature distributions between baseline and current periods.
     """
-    logger.info(f"Drift detection for {model_type.value} requested by {current_user.username}")
+    logger.info(
+        f"Drift detection for {model_type.value} requested by {current_user.username}"
+    )
 
     drift_indicators = []
 
@@ -334,12 +361,19 @@ async def detect_drift(
         # Check drift in solar features
         features = ["power_kw", "pyrano1", "ambtemp"]
         table = "solar_measurements"
-        feature_columns = {"power_kw": "power_kw", "pyrano1": "pyrano1", "ambtemp": "ambtemp"}
+        feature_columns = {
+            "power_kw": "power_kw",
+            "pyrano1": "pyrano1",
+            "ambtemp": "ambtemp",
+        }
     else:
         # Check drift in voltage features
         features = ["voltage", "active_power"]
         table = "single_phase_meters"
-        feature_columns = {"voltage": "energy_meter_voltage", "active_power": "active_power"}
+        feature_columns = {
+            "voltage": "energy_meter_voltage",
+            "active_power": "active_power",
+        }
 
     for feature in features:
         col = feature_columns.get(feature, feature)
@@ -348,21 +382,24 @@ async def detect_drift(
         baseline_query = text(f"""
             SELECT AVG({col}) as mean, STDDEV({col}) as std
             FROM {table}
-            WHERE time >= NOW() - INTERVAL ':baseline_days days'
-              AND time < NOW() - INTERVAL ':current_days days'
-        """.replace(":baseline_days", str(baseline_days)).replace(":current_days", str(current_days)))
+            WHERE time >= NOW() - INTERVAL '1 day' * :baseline_days
+              AND time < NOW() - INTERVAL '1 day' * :current_days
+        """)
 
-        baseline_result = await db.execute(baseline_query)
+        baseline_result = await db.execute(
+            baseline_query,
+            {"baseline_days": baseline_days, "current_days": current_days},
+        )
         baseline_row = baseline_result.fetchone()
 
         # Current statistics
         current_query = text(f"""
             SELECT AVG({col}) as mean, STDDEV({col}) as std
             FROM {table}
-            WHERE time >= NOW() - INTERVAL ':current_days days'
-        """.replace(":current_days", str(current_days)))
+            WHERE time >= NOW() - INTERVAL '1 day' * :current_days
+        """)
 
-        current_result = await db.execute(current_query)
+        current_result = await db.execute(current_query, {"current_days": current_days})
         current_row = current_result.fetchone()
 
         if baseline_row and current_row and baseline_row[0] and current_row[0]:
@@ -374,14 +411,16 @@ async def detect_drift(
             drift_score = abs((current_mean - baseline_mean) / baseline_std)
             threshold = 2.0  # Standard threshold for drift detection
 
-            drift_indicators.append({
-                "feature": feature,
-                "drift_score": round(drift_score, 3),
-                "drift_detected": drift_score > threshold,
-                "baseline_mean": round(baseline_mean, 2),
-                "current_mean": round(current_mean, 2),
-                "threshold": threshold,
-            })
+            drift_indicators.append(
+                {
+                    "feature": feature,
+                    "drift_score": round(drift_score, 3),
+                    "drift_detected": drift_score > threshold,
+                    "baseline_mean": round(baseline_mean, 2),
+                    "current_mean": round(current_mean, 2),
+                    "threshold": threshold,
+                }
+            )
 
     overall_drift = any(d["drift_detected"] for d in drift_indicators)
 
@@ -396,8 +435,12 @@ async def detect_drift(
             "overall_drift_detected": overall_drift,
             "drift_indicators": drift_indicators,
             "recommendations": [
-                "Consider retraining the model with recent data" if overall_drift else "No action needed",
-            ] if drift_indicators else [],
+                "Consider retraining the model with recent data"
+                if overall_drift
+                else "No action needed",
+            ]
+            if drift_indicators
+            else [],
             "analyzed_at": datetime.now().isoformat(),
         },
     }
@@ -417,7 +460,9 @@ async def get_prediction_accuracy(
 
     Returns accuracy analysis with error distribution.
     """
-    logger.info(f"Prediction accuracy for {model_type.value} requested by {current_user.username}")
+    logger.info(
+        f"Prediction accuracy for {model_type.value} requested by {current_user.username}"
+    )
 
     query = text("""
         SELECT
@@ -427,12 +472,12 @@ async def get_prediction_accuracy(
             time
         FROM predictions
         WHERE model_type = :model_type
-          AND time >= NOW() - INTERVAL ':hours hours'
+          AND time >= NOW() - INTERVAL '1 hour' * :hours
           AND actual_value IS NOT NULL
         ORDER BY time ASC
-    """.replace(":hours", str(hours)))
+    """)
 
-    result = await db.execute(query, {"model_type": model_type.value})
+    result = await db.execute(query, {"model_type": model_type.value, "hours": hours})
     rows = result.fetchall()
 
     if not rows:
@@ -449,25 +494,32 @@ async def get_prediction_accuracy(
     errors = []
     for row in rows:
         pred, act, err, time = row
-        predictions.append({
-            "time": time.isoformat() if time else None,
-            "predicted": round(pred, 2) if pred else None,
-            "actual": round(act, 2) if act else None,
-            "error": round(err, 2) if err else None,
-        })
+        predictions.append(
+            {
+                "time": time.isoformat() if time else None,
+                "predicted": round(pred, 2) if pred else None,
+                "actual": round(act, 2) if act else None,
+                "error": round(err, 2) if err else None,
+            }
+        )
         if err is not None:
             errors.append(err)
 
     # Error distribution
     import numpy as np
+
     errors_arr = np.array(errors)
 
-    percentiles = {
-        "p50": round(float(np.percentile(errors_arr, 50)), 2),
-        "p90": round(float(np.percentile(errors_arr, 90)), 2),
-        "p95": round(float(np.percentile(errors_arr, 95)), 2),
-        "p99": round(float(np.percentile(errors_arr, 99)), 2),
-    } if len(errors) > 0 else {}
+    percentiles = (
+        {
+            "p50": round(float(np.percentile(errors_arr, 50)), 2),
+            "p90": round(float(np.percentile(errors_arr, 90)), 2),
+            "p95": round(float(np.percentile(errors_arr, 95)), 2),
+            "p99": round(float(np.percentile(errors_arr, 99)), 2),
+        }
+        if len(errors) > 0
+        else {}
+    )
 
     return {
         "status": "success",
@@ -506,17 +558,19 @@ async def list_models(
 
     models = []
     for row in rows:
-        models.append({
-            "id": row[0],
-            "name": row[1],
-            "version": row[2],
-            "model_type": row[3],
-            "metrics": row[4],
-            "is_active": row[5],
-            "is_production": row[6],
-            "trained_at": row[7].isoformat() if row[7] else None,
-            "created_at": row[8].isoformat() if row[8] else None,
-        })
+        models.append(
+            {
+                "id": row[0],
+                "name": row[1],
+                "version": row[2],
+                "model_type": row[3],
+                "metrics": row[4],
+                "is_active": row[5],
+                "is_production": row[6],
+                "trained_at": row[7].isoformat() if row[7] else None,
+                "created_at": row[8].isoformat() if row[8] else None,
+            }
+        )
 
     return {
         "status": "success",

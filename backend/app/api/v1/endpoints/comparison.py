@@ -60,7 +60,9 @@ class ComparisonResponse(BaseModel):
 # =============================================================================
 
 
-def calculate_metrics(predictions: list[float], actuals: list[float]) -> AccuracyMetrics:
+def calculate_metrics(
+    predictions: list[float], actuals: list[float]
+) -> AccuracyMetrics:
     """Calculate accuracy metrics from predictions and actuals."""
     if len(predictions) == 0 or len(actuals) == 0:
         return AccuracyMetrics(mae=0, rmse=0, bias=0, count=0)
@@ -85,7 +87,9 @@ def calculate_metrics(predictions: list[float], actuals: list[float]) -> Accurac
     # MAPE (only on non-zero actuals)
     mape = None
     if np.any(non_zero_mask):
-        mape = float(np.mean(np.abs(errors[non_zero_mask] / actuals_arr[non_zero_mask])) * 100)
+        mape = float(
+            np.mean(np.abs(errors[non_zero_mask] / actuals_arr[non_zero_mask])) * 100
+        )
 
     # R-squared
     r_squared = None
@@ -135,11 +139,11 @@ async def get_solar_comparison(
         FROM predictions
         WHERE model_type = 'solar'
           AND actual_value IS NOT NULL
-          AND time >= NOW() - INTERVAL ':hours hours'
+          AND time >= NOW() - INTERVAL '1 hour' * :hours
         ORDER BY time ASC
-    """.replace(":hours", str(hours)))
+    """)
 
-    result = await db.execute(query)
+    result = await db.execute(query, {"hours": hours})
     rows = result.fetchall()
 
     comparison_data = []
@@ -154,13 +158,17 @@ async def get_solar_comparison(
             error = predicted - actual
             error_percent = (abs(error) / actual * 100) if actual != 0 else None
 
-            comparison_data.append({
-                "time": row.time.strftime("%H:%M") if row.time else None,
-                "predicted": round(predicted, 2),
-                "actual": round(actual, 2),
-                "error": round(error, 2),
-                "error_percent": round(error_percent, 2) if error_percent is not None else None,
-            })
+            comparison_data.append(
+                {
+                    "time": row.time.strftime("%H:%M") if row.time else None,
+                    "predicted": round(predicted, 2),
+                    "actual": round(actual, 2),
+                    "error": round(error, 2),
+                    "error_percent": round(error_percent, 2)
+                    if error_percent is not None
+                    else None,
+                }
+            )
 
             predictions.append(predicted)
             actuals.append(actual)
@@ -177,7 +185,9 @@ async def get_solar_comparison(
             LIMIT 288
         """)
 
-        measurement_result = await db.execute(measurement_query, {"station_id": station_id})
+        measurement_result = await db.execute(
+            measurement_query, {"station_id": station_id}
+        )
         measurement_rows = list(reversed(measurement_result.fetchall()))
 
         for row in measurement_rows:
@@ -188,13 +198,17 @@ async def get_solar_comparison(
                 predicted = actual * error_factor
                 error = predicted - actual
 
-                comparison_data.append({
-                    "time": row.time.strftime("%H:%M") if row.time else None,
-                    "predicted": round(predicted, 2),
-                    "actual": round(actual, 2),
-                    "error": round(error, 2),
-                    "error_percent": round(abs(error) / actual * 100, 2) if actual != 0 else None,
-                })
+                comparison_data.append(
+                    {
+                        "time": row.time.strftime("%H:%M") if row.time else None,
+                        "predicted": round(predicted, 2),
+                        "actual": round(actual, 2),
+                        "error": round(error, 2),
+                        "error_percent": round(abs(error) / actual * 100, 2)
+                        if actual != 0
+                        else None,
+                    }
+                )
 
                 predictions.append(predicted)
                 actuals.append(actual)
@@ -212,9 +226,17 @@ async def get_solar_comparison(
             "period_hours": hours,
             "count": len(comparison_data),
             "targets": {
-                "mape": {"target": 10.0, "unit": "%", "met": metrics.mape is not None and metrics.mape < 10},
+                "mape": {
+                    "target": 10.0,
+                    "unit": "%",
+                    "met": metrics.mape is not None and metrics.mape < 10,
+                },
                 "rmse": {"target": 100.0, "unit": "kW", "met": metrics.rmse < 100},
-                "r_squared": {"target": 0.95, "unit": "", "met": metrics.r_squared is not None and metrics.r_squared > 0.95},
+                "r_squared": {
+                    "target": 0.95,
+                    "unit": "",
+                    "met": metrics.r_squared is not None and metrics.r_squared > 0.95,
+                },
             },
         },
     )
@@ -248,10 +270,10 @@ async def get_voltage_comparison(
             WHERE model_type = 'voltage'
               AND target_id = :prosumer_id
               AND actual_value IS NOT NULL
-              AND time >= NOW() - INTERVAL ':hours hours'
+              AND time >= NOW() - INTERVAL '1 hour' * :hours
             ORDER BY time ASC
-        """.replace(":hours", str(hours)))
-        params = {"prosumer_id": prosumer_id}
+        """)
+        params = {"prosumer_id": prosumer_id, "hours": hours}
     else:
         query = text("""
             SELECT
@@ -262,10 +284,10 @@ async def get_voltage_comparison(
             FROM predictions
             WHERE model_type = 'voltage'
               AND actual_value IS NOT NULL
-              AND time >= NOW() - INTERVAL ':hours hours'
+              AND time >= NOW() - INTERVAL '1 hour' * :hours
             ORDER BY time ASC
-        """.replace(":hours", str(hours)))
-        params = {}
+        """)
+        params = {"hours": hours}
 
     result = await db.execute(query, params)
     rows = result.fetchall()
@@ -283,13 +305,15 @@ async def get_voltage_comparison(
         if predicted is not None and actual is not None:
             error = predicted - actual
 
-            comparison_data.append({
-                "time": row.time.strftime("%H:%M") if row.time else None,
-                "prosumer_id": pid,
-                "predicted": round(predicted, 2),
-                "actual": round(actual, 2),
-                "error": round(error, 2),
-            })
+            comparison_data.append(
+                {
+                    "time": row.time.strftime("%H:%M") if row.time else None,
+                    "prosumer_id": pid,
+                    "predicted": round(predicted, 2),
+                    "actual": round(actual, 2),
+                    "error": round(error, 2),
+                }
+            )
 
             predictions.append(predicted)
             actuals.append(actual)
@@ -338,13 +362,15 @@ async def get_voltage_comparison(
                 predicted = actual + error_offset
                 error = predicted - actual
 
-                comparison_data.append({
-                    "time": row.time.strftime("%H:%M") if row.time else None,
-                    "prosumer_id": pid,
-                    "predicted": round(predicted, 2),
-                    "actual": round(actual, 2),
-                    "error": round(error, 2),
-                })
+                comparison_data.append(
+                    {
+                        "time": row.time.strftime("%H:%M") if row.time else None,
+                        "prosumer_id": pid,
+                        "predicted": round(predicted, 2),
+                        "actual": round(actual, 2),
+                        "error": round(error, 2),
+                    }
+                )
 
                 predictions.append(predicted)
                 actuals.append(actual)
@@ -377,7 +403,11 @@ async def get_voltage_comparison(
             "targets": {
                 "mae": {"target": 2.0, "unit": "V", "met": metrics.mae < 2.0},
                 "rmse": {"target": 3.0, "unit": "V", "met": metrics.rmse < 3.0},
-                "r_squared": {"target": 0.90, "unit": "", "met": metrics.r_squared is not None and metrics.r_squared > 0.90},
+                "r_squared": {
+                    "target": 0.90,
+                    "unit": "",
+                    "met": metrics.r_squared is not None and metrics.r_squared > 0.90,
+                },
             },
         },
     )
@@ -452,7 +482,8 @@ async def get_comparison_summary(
                 "targets_met": {
                     "mape": solar_metrics.mape is not None and solar_metrics.mape < 10,
                     "rmse": solar_metrics.rmse < 100,
-                    "r_squared": solar_metrics.r_squared is not None and solar_metrics.r_squared > 0.95,
+                    "r_squared": solar_metrics.r_squared is not None
+                    and solar_metrics.r_squared > 0.95,
                 },
             },
             "voltage": {
@@ -460,13 +491,16 @@ async def get_comparison_summary(
                 "targets_met": {
                     "mae": voltage_metrics.mae < 2.0,
                     "rmse": voltage_metrics.rmse < 3.0,
-                    "r_squared": voltage_metrics.r_squared is not None and voltage_metrics.r_squared > 0.90,
+                    "r_squared": voltage_metrics.r_squared is not None
+                    and voltage_metrics.r_squared > 0.90,
                 },
             },
             "period_hours": hours,
-            "overall_status": "passing" if (
-                (solar_metrics.mape is None or solar_metrics.mape < 10) and
-                voltage_metrics.mae < 2.0
-            ) else "failing",
+            "overall_status": "passing"
+            if (
+                (solar_metrics.mape is None or solar_metrics.mape < 10)
+                and voltage_metrics.mae < 2.0
+            )
+            else "failing",
         },
     )
