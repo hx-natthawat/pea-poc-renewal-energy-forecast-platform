@@ -54,6 +54,7 @@
 | ML Error Handling                | 2025-12-13 | HTTP 503 instead of 500 on predict() |
 | Alerts Endpoint Hardening        | 2025-12-13 | SQL injection + error logging |
 | SQL Injection Elimination        | 2025-12-13 | 12 total fixes across 4 endpoints |
+| Reliability Improvements         | 2025-12-13 | TX rollback, model loading timeout |
 
 ---
 
