@@ -10,7 +10,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from app.api.v1.router import api_router
 from app.api.v2.router import api_router as api_router_v2
@@ -76,8 +77,8 @@ app = FastAPI(
     description="PEA Renewable Energy Forecast Platform API",
     version=settings.APP_VERSION,
     openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
-    docs_url=f"{settings.API_V1_PREFIX}/docs",
-    redoc_url=f"{settings.API_V1_PREFIX}/redoc",
+    docs_url=None,  # Disable default, use custom endpoint
+    redoc_url=None,  # Disable default, use custom endpoint
     lifespan=lifespan,
 )
 
@@ -183,6 +184,28 @@ async def root():
         },
         "docs": f"{settings.API_V1_PREFIX}/docs",
     }
+
+
+# Custom Swagger UI with alternative CDN (unpkg.com instead of jsdelivr.net)
+@app.get(f"{settings.API_V1_PREFIX}/docs", include_in_schema=False)
+async def custom_swagger_ui_html() -> HTMLResponse:
+    """Custom Swagger UI using unpkg.com CDN (more reliable in some networks)."""
+    return get_swagger_ui_html(
+        openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
+        title=f"{settings.APP_NAME} - Swagger UI",
+        swagger_js_url="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
+        swagger_css_url="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css",
+    )
+
+
+@app.get(f"{settings.API_V1_PREFIX}/redoc", include_in_schema=False)
+async def custom_redoc_html() -> HTMLResponse:
+    """Custom ReDoc using unpkg.com CDN."""
+    return get_redoc_html(
+        openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
+        title=f"{settings.APP_NAME} - ReDoc",
+        redoc_js_url="https://unpkg.com/redoc@2.1.3/bundles/redoc.standalone.js",
+    )
 
 
 if __name__ == "__main__":

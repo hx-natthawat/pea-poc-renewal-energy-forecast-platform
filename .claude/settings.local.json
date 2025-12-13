@@ -229,7 +229,11 @@
       "Bash(kubectl:*)",
       "Bash(pip3 index:*)",
       "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff backend/requirements.txt)",
-      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff docs/guides/design-guideline.md)"
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff docs/guides/design-guideline.md)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff backend/tests/unit/test_demo.py)",
+      "Bash(DATABASE_URL=\"postgresql+asyncpg://postgres:postgres@localhost:5433/pea_forecast\" ./venv/bin/uvicorn:*)",
+      "Bash(git -C /Users/fero/Desktop/PEA/pea-re-forecast-platform diff docs/guides/POC-VALIDATION-GUIDE.md)",
+      "Bash(./venv/bin/pytest tests/unit/test_doe.py -v --tb=short)"
     ],
     "deny": [],
     "ask": []

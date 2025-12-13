@@ -25,9 +25,15 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     - Permissions-Policy - controls browser features
     """
 
+    # Paths that need relaxed CSP for external resources (docs/swagger)
+    DOCS_PATHS = ("/api/v1/docs", "/api/v1/redoc", "/api/v2/docs", "/api/v2/redoc")
+
     async def dispatch(self, request: Request, call_next) -> Response:
         """Process request and add security headers to response."""
         response = await call_next(request)
+
+        # Check if this is a documentation endpoint
+        is_docs_path = request.url.path in self.DOCS_PATHS
 
         # X-Frame-Options: Prevent clickjacking
         response.headers["X-Frame-Options"] = "DENY"
@@ -65,21 +71,36 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Content-Security-Policy: Restrict resource loading
         # Note: This is a permissive policy suitable for an API
         # Frontend apps should have stricter CSP
-        csp_directives = [
-            "default-src 'self'",
-            "script-src 'self' 'unsafe-inline'",  # For Swagger UI
-            "style-src 'self' 'unsafe-inline'",  # For Swagger UI
-            "img-src 'self' data: https:",
-            "font-src 'self' data:",
-            "connect-src 'self'",
-            "frame-ancestors 'none'",
-            "base-uri 'self'",
-            "form-action 'self'",
-        ]
+        if is_docs_path:
+            # Relaxed CSP for Swagger UI / ReDoc - allow external CDN resources
+            csp_directives = [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net",
+                "style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://fonts.googleapis.com",
+                "img-src 'self' data: https:",
+                "font-src 'self' data: https://fonts.gstatic.com",
+                "connect-src 'self'",
+                "frame-ancestors 'none'",
+            ]
+        else:
+            # Strict CSP for API endpoints
+            csp_directives = [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline'",
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data: https:",
+                "font-src 'self' data:",
+                "connect-src 'self'",
+                "frame-ancestors 'none'",
+                "base-uri 'self'",
+                "form-action 'self'",
+            ]
 
-        # In development, allow connections to localhost
-        if settings.APP_ENV != "production":
-            csp_directives[5] = "connect-src 'self' http://localhost:* ws://localhost:*"
+            # In development, allow connections to localhost
+            if settings.APP_ENV != "production":
+                csp_directives[5] = (
+                    "connect-src 'self' http://localhost:* ws://localhost:*"
+                )
 
         response.headers["Content-Security-Policy"] = "; ".join(csp_directives)
 

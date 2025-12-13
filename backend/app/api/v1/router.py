@@ -132,32 +132,32 @@ api_router.include_router(
     tags=["demo"],
 )
 
-# Phase 2: Load Forecast endpoints (TOR Function 3)
+# Grid Operations: Load Forecast endpoints (TOR 7.5.1.3)
 api_router.include_router(
     load_forecast.router,
     prefix="/load-forecast",
-    tags=["load-forecast", "phase2"],
+    tags=["grid-operations", "load-forecast"],
 )
 
-# Phase 2: Demand Forecast endpoints (TOR Function 2)
+# Grid Operations: Demand Forecast endpoints (TOR 7.5.1.2)
 api_router.include_router(
     demand_forecast.router,
     prefix="/demand-forecast",
-    tags=["demand-forecast", "phase2"],
+    tags=["grid-operations", "demand-forecast"],
 )
 
-# Phase 2: Imbalance Forecast endpoints (TOR Function 4)
+# Grid Operations: Imbalance Forecast endpoints (TOR 7.5.1.4)
 api_router.include_router(
     imbalance_forecast.router,
     prefix="/imbalance-forecast",
-    tags=["imbalance-forecast", "phase2"],
+    tags=["grid-operations", "imbalance-forecast"],
 )
 
-# Phase 2b: DOE (Dynamic Operating Envelope) endpoints (TOR Function 6)
+# Grid Operations: DOE (Dynamic Operating Envelope) endpoints (TOR 7.5.1.6)
 api_router.include_router(
     doe.router,
     prefix="/doe",
-    tags=["doe", "phase2b"],
+    tags=["grid-operations", "doe"],
 )
 
 # WebSocket endpoints for real-time updates
