@@ -8,24 +8,24 @@
 
 ## Integration Verification Results
 
-| Component          | Status            | Details                                                |
-| ------------------ | ----------------- | ------------------------------------------------------ |
+| Component          | Status           | Details                                                |
+| ------------------ | ---------------- | ------------------------------------------------------ |
 | Backend API        | ✅ Running        | http://localhost:8000                                  |
 | Frontend           | ✅ Running        | http://localhost:3000                                  |
 | Database           | ✅ Connected      | 26K solar + 181K voltage records                       |
 | Prometheus Metrics | ✅ Exposed        | /metrics endpoint                                      |
-| Unit Tests         | ✅ 100% pass rate | 679 passed, 4 skipped (backend) + 83 passed (frontend) |
+| Unit Tests         | ✅ 100% pass rate | 712 passed, 4 skipped (backend) + 83 passed (frontend) |
 
 ---
 
 ## TOR Compliance
 
-| Requirement | Target     | Actual      | Status  |
-| ----------- | ---------- | ----------- | ------- |
-| Solar MAPE  | < 10%      | 9.74%       | ✅ PASS |
-| Voltage MAE | < 2V       | 0.036V      | ✅ PASS |
-| API Latency | < 500ms    | P95=38ms    | ✅ PASS |
-| WebSocket   | Real-time  | Working     | ✅ PASS |
+| Requirement | Target    | Actual      | Status |
+| ----------- | --------- | ----------- | ------ |
+| Solar MAPE  | < 10%     | 9.74%       | ✅ PASS |
+| Voltage MAE | < 2V      | 0.036V      | ✅ PASS |
+| API Latency | < 500ms   | P95=38ms    | ✅ PASS |
+| WebSocket   | Real-time | Working     | ✅ PASS |
 | RE Plants   | ≥ 2,000   | Supported   | ✅ PASS |
 | Consumers   | ≥ 300,000 | Load tested | ✅ PASS |
 
@@ -113,20 +113,20 @@
 
 ## Key Files
 
-| Category         | Path                                                     |
-| ---------------- | -------------------------------------------------------- |
-| Backend Entry    | `backend/app/main.py`                                    |
-| Frontend Entry   | `frontend/src/app/page.tsx`                              |
-| ML Models        | `ml/models/`                                             |
-| Helm Charts      | `infrastructure/helm/pea-re-forecast/`                   |
-| CI/CD            | `.gitlab-ci.yml`                                         |
-| Observability    | `infrastructure/kubernetes/observability/`               |
-| Network Policies | `infrastructure/kubernetes/security/network-policies/`   |
-| Vault            | `infrastructure/kubernetes/security/vault/`              |
-| TLS/cert-manager | `infrastructure/kubernetes/security/cert-manager/`       |
-| Kong API Gateway | `infrastructure/kubernetes/ingress/kong/`                |
-| Secrets Module   | `backend/app/core/secrets.py`                            |
-| Load Tests       | `tests/load/locustfile.py`                               |
+| Category         | Path                                                   |
+| ---------------- | ------------------------------------------------------ |
+| Backend Entry    | `backend/app/main.py`                                  |
+| Frontend Entry   | `frontend/src/app/page.tsx`                            |
+| ML Models        | `ml/models/`                                           |
+| Helm Charts      | `infrastructure/helm/pea-re-forecast/`                 |
+| CI/CD            | `.gitlab-ci.yml`                                       |
+| Observability    | `infrastructure/kubernetes/observability/`             |
+| Network Policies | `infrastructure/kubernetes/security/network-policies/` |
+| Vault            | `infrastructure/kubernetes/security/vault/`            |
+| TLS/cert-manager | `infrastructure/kubernetes/security/cert-manager/`     |
+| Kong API Gateway | `infrastructure/kubernetes/ingress/kong/`              |
+| Secrets Module   | `backend/app/core/secrets.py`                          |
+| Load Tests       | `tests/load/locustfile.py`                             |
 
 ---
 
@@ -140,45 +140,45 @@ None - all critical issues resolved.
 
 ### P0 - Critical Enhancements ✅ COMPLETED
 
-| Feature                   | Status      | Implementation                   |
-| ------------------------- | ----------- | -------------------------------- |
+| Feature                   | Status     | Implementation                   |
+| ------------------------- | ---------- | -------------------------------- |
 | Weather API Integration   | ✅ Complete | TMD API with fallback simulation |
 | Model Retraining Pipeline | ✅ Complete | Drift detection + A/B testing    |
 
 ### P1 - Important Features ✅ COMPLETED
 
-| Feature                     | Status      | Implementation        |
-| --------------------------- | ----------- | --------------------- |
+| Feature                     | Status     | Implementation        |
+| --------------------------- | ---------- | --------------------- |
 | Enhanced Alerting (F002)    | ✅ Complete | Email + LINE Notify   |
 | Multi-Region Support (F003) | ✅ Complete | 4 PEA zones with RBAC |
 
 ### P2 - Compliance Features
 
-| Feature                  | Status      | Implementation                          |
-| ------------------------ | ----------- | --------------------------------------- |
+| Feature                  | Status     | Implementation                          |
+| ------------------------ | ---------- | --------------------------------------- |
 | Audit Log UI (TOR 7.1.6) | ✅ Complete | Full viewer with filters, export, stats |
 
 ### Phase 2: TOR Extended Functions (IN PROGRESS)
 
-| Function           | TOR Ref | Endpoint                               | API Status                | UI Status            |
-| ------------------ | ------- | -------------------------------------- | ------------------------- | -------------------- |
-| Load Forecast      | 7.5.1.3 | `/api/v1/load-forecast/predict`      | ✅ API Ready (Simulation) | ✅ Grid Operations   |
-| Demand Forecast    | 7.5.1.2 | `/api/v1/demand-forecast/predict`    | ✅ API Ready (Simulation) | ✅ Grid Operations   |
-| Imbalance Forecast | 7.5.1.4 | `/api/v1/imbalance-forecast/predict` | ✅ API Ready (Simulation) | ✅ Grid Operations   |
-| DOE                | 7.5.1.6 | Planned                                | ⏳ Phase 2b               | ⏳ Phase 2b          |
-| Hosting Capacity   | 7.5.1.7 | Planned                                | ⏳ Phase 3                | ⏳ Phase 3           |
+| Function           | TOR Ref | Endpoint                             | API Status               | UI Status         |
+| ------------------ | ------- | ------------------------------------ | ------------------------ | ----------------- |
+| Load Forecast      | 7.5.1.3 | `/api/v1/load-forecast/predict`      | ✅ API Ready (Simulation) | ✅ Grid Operations |
+| Demand Forecast    | 7.5.1.2 | `/api/v1/demand-forecast/predict`    | ✅ API Ready (Simulation) | ✅ Grid Operations |
+| Imbalance Forecast | 7.5.1.4 | `/api/v1/imbalance-forecast/predict` | ✅ API Ready (Simulation) | ✅ Grid Operations |
+| DOE                | 7.5.1.6 | `/api/v1/doe/*`                      | ✅ API Ready (Mock GIS)   | ⏳ Phase 2b UI     |
+| Hosting Capacity   | 7.5.1.7 | Planned                              | ⏳ Phase 3 (Depends DOE)  | ⏳ Phase 3         |
 
-*Phase 2a completed December 6, 2025. UI components added for Load/Demand/Imbalance forecasts.*
+*Phase 2a completed December 6, 2025. Phase 2b DOE API completed December 13, 2025.*
 
 ### Phase 3: Infrastructure (TOR 7.1.3, 7.1.6, Table 2)
 
-| Component          | TOR Ref   | Status      | Implementation                            |
-| ------------------ | --------- | ----------- | ----------------------------------------- |
-| Vault Secrets      | Table 2   | ✅ Complete | HashiCorp Vault v1.15 + K8s auth          |
-| Network Policies   | 7.1.3     | ✅ Complete | Zero-trust with default deny              |
-| Observability      | Table 2   | ✅ Complete | Prometheus + Grafana + AlertManager       |
-| TLS/cert-manager   | 7.1.3     | ✅ Complete | Let's Encrypt + self-signed dev certs     |
-| API Gateway        | 7.1.3     | ✅ Complete | Kong 3.8 with path-based routing          |
+| Component        | TOR Ref | Status     | Implementation                        |
+| ---------------- | ------- | ---------- | ------------------------------------- |
+| Vault Secrets    | Table 2 | ✅ Complete | HashiCorp Vault v1.15 + K8s auth      |
+| Network Policies | 7.1.3   | ✅ Complete | Zero-trust with default deny          |
+| Observability    | Table 2 | ✅ Complete | Prometheus + Grafana + AlertManager   |
+| TLS/cert-manager | 7.1.3   | ✅ Complete | Let's Encrypt + self-signed dev certs |
+| API Gateway      | 7.1.3   | ✅ Complete | Kong 3.8 with path-based routing      |
 
 *Phase 3 infrastructure completed December 10, 2025.*
 
@@ -196,9 +196,12 @@ None - all critical issues resolved.
 10. ~~Phase 3: Observability Stack~~ ✅ Complete
 11. ~~Phase 3: TLS/cert-manager~~ ✅ Complete
 12. ~~Deploy to staging environment~~ ✅ Complete (Kind cluster, 7 pods healthy)
-13. Conduct UAT with stakeholders
-14. Production deployment
-15. Phase 2b: DOE implementation (requires network model)
+13. ~~Phase 2b: DOE API implementation~~ ✅ Complete (December 13, 2025)
+14. Phase 2b: DOE UI dashboard components
+15. Conduct UAT with stakeholders
+16. Production deployment
+17. Replace mock GIS data with actual กฟภ. network model
+18. Phase 3: Hosting Capacity (depends on full DOE + GIS)
 
 ---
 
@@ -230,21 +233,21 @@ cd backend && ./venv/bin/pytest tests/ -v
 
 ### Pre-Deployment Checks
 
-| Check                    | Status  | Details                           |
-| ------------------------ | ------- | --------------------------------- |
+| Check                    | Status | Details                           |
+| ------------------------ | ------ | --------------------------------- |
 | Helm Chart Lint          | ✅ PASS | 1 chart linted, 0 failed          |
 | Helm Template            | ✅ PASS | All resources render correctly    |
 | Backend Linting (Ruff)   | ✅ PASS | All checks passed                 |
 | Frontend Linting (Biome) | ✅ PASS | 62 files checked, no issues       |
-| Backend Tests            | ✅ PASS | 679 passed, 4 skipped             |
-| Frontend Tests           | ✅ PASS | 56 passed                         |
+| Backend Tests            | ✅ PASS | 712 passed, 4 skipped             |
+| Frontend Tests           | ✅ PASS | 83 passed                         |
 | Security Audit           | ✅ PASS | All critical/high issues resolved |
 
 ### Security Hardening (December 6, 2025)
 
-| Fix                      | Severity | Status                           |
-| ------------------------ | -------- | -------------------------------- |
-| Next.js CVE (RCE)        | CRITICAL | ✅ Fixed (16.0.6 → 16.0.7)      |
+| Fix                      | Severity | Status                          |
+| ------------------------ | -------- | ------------------------------- |
+| Next.js CVE (RCE)        | CRITICAL | ✅ Fixed (16.0.6 → 16.0.7)       |
 | JWT Error Info Leakage   | HIGH     | ✅ Fixed (generic error message) |
 | CORS Wildcards           | MEDIUM   | ✅ Fixed (explicit allow lists)  |
 | Missing Security Headers | MEDIUM   | ✅ Fixed (OWASP headers added)   |
@@ -254,7 +257,7 @@ cd backend && ./venv/bin/pytest tests/ -v
 The platform is **ready for staging deployment**:
 
 1. ✅ All TOR requirements met
-2. ✅ All tests passing (762 total: 679 backend + 83 frontend)
+2. ✅ All tests passing (795 total: 712 backend + 83 frontend)
 3. ✅ Helm charts validated
 4. ✅ Linting passes (Ruff + Biome)
 5. ✅ v1.1.0 features complete
@@ -270,22 +273,22 @@ The platform is **ready for staging deployment**:
 
 Complete handover documentation has been prepared:
 
-| Document | Path | Description |
-|----------|------|-------------|
-| Handover Checklist | `docs/CLIENT-HANDOVER-CHECKLIST.md` | Complete list of deliverables and client action items |
-| Deployment Script | `scripts/deploy-staging.sh` | One-click staging deployment |
-| Grafana Dashboards | `infrastructure/kubernetes/observability/grafana/dashboards/` | Pre-configured monitoring |
+| Document           | Path                                                          | Description                                           |
+| ------------------ | ------------------------------------------------------------- | ----------------------------------------------------- |
+| Handover Checklist | `docs/CLIENT-HANDOVER-CHECKLIST.md`                           | Complete list of deliverables and client action items |
+| Deployment Script  | `scripts/deploy-staging.sh`                                   | One-click staging deployment                          |
+| Grafana Dashboards | `infrastructure/kubernetes/observability/grafana/dashboards/` | Pre-configured monitoring                             |
 
 ### Client Action Items Required
 
-| Item | Priority | Owner |
-|------|----------|-------|
-| Kubernetes cluster access | CRITICAL | กฟภ. IT |
-| Container registry | CRITICAL | กฟภ. IT |
-| Database provisioning | CRITICAL | กฟภ. DBA |
-| DNS configuration | HIGH | กฟภ. Network |
-| Data integration (SCADA/AMI) | MEDIUM | กฟภ. Operations |
-| UAT scheduling | MEDIUM | กฟภ. PM |
+| Item                         | Priority | Owner           |
+| ---------------------------- | -------- | --------------- |
+| Kubernetes cluster access    | CRITICAL | กฟภ. IT         |
+| Container registry           | CRITICAL | กฟภ. IT         |
+| Database provisioning        | CRITICAL | กฟภ. DBA        |
+| DNS configuration            | HIGH     | กฟภ. Network    |
+| Data integration (SCADA/AMI) | MEDIUM   | กฟภ. Operations |
+| UAT scheduling               | MEDIUM   | กฟภ. PM         |
 
 ---
 
