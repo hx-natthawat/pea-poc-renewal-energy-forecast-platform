@@ -9,15 +9,15 @@
 
 ## Executive Summary
 
-| Function                      | TOR Reference | Status      | Implementation     |
-| ----------------------------- | ------------- | ----------- | ------------------ |
-| **1. RE Forecast**            | 7.5.1.2       | **PASS**    | ML Model (XGBoost) |
-| **2. Actual Demand Forecast** | 7.5.1.2       | **READY**   | Phase 2 Simulation |
-| **3. Load Forecast**          | 7.5.1.3       | **READY**   | Phase 2 Simulation |
-| **4. Imbalance Forecast**     | 7.5.1.4       | **READY**   | Phase 2 Simulation |
-| **5. Voltage Prediction**     | 7.5.1.5       | **PASS**    | ML Model (XGBoost) |
-| **6. DOE**                    | 7.5.1.6       | **BLOCKED** | Awaiting GIS data  |
-| **7. Hosting Capacity**       | 7.5.1.7       | **BLOCKED** | Depends on DOE     |
+| Function                      | TOR Reference | Status      | Implementation          |
+| ----------------------------- | ------------- | ----------- | ----------------------- |
+| **1. RE Forecast**            | 7.5.1.2       | **PASS**    | ML Model (XGBoost)      |
+| **2. Actual Demand Forecast** | 7.5.1.2       | **READY**   | Phase 2 Simulation      |
+| **3. Load Forecast**          | 7.5.1.3       | **READY**   | Phase 2 Simulation      |
+| **4. Imbalance Forecast**     | 7.5.1.4       | **READY**   | Phase 2 Simulation      |
+| **5. Voltage Prediction**     | 7.5.1.5       | **PASS**    | ML Model (XGBoost)      |
+| **6. DOE**                    | 7.5.1.6       | **READY**   | Phase 2b Mock GIS Data  |
+| **7. Hosting Capacity**       | 7.5.1.7       | **BLOCKED** | Depends on full DOE     |
 
 ### POC Test Status
 
@@ -189,29 +189,40 @@
 
 **TOR Reference**: 7.5.1.6
 
-**Implementation Status**: **BLOCKED - AWAITING GIS DATA**
+**Implementation Status**: **PHASE 2b - SIMULATION WITH MOCK GIS DATA**
 
-| Criterion        | Target    | Status  |
-| ---------------- | --------- | ------- |
-| Violation Rate   | < 1%      | Pending |
-| Update Frequency | 5-15 min  | Planned |
-| Forecast Horizon | 15min-48h | Planned |
-| Confidence       | > 95%     | Planned |
+| Criterion        | Target    | Status             |
+| ---------------- | --------- | ------------------ |
+| Violation Rate   | < 1%      | Simulated (< 1%)   |
+| Update Frequency | 5-15 min  | **IMPLEMENTED**    |
+| Forecast Horizon | 15min-48h | **IMPLEMENTED**    |
+| Confidence       | > 95%     | **IMPLEMENTED**    |
 
-**Blocker**: Network model data required from กฟภ. GIS system
+**API Endpoints**:
 
-- Topology structure
-- Line/cable impedances
-- Transformer ratings
-- Protection settings
+- `POST /api/v1/doe/calculate` - Calculate DOE for single prosumer
+- `POST /api/v1/doe/calculate/batch` - Calculate DOE for all prosumers
+- `GET /api/v1/doe/limits/{prosumer_id}` - Get current limits
+- `GET /api/v1/doe/limits` - Get all prosumer limits
+- `GET /api/v1/doe/network/topology` - Get network topology
+- `GET /api/v1/doe/status` - Get DOE service status
 
-**Dependencies Ready**:
+**Implementation Details**:
 
-- Voltage Prediction (Function 5)
-- Load Forecast (Function 3)
-- RE Forecast (Function 1)
+- Voltage sensitivity method (dV/dP calculation)
+- 7-prosumer POC network with mock impedances
+- Binary search for max export/import limits
+- 15% safety margin for forecast uncertainty
 
-**Plan Document**: [docs/plans/phase-2b-doe-implementation.md](docs/plans/phase-2b-doe-implementation.md)
+**Mock GIS Data** (replace with actual กฟภ. data):
+
+- Transformer: 50 kVA, 22kV/0.4kV
+- Cables: 95mm² Al, R=0.32 Ω/km, Imax=200A
+- Voltage limits: 218-242V (±5% of 230V)
+
+**Code Location**: [backend/app/services/doe_service.py](backend/app/services/doe_service.py)
+
+**Research Document**: [docs/research/doe-implementation-research.md](docs/research/doe-implementation-research.md)
 
 ---
 
@@ -268,10 +279,10 @@ Hosting Capacity = Planning perspective aggregating DOE limits
 
 | Category      | Total   | Passed  | Coverage     |
 | ------------- | ------- | ------- | ------------ |
-| Backend Unit  | 679     | 679     | 80%+         |
+| Backend Unit  | 712     | 712     | 80%+         |
 | Frontend Unit | 83      | 83      | 70%+         |
 | E2E Tests     | 28      | 28      | All browsers |
-| **Total**     | **762** | **762** | **100%**     |
+| **Total**     | **795** | **795** | **100%**     |
 
 ---
 

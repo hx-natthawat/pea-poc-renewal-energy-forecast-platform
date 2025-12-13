@@ -12,6 +12,7 @@ from app.api.v1.endpoints import (
     dayahead,
     demand_forecast,
     demo,
+    doe,
     forecast,
     health,
     history,
@@ -150,6 +151,13 @@ api_router.include_router(
     imbalance_forecast.router,
     prefix="/imbalance-forecast",
     tags=["imbalance-forecast", "phase2"],
+)
+
+# Phase 2b: DOE (Dynamic Operating Envelope) endpoints (TOR Function 6)
+api_router.include_router(
+    doe.router,
+    prefix="/doe",
+    tags=["doe", "phase2b"],
 )
 
 # WebSocket endpoints for real-time updates
