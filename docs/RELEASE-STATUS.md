@@ -158,17 +158,17 @@ None - all critical issues resolved.
 | ------------------------ | ---------- | --------------------------------------- |
 | Audit Log UI (TOR 7.1.6) | ✅ Complete | Full viewer with filters, export, stats |
 
-### Phase 2: TOR Extended Functions (IN PROGRESS)
+### Phase 2: TOR Extended Functions (COMPLETE)
 
 | Function           | TOR Ref | Endpoint                             | API Status               | UI Status         |
 | ------------------ | ------- | ------------------------------------ | ------------------------ | ----------------- |
 | Load Forecast      | 7.5.1.3 | `/api/v1/load-forecast/predict`      | ✅ API Ready (Simulation) | ✅ Grid Operations |
 | Demand Forecast    | 7.5.1.2 | `/api/v1/demand-forecast/predict`    | ✅ API Ready (Simulation) | ✅ Grid Operations |
 | Imbalance Forecast | 7.5.1.4 | `/api/v1/imbalance-forecast/predict` | ✅ API Ready (Simulation) | ✅ Grid Operations |
-| DOE                | 7.5.1.6 | `/api/v1/doe/*`                      | ✅ API Ready (Mock GIS)   | ⏳ Phase 2b UI     |
+| DOE                | 7.5.1.6 | `/api/v1/doe/*`                      | ✅ API Ready (Mock GIS)   | ✅ DOE Dashboard   |
 | Hosting Capacity   | 7.5.1.7 | Planned                              | ⏳ Phase 3 (Depends DOE)  | ⏳ Phase 3         |
 
-*Phase 2a completed December 6, 2025. Phase 2b DOE API completed December 13, 2025.*
+*Phase 2a completed December 6, 2025. Phase 2b DOE (API + UI) completed December 13, 2025.*
 
 ### Phase 3: Infrastructure (TOR 7.1.3, 7.1.6, Table 2)
 
@@ -197,7 +197,7 @@ None - all critical issues resolved.
 11. ~~Phase 3: TLS/cert-manager~~ ✅ Complete
 12. ~~Deploy to staging environment~~ ✅ Complete (Kind cluster, 7 pods healthy)
 13. ~~Phase 2b: DOE API implementation~~ ✅ Complete (December 13, 2025)
-14. Phase 2b: DOE UI dashboard components
+14. ~~Phase 2b: DOE UI dashboard components~~ ✅ Complete (December 13, 2025)
 15. Conduct UAT with stakeholders
 16. Production deployment
 17. Replace mock GIS data with actual กฟภ. network model
