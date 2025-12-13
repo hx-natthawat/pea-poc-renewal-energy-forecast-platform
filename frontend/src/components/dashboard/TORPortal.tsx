@@ -268,10 +268,11 @@ export function TORPortal({ onNavigate }: TORPortalProps) {
       titleEn: "Dynamic Operating Envelope (DOE)",
       description:
         "Calculate dynamic export/import limits for DER at each connection point. Replaces static limits with time-varying constraints based on network conditions.",
-      status: "not_implemented",
+      status: "simulation",
       accuracy: "Violation Rate < 1%",
-      endpoints: [],
-      icon: <Battery className="w-6 h-6 text-gray-400" />,
+      endpoints: ["POST /api/v1/doe/calculate", "GET /api/v1/doe/limits"],
+      icon: <Battery className="w-6 h-6 text-green-500" />,
+      onClick: () => onNavigate?.("doe"),
     },
     {
       number: 7,
